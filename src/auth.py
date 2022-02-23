@@ -1,5 +1,9 @@
 from src.data_store import data_store
 from src.error import InputError
+import re
+
+MAX_FIRST_NAME_LENGTH = 50
+MAX_LAST_NAME_LENGTH = 50
 
 def auth_login_v1(email, password):
     return {
@@ -7,12 +11,47 @@ def auth_login_v1(email, password):
     }
 
 def auth_register_v1(email, password, name_first, name_last):
+    if not is_valid_email(email):
+        raise InputError("Email is not valid")
+    if len(password) < 6:
+        raise InputError("Password is too short")
+    if is_email_taken(email):
+        raise InputError("Email is already taken")
+    if len(name_first) == 0 or len(name_first) > MAX_FIRST_NAME_LENGTH:
+        raise InputError("First name is too short or long")
+    if len(name_last) == 0 or len(name_last) > MAX_LAST_NAME_LENGTH:
+        raise InputError("Last name is too short or long")
+
     return {
         'auth_user_id': 1,
     }
 
+def generate_handle(name_first, name_last):
+    return 'name'
+
+def is_email_taken(email):
+    store = data_store.get()
+    users = store['users']
+    for user in users:
+        if user['email'] == email:
+            return True
+    return False
+
+def is_handle_taken(handle):
+    store = data_store.get()
+    users = store['users']
+    for user in users:
+        if user['handle'] == handle:
+            return True
+    return False
+
+
 def is_valid_email(email):
-    pass
+    return bool(re.search('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$', email))
 
 def remove_non_alphnum(string):
-    pass
+    alnumString = ''
+    for character in string:
+        if character.isalnum():
+            alnumString += character
+    return alnumString
