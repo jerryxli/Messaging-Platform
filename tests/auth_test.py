@@ -67,14 +67,23 @@ def test_auth_register_v1_error_email_used():
     with pytest.raises(InputError):
         auth_register_v1("z123456789@unsw.edu.au", "newpassword", "Steve", "Wozniak")
 
-def test_auth_register_v1_error_first_name_bounds():
+def test_auth_register_v1_error_first_name_short():
     clear_v1()
     with pytest.raises(InputError):
         auth_register_v1("z123456789@unsw.edu.au", "longpassword", "", "Li")
+
+def test_auth_register_v1_error_first_name_long():
+    clear_v1()
+    with pytest.raises(InputError):
         auth_register_v1("245324@opedu.nsw.edu.au", "pass", "THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY", "Lastname")
         
-def test_auth_register_v1_error_last_name_bounds():
+def test_auth_register_v1_error_last_name_short():
+    clear_v1()
+    with pytest.raises(InputError):
+        auth_register_v1("z123456789@unsw.edu.au", "goodpass", "Simon", "")
+
+
+def test_auth_register_v1_error_last_name_long():
     clear_v1()
     with pytest.raises(InputError):
         auth_register_v1("245324@opedu.nsw.edu.au", "pass", "Firstname", "THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY")
-        auth_register_v1("z123456789@unsw.edu.au", "goodpass", "Simon", "")
