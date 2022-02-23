@@ -22,12 +22,39 @@ def auth_register_v1(email, password, name_first, name_last):
     if len(name_last) == 0 or len(name_last) > MAX_LAST_NAME_LENGTH:
         raise InputError("Last name is too short or long")
 
+    handle = generate_handle(name_first, name_last)
+
+    store = data_store.get()
+    users = store['users']
+
+    new_user_id = len(users)
+
+    new_user_dictionary = {'id': new_user_id, 'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
+
+    users.append(new_user_dictionary)
+
+    data_store.set(store)
+
     return {
-        'auth_user_id': 1,
+        'auth_user_id': new_user_id,
     }
 
 def generate_handle(name_first, name_last):
-    return 'name'
+    stripped_concatenated_name = remove_non_alphnum(name_first+name_last)
+    stripped_concatenated_name = stripped_concatenated_name.lower()
+    if len(stripped_concatenated_name) > 20:
+        stripped_concatenated_name = stripped_concatenated_name[0:20]
+    
+    end_number = 0
+    while is_handle_taken(stripped_concatenated_name):
+        if end_number == 0:
+            stripped_concatenated_name += str(end_number)
+        else:
+            stripped_concatenated_name = stripped_concatenated_name[:-1] + str(end_number)
+        
+        end_number += 1
+
+    return stripped_concatenated_name
 
 def is_email_taken(email):
     store = data_store.get()
