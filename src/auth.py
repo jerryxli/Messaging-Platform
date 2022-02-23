@@ -29,7 +29,7 @@ def auth_register_v1(email, password, name_first, name_last):
 
     new_user_id = len(users)
 
-    new_user_dictionary = {'id': new_user_id, 'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
+    new_user_dictionary = {'auth_user_id': new_user_id, 'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
 
     users.append(new_user_dictionary)
 
