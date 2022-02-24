@@ -89,3 +89,4 @@ def remove_non_alphnum(string):
         if character.isalnum():
             alnumString += character
     return alnumString
+
