@@ -5,7 +5,10 @@ import re
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
 
+MAX_FIRST_NAME_LENGTH = 50
+MAX_LAST_NAME_LENGTH = 50
 
+#New push to test if pipeline will run
 def auth_login_v1(email, password):
     store = data_store.get()
     users = store['users']
@@ -16,6 +19,7 @@ def auth_login_v1(email, password):
             else:
                 raise(InputError("Incorrect Password"))
     raise(InputError("Invalid Email"))
+
 
 def auth_register_v1(email, password, name_first, name_last):
     if not is_valid_email(email):
@@ -89,4 +93,3 @@ def remove_non_alphnum(string):
         if character.isalnum():
             alnumString += character
     return alnumString
-
