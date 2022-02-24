@@ -3,7 +3,7 @@ from src.error import InputError
 import re
 
 MAX_FIRST_NAME_LENGTH = 50
-MAX_LAST_NAME_LENGTH = 5
+MAX_LAST_NAME_LENGTH = 50
 
 
 #New push to test if pipeline will run
