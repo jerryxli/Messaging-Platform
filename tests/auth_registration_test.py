@@ -2,7 +2,7 @@ import pytest
 
 from src.auth import auth_login_v1, auth_register_v1, generate_handle, is_email_taken, is_valid_email, remove_non_alphnum, is_handle_taken
 from src.error import InputError, AccessError
-from src.other import clear_v1
+from src.other import clear_v1, is_valid_dictionary_output
 
 @pytest.fixture
 def clear_store():
@@ -46,8 +46,8 @@ def test_generate_handle(clear_store):
 
 
 def test_auth_register_v1(clear_store):
-    assert auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella") == {'auth_user_id': 0}
-    assert auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs") == {'auth_user_id': 1}
+    assert is_valid_dictionary_output(auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella"), {'auth_user_id': int})
+    assert is_valid_dictionary_output(auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs"), {'auth_user_id': int})
 
 
 def test_auth_register_v1_error_email_not_valid(clear_store):
