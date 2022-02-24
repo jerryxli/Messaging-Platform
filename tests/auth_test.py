@@ -1,4 +1,3 @@
-
 import pytest
 
 from src.auth import auth_login_v1, auth_register_v1, generate_handle, is_email_taken, is_valid_email, remove_non_alphnum, is_handle_taken
@@ -83,4 +82,8 @@ def test_auth_register_v1_error_last_name_short(clear_store):
 
 def test_auth_register_v1_error_last_name_long(clear_store):
     with pytest.raises(InputError):
+<<<<<<< HEAD
 
+=======
+        auth_register_v1("245324@opedu.nsw.edu.au", "pass", "Firstname", "THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY")
+>>>>>>> 61140bdd3ffb8c05c0b1c7e1527dd179d2425e79
