@@ -6,7 +6,6 @@ MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
 
 
-#New push to test if pipeline will run
 def auth_login_v1(email, password):
     store = data_store.get()
     users = store['users']
