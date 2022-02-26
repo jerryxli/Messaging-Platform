@@ -8,13 +8,13 @@ def test_add_public_channel():
     clear_v1()
     user_id = auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")['auth_user_id']
     print(user_id)
-    channels_create_v1(user_id, 'Jake\'s Room', True) == {'channel_id': 0}
+    assert channels_create_v1(user_id, 'Jake\'s Room', True) == {'channel_id': 0}
 
 def test_add_private_channel():
     clear_v1()
     user_id = auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")['auth_user_id']
-    channels_create_v1(user_id, 'My Happy place', True) == {'channel_id': 0}
-    channels_create_v1(user_id, 'Woweeee', False) == {'channel_id': 1}
+    assert channels_create_v1(user_id, 'My Happy place', True) == {'channel_id': 0}
+    assert channels_create_v1(user_id, 'Woweeee', False) == {'channel_id': 1}
 
 def test_null_name():
     clear_v1()
