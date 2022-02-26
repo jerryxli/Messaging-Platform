@@ -1,6 +1,6 @@
 from src.data_store import data_store
 from src.error import AccessError, InputError
-from src.verify_user import verify_user
+from src.other import verify_user
 
 MAX_CHANNEL_NAME_LENGTH = 20
 

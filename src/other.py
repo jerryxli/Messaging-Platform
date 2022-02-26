@@ -38,3 +38,17 @@ def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dic
             return False
     return True
     
+
+'''
+This function takes a user ID and validates that they are registered in the system
+'''
+def verify_user(auth_user_id):
+    verified = 0
+    users = data_store.get()['users']
+    for user in users:
+        if auth_user_id == user['auth_user_id']:
+            verified = 1
+    if verified == 0:
+        return False
+    else:
+        return True
