@@ -27,6 +27,16 @@ def test_successfully_joined_channel():
     channel_join_v1(0, channels['channel_id']) 
     assert len(channels['users']) == 1
 
+def test_successfully_joined_channel2():
+    auth_register_v1("hello@unsw.edu.au", "passwordlong", "Hayden", "Smith")
+    auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs")
+    auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")
+    channels = channels_create_v1(0, 'test2', False)
+    channel_join_v1(0, channels['channel_id'])
+    channel_join_v1(1, channels['channel_id']) 
+    channel_join_v1(2, channels['channel_id']) 
+    assert len(channels['users']) == 3
+
 def test_channel_doesnt_exist():
     auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs")
     with pytest.raises(InputError):
