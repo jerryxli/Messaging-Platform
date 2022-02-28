@@ -27,7 +27,7 @@ def create_user2():
 # Test for when the user has no channels
 def test_no_channels(clear_store, create_user):
     user_id = create_user
-    expected_outcome = "channels: [{}]"
+    expected_outcome = "channels: []"
     assert channels_list_v1(user_id) == expected_outcome
 
 # Test for when the user has created one channel
