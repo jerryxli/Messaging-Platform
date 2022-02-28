@@ -24,27 +24,30 @@ def create_user2():
 
 def test_no_channels(clear_store, create_user):
     user_id = create_user
-    assert channels_list_v1(user_id) == "There are no channels with this ID"
+    expected_outcome = "channels: [{}]"
+    assert channels_list_v1(user_id) == expected_outcome
 
 def test_one_channel(clear_store, create_user):
     user_id = create_user
-    channel_id = channels_create_v1(user_id, 'Name', True)
-    assert channels_list_v1(user_id) == {'channel_id': channel_id, 'name': 'Name'}
+    channel_id = str(channels_create_v1(user_id, 'Name', True))
+    expected_outcome = "channels: [{'channel_id': " + channel_id + ", 'name': 'Name'}]"
+    assert channels_list_v1(user_id) == expected_outcome
 
 def test_multiple_channels(clear_store, create_user):
     user_id = create_user
-    channel_id_1 = channels_create_v1(user_id, 'Name 1', True)
-    channel_id_2 = channels_create_v1(user_id, 'Name 2', False)
-    channel_id_3 = channels_create_v1(user_id, 'Name 3', True)
-    assert channels_list_v1(user_id) == {'channel_id': channel_id_1, 'name': 'Name 1'}
-    {'channel_id': channel_id_2, 'name': "Name 2"}
-    {'channel_id': channel_id_3, 'name': "Name 3"}
+    channel_id_1 = str(channels_create_v1(user_id, 'Name 1', True))
+    channel_id_2 = str(channels_create_v1(user_id, 'Name 2', False))
+    channel_id_3 = str(channels_create_v1(user_id, 'Name 3', True))
+    expected_outcome = "channels: {'channel_id': " + channel_id_1 + ", 'name': 'Name 1'}, {'channel_id': " + channel_id_2 + ", 'name': 'Name 2'}, {'channel_id': " + channel_id_3 + ", 'name': 'Name 3'}]"
+    assert channels_list_v1(user_id) == expected_outcome
 
 def test_multiple_users(clear_store, create_user, create_user2):
     user_id_1 = create_user
     user_id_2 = create_user2
-    channel_id_user1 = channels_create_v1(user_id_1, 'Name 1', True)
-    channel_id_user2 = channels_create_v1(user_id_2, 'Name 2', False)
-    assert channels_list_v1(user_id_1) == {'channel_id': channel_id_user1, 'name': 'Name 1'}
-    assert channels_list_v1(user_id_2) == {'channel_id': channel_id_user2, 'name': 'Name 2'}
+    channel_id_user1 = str(channels_create_v1(user_id_1, 'Name 1', True))
+    channel_id_user2 = str(channels_create_v1(user_id_2, 'Name 2', False))
+    assert channels_list_v1(user_id_1) == "channels: {'channel_id': " + channel_id_user1 + ", 'name': 'Name 1'}"
+    assert channels_list_v1(user_id_2) == "channels: {'channel_id': " + channel_id_user2 + ", 'name': 'Name 2'}"
+
+
 
