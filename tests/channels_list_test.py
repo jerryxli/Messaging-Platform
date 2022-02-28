@@ -11,43 +11,49 @@ def clear_store():
 
 @pytest.fixture
 def create_user():
-    user_id = auth_register_v1("z432324@unsw.edu.au", "password", "Name", "Lastname")['auth_user_id']
+    user = auth_register_v1("z432324@unsw.edu.au", "password", "Name", "Lastname")['auth_user_id']
+    user_id = user['auth_user_id']
     return user_id
 
 @pytest.fixture
 def create_user2():
-    user_id = auth_register_v1("z54626@unsw.edu.au", "password", "Name", "Lastname")['auth_user_id']
+    user = auth_register_v1("z54626@unsw.edu.au", "password", "Name", "Lastname")['auth_user_id']
+    user_id = user['auth_user_id']
     return user_id
 
 # When channels_list_v1 is called, it should return the channel name and channel id.
 # In the format: {'channel_id': ' ', 'name': ' '}
 
+# Test for when the user has no channels
 def test_no_channels(clear_store, create_user):
     user_id = create_user
     expected_outcome = "channels: [{}]"
     assert channels_list_v1(user_id) == expected_outcome
 
+# Test for when the user has created one channel
 def test_one_channel(clear_store, create_user):
     user_id = create_user
-    channel_id = str(channels_create_v1(user_id, 'Name', True))
-    expected_outcome = "channels: [{'channel_id': " + channel_id + ", 'name': 'Name'}]"
+    channels_create_v1(user_id, 'Name', True)
+    expected_outcome = "channels: [{'channel_id': 0, 'name': 'Name'}]"
     assert channels_list_v1(user_id) == expected_outcome
 
+# Test for when the user has multiple channels
 def test_multiple_channels(clear_store, create_user):
     user_id = create_user
-    channel_id_1 = str(channels_create_v1(user_id, 'Name 1', True))
-    channel_id_2 = str(channels_create_v1(user_id, 'Name 2', False))
-    channel_id_3 = str(channels_create_v1(user_id, 'Name 3', True))
-    expected_outcome = "channels: {'channel_id': " + channel_id_1 + ", 'name': 'Name 1'}, {'channel_id': " + channel_id_2 + ", 'name': 'Name 2'}, {'channel_id': " + channel_id_3 + ", 'name': 'Name 3'}]"
+    channels_create_v1(user_id, 'Name 1', True)
+    channels_create_v1(user_id, 'Name 2', False)
+    channels_create_v1(user_id, 'Name 3', True)
+    expected_outcome = "channels: {'channel_id': 0, 'name': 'Name 1'}, {'channel_id': 1, 'name': 'Name 2'}, {'channel_id': 2, 'name': 'Name 3'}]"
     assert channels_list_v1(user_id) == expected_outcome
 
+# Test for when multiple users have created channels
 def test_multiple_users(clear_store, create_user, create_user2):
     user_id_1 = create_user
     user_id_2 = create_user2
-    channel_id_user1 = str(channels_create_v1(user_id_1, 'Name 1', True))
-    channel_id_user2 = str(channels_create_v1(user_id_2, 'Name 2', False))
-    assert channels_list_v1(user_id_1) == "channels: {'channel_id': " + channel_id_user1 + ", 'name': 'Name 1'}"
-    assert channels_list_v1(user_id_2) == "channels: {'channel_id': " + channel_id_user2 + ", 'name': 'Name 2'}"
+    channels_create_v1(user_id_1, 'Name 1', True)
+    channels_create_v1(user_id_2, 'Name 2', False)
+    assert channels_list_v1(user_id_1) == "channels: {'channel_id': 0, 'name': 'Name 1'}"
+    assert channels_list_v1(user_id_2) == "channels: {'channel_id': 1, 'name': 'Name 2'}"
 
 
 
