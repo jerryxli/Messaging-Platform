@@ -1,3 +1,4 @@
+from ast import Store
 from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.other import verify_user
@@ -5,14 +6,27 @@ from src.other import verify_user
 MAX_CHANNEL_NAME_LENGTH = 20
 
 def channels_list_v1(auth_user_id):
-    return {
-        'channels': [
-        	{
-        		'channel_id': 1,
-        		'name': 'My Channel',
-        	}
-        ],
-    }
+    ''' 
+    Prints out the list of channels that were added by the user
+    In the format: "channels: [{}, {}, {}]"
+    '''
+    # Gets list of channels from data_store
+    store = data_store.get()
+    channels = store['channels']
+
+    # Creats a list to store channels with that user_id
+    user_channels = []
+
+    # Checks each channel in list of channels for matching user_id
+    for channel in channels: 
+        # If user_id match occurs, appends a dictionary with channel_id and name
+        # into user_channels
+        if channel['users'] == [auth_user_id]:
+            user_channel = {}
+            user_channel['channel_id'] = channel['channel_id']
+            user_channel['name'] = channel['name']
+            user_channels.append(user_channel)
+    return f"channels: {user_channels}"
 
 def channels_listall_v1(auth_user_id):
     return {
@@ -45,3 +59,4 @@ def channels_create_v1(auth_user_id, name, is_public):
     return(
         {'channel_id': new_channel['channel_id']}
     )
+
