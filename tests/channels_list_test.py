@@ -31,12 +31,16 @@ def test_no_channels(clear_store, create_user):
 # Test for when the user has created one channel
 def test_one_channel(clear_store, create_user):
     user_id = create_user
+    channels_create_v1(user_id, 'Name', True)
     expected_outcome = "channels: [{'channel_id': 0, 'name': 'Name'}]"
     assert channels_list_v1(user_id) == expected_outcome
 
 # Test for when the user has multiple channels
 def test_multiple_channels(clear_store, create_user):
     user_id = create_user
+    channels_create_v1(user_id, 'Name 1', True)
+    channels_create_v1(user_id, 'Name 2', False)
+    channels_create_v1(user_id, 'Name 3', True)
     expected_outcome = "channels: [{'channel_id': 0, 'name': 'Name 1'}, {'channel_id': 1, 'name': 'Name 2'}, {'channel_id': 2, 'name': 'Name 3'}]"
     assert channels_list_v1(user_id) == expected_outcome
 
@@ -44,6 +48,8 @@ def test_multiple_channels(clear_store, create_user):
 def test_multiple_users(clear_store, create_user, create_user2):
     user_id_1 = create_user
     user_id_2 = create_user2
+    channels_create_v1(user_id_1, 'Name 1', True)
+    channels_create_v1(user_id_2, 'Name 2', False)
     assert channels_list_v1(user_id_1) == "channels: [{'channel_id': 0, 'name': 'Name 1'}]"
     assert channels_list_v1(user_id_2) == "channels: [{'channel_id': 1, 'name': 'Name 2'}]"
 
