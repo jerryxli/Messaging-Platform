@@ -7,8 +7,11 @@ MAX_CHANNEL_NAME_LENGTH = 20
 
 def channels_list_v1(auth_user_id):
     ''' 
-    Prints out the list of channels that were added by the user
-    In the format: "channels: [{}, {}, {}]"
+    Prints out the list of channels that the user is a member of
+    In the format: { channels: [{}, {}, {}] }
+
+    Args: 
+    int auth_user_id
     '''
     # Gets list of channels from data_store
     store = data_store.get()
@@ -21,11 +24,13 @@ def channels_list_v1(auth_user_id):
     for channel in channels: 
         # If user_id match occurs, appends a dictionary with channel_id and name
         # into user_channels
-        if channel['users'] == [auth_user_id]:
-            user_channel = {}
-            user_channel['channel_id'] = channel['channel_id']
-            user_channel['name'] = channel['name']
-            user_channels.append(user_channel)
+
+        for user in channel['channel_members']:
+            if user == [auth_user_id]:
+                user_channel = {}
+                user_channel['channel_id'] = channel['channel_id']
+                user_channel['name'] = channel['name']
+                user_channels.append(user_channel)
     return { f"channels: {user_channels}" }
 
 def channels_listall_v1(auth_user_id):
