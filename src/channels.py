@@ -23,17 +23,30 @@ def channels_listall_v1(auth_user_id):
         	}
         ],
     }
+'''
+Creates a new channel
 
-def channels_create_v1(auth_user_id, name, is_public):
-    '''
-    Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
-    '''
+Arguments:
+    auth_user_id (int)  - The id of the user
+    name (string)       - Name of the channel
+    is_public (bool)    - whether the channel is to be public or not
+
+Exceptions:
+    InputError  - Occurs when channel name is too long or short
+    AccessError - Occurs when user is not verified
+
+Return Value:
+    Returns {channel_id} on successful creation
+
+'''
+def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
+    # Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
     store = data_store.get()
     channels = store['channels']
     if verify_user(auth_user_id) == False:
-        raise(AccessError)
+        raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
-        raise(InputError)
+        raise InputError("Channel name too long or short")
     new_channel = {}
     new_channel['channel_id'] = len(channels)
     new_channel['name'] = name
@@ -42,6 +55,4 @@ def channels_create_v1(auth_user_id, name, is_public):
     channels.append(new_channel)
     store['channels'] = channels
     data_store.set(store)
-    return(
-        {'channel_id': new_channel['channel_id']}
-    )
+    return {'channel_id': new_channel['channel_id']}

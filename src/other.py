@@ -29,20 +29,26 @@ Return Value:
     Returns a boolean value always
 '''
 def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dict) -> bool:
-    if type(dictionary_output) != dict:
+    if not isinstance(dictionary_output,dict):
         return False
     if set(dictionary_output.keys()) != set(template_dictionary.keys()):
         return False
     for key in template_dictionary.keys():
-        if type(dictionary_output[key]) != template_dictionary[key]:
+        if not isinstance(dictionary_output[key], template_dictionary[key]):
             return False
     return True
-    
 
 '''
 This function takes a user ID and validates that they are registered in the system
+
+Arguments:
+    auth_user_id (int)    - The id to validate
+
+Return Value:
+    Returns True if it is registered, False if not
+
 '''
-def verify_user(auth_user_id):
+def verify_user(auth_user_id: int)->bool:
     verified = 0
     users = data_store.get()['users']
     for user in users:
