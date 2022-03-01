@@ -26,7 +26,7 @@ def channels_list_v1(auth_user_id):
             user_channel['channel_id'] = channel['channel_id']
             user_channel['name'] = channel['name']
             user_channels.append(user_channel)
-    return f"channels: {user_channels}"
+    return { f"channels: {user_channels}" }
 
 def channels_listall_v1(auth_user_id):
     return {
