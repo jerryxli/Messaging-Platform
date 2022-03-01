@@ -36,6 +36,13 @@ def test_listall_one_private(clear_store, create_user):
     user_id = create_user
     channels_create_v1(user_id, 'Channel1', False)
     assert channels_listall_v1(user_id) == {"channels: [{'channel_id': 0, 'name': 'Channel1'}]"}
+
+# Test for when there are multiple private channel
+def test_listall_mul_private(clear_store, create_user):
+    user_id = create_user
+    channels_create_v1(user_id, 'Channel1', False)
+    channels_create_v1(user_id, 'Channel2', False)
+    assert channels_listall_v1(user_id) == {"Channels: [{'channel_id': 0, 'name': 'Channel1'}, {'channel_id': 1, 'name': 'Channel2'}]"}
     
 # Test for when there are multiple public and private channel
 def test_listall_both_privacy(clear_store, create_user):
@@ -44,8 +51,8 @@ def test_listall_both_privacy(clear_store, create_user):
     channels_create_v1(user_id, 'Channel2', False)
     channels_create_v1(user_id, 'Channel3', False)
     channels_create_v1(user_id, 'Channel4', True)
-    expected_outcome = {"Channels: [{'channel_id': 0, 'name': 'Channel1'}, {'channel_id': 1, 'name': 'Channel2'}, {'channel_id': 2, 'name': 'Channel3'}, {'channel_id': 3, 'name': 'Channel4'}]"}
-    assert channels_listall_v1(user_id) == expected_outcome
+    
+    assert channels_listall_v1(user_id) == {"Channels: [{'channel_id': 0, 'name': 'Channel1'}, {'channel_id': 1, 'name': 'Channel2'}, {'channel_id': 2, 'name': 'Channel3'}, {'channel_id': 3, 'name': 'Channel4'}]"}
 
 #--------- Test for channels user isin't part of -----------#
 
@@ -57,8 +64,8 @@ def test_listall_notin_bothprivacy(clear_store, create_user, create_user2):
     channels_create_v1(user_id_1, 'Channel2', False)
     channels_create_v1(user_id_2, 'Channel3', False)
     channels_create_v1(user_id_2, 'Channel4', True)
-    expected_outcome = {"Channels: [{'channel_id': 0, 'name': 'Channel1'}, {'channel_id': 1, 'name': 'Channel2'}, {'channel_id': 2, 'name': 'Channel3'}, {'channel_id': 3, 'name': 'Channel4'}]"}
-    assert channels_listall_v1(user_id_1) == expected_outcome
-    assert channels_listall_v1(user_id_2) == expected_outcome
+    expected = {"Channels: [{'channel_id': 0, 'name': 'Channel1'}, {'channel_id': 1, 'name': 'Channel2'}, {'channel_id': 2, 'name': 'Channel3'}, {'channel_id': 3, 'name': 'Channel4'}]"}
+    assert channels_listall_v1(user_id_1) == expected
+    assert channels_listall_v1(user_id_2) == expected
     
 
