@@ -57,9 +57,7 @@ def channels_create_v1(auth_user_id, name, is_public):
     new_channel['channel_id'] = len(channels)
     new_channel['name'] = name
     new_channel['is_public'] = is_public
-    new_channel['channel_owners'] = [auth_user_id]
-    new_channel['channel_members'] = [auth_user_id]
-    new_channel['messages'] = []
+    new_channel['users'] = [auth_user_id]
     channels.append(new_channel)
     store['channels'] = channels
     data_store.set(store)
