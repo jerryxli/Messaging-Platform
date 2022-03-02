@@ -26,7 +26,7 @@ def channels_list_v1(auth_user_id):
         for user in channel['channel_members']:
             # If user_id match occurs, appends a dictionary with channel_id and name
             # into user_channels
-            if user == [auth_user_id]:
+            if user == auth_user_id:
                 user_channel = {}
                 user_channel['channel_id'] = channel['channel_id']
                 user_channel['name'] = channel['name']
@@ -57,7 +57,9 @@ def channels_create_v1(auth_user_id, name, is_public):
     new_channel['channel_id'] = len(channels)
     new_channel['name'] = name
     new_channel['is_public'] = is_public
-    new_channel['users'] = [auth_user_id]
+    new_channel['channel_owners'] = [auth_user_id]
+    new_channel['channel_members'] = [auth_user_id]
+    new_channel['messages'] = []
     channels.append(new_channel)
     store['channels'] = channels
     data_store.set(store)
