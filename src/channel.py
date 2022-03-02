@@ -53,7 +53,7 @@ def get_channel(id):
 
 # check if the user is already in the channel
 def check_user_in_channel(user_id, channel):
-    for member in channel['users']:
+    for member in channel['channel_members']:
         if user_id == member:
             return True
     return False
@@ -70,7 +70,7 @@ def channel_join_v1(auth_user_id, channel_id):
             raise InputError("the authorised user is already a member of the channel")
         
         # channel is public and user isn't in the channel yet. Add to channel
-        channel['users'].append(auth_user_id)
+        channel['channel_members'].append(auth_user_id)
     else:
         raise(AccessError)
 
