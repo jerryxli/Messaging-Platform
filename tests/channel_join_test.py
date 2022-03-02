@@ -1,7 +1,7 @@
 import pytest
 
 from src.auth import auth_register_v1
-from src.channel import channel_join_v1
+from src.channel import channel_join_v1, check_user_in_channel, get_channel
 from src.channels import channels_create_v1
 from src.error import InputError, AccessError
 from src.other import clear_v1
@@ -20,6 +20,11 @@ def create_user2():
     user_id2 = auth_register_v1("z432325@unsw.edu.au", "password1", "Name1", "Lastname1")['auth_user_id']
     return user_id2 
 
+@pytest.fixture
+def create_user3():
+    user_id3 = auth_register_v1("z432326@unsw.edu.au", "password2", "Name2", "Lastname2")['auth_user_id']
+    return user_id3 
+
 def test_private_channel(clear_store, create_user, create_user2):
     user_id = create_user
     user_id2 = create_user2
@@ -30,19 +35,23 @@ def test_private_channel(clear_store, create_user, create_user2):
 def test_successfully_joined_channel(clear_store, create_user, create_user2):
     user_id = create_user
     user_id2 = create_user2
-    channels = channels_create_v1(user_id, 'test2', True)
+    channel_id = channels_create_v1(user_id, 'test2', True)
     expected_outcome = None
-    assert expected_outcome == channel_join_v1(user_id2, channels['channel_id']) 
+    assert expected_outcome == channel_join_v1(user_id2, channel_id['channel_id']) 
+    channels = get_channel(channel_id['channel_id'])
+    assert check_user_in_channel(user_id2, channels) == True
 
-def test_successfully_joined_channel2(clear_store):
-    auth_register_v1("hello@unsw.edu.au", "passwordlong", "Hayden", "Smith")
-    auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs")
-    auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")
-    channels = channels_create_v1(0, 'test2', True)
+def test_successfully_joined_channel2(clear_store, create_user, create_user2, create_user3):
+    user_id = create_user
+    user_id2 = create_user2
+    user_id3 = create_user3
+    channel_id = channels_create_v1(user_id, 'test2', True)
     expected_outcome = None
-    assert expected_outcome == channel_join_v1(1, channels['channel_id']) 
-    assert expected_outcome == channel_join_v1(2, channels['channel_id']) 
-    
+    assert expected_outcome == channel_join_v1(user_id2, channel_id['channel_id']) 
+    assert expected_outcome == channel_join_v1(user_id3, channel_id['channel_id']) 
+    channels = get_channel(channel_id['channel_id'])
+    assert check_user_in_channel(user_id2, channels) == True
+    assert check_user_in_channel(user_id3, channels) == True
 
 def test_channel_doesnt_exist(clear_store, create_user, create_user2):
     user_id = create_user
