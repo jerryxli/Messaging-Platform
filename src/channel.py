@@ -17,7 +17,7 @@ def get_channel(id):
 
 # check if the user is already in the channel
 def check_user_in_channel(user_id, channel):
-    for member in channel['users']:
+    for member in channel['channel_members']:
         if user_id == member:
             return True
     return False
@@ -36,7 +36,7 @@ def get_user_details(auth_user_id):
             details['email'] = user['email']
             details['name_first'] = user['name_first']
             details['name_last'] = user['name_last']
-            details['handle'] = user['handle']
+            details['handle_str'] = user['handle']
     return details
 
 
@@ -57,7 +57,7 @@ def channel_details_v1(auth_user_id, channel_id):
     channel_details = {}
 
     # Add the details into the channel_details dictionary
-    channel_details['Name'] = channel['Name']
+    channel_details['name'] = channel['name']
     channel_details['is_public'] = channel['is_public']
     channel_details['owner_members'] = []
     channel_details['all_members'] = []
@@ -89,5 +89,8 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     }
 
 def channel_join_v1(auth_user_id, channel_id):
-    return {
-    }
+    channel = get_channel(channel_id)  
+    if check_user_in_channel(auth_user_id, channel) == False:
+        channel['channel_members'].append(auth_user_id)
+
+    return {}
