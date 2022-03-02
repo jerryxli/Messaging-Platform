@@ -22,7 +22,7 @@ def create_user2():
 
 @pytest.fixture
 def create_user3():
-    user_id = auth_register_v1("z536031@unsw.edu.au", "password", "Name", "Lastname")['auth_user_id']
+    user_id = auth_register_v1("z536601@unsw.edu.au", "password", "Name", "Lastname")['auth_user_id']
     return user_id
 
 # When channels_list_v1 is called, it should return the channel name and channel id.
@@ -62,6 +62,4 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
     assert channels_list_v1(user_id_1) == { "channels: [{'channel_id': 0, 'name': 'Name 1'}]" }
     assert channels_list_v1(user_id_2) == { "channels: [{'channel_id': 1, 'name': 'Name 2'}]" }
     assert channels_list_v1(user_id_3) == { "channels: [{'channel_id': 2, 'name': 'Name 3'}]" }
-
-
 

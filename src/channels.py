@@ -1,4 +1,3 @@
-from ast import Store
 from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.other import verify_user
@@ -57,11 +56,12 @@ def channels_create_v1(auth_user_id, name, is_public):
     new_channel['channel_id'] = len(channels)
     new_channel['name'] = name
     new_channel['is_public'] = is_public
-    new_channel['users'] = [auth_user_id]
+    new_channel['channel_owners'] = [auth_user_id]
+    new_channel['channel_members'] = [auth_user_id]
+    new_channel['messages'] = []
     channels.append(new_channel)
     store['channels'] = channels
     data_store.set(store)
     return(
         {'channel_id': new_channel['channel_id']}
     )
-
