@@ -30,22 +30,22 @@ def create_user3():
 
 # Tests for the creator trying to access the details of a channel with only one member (themselves).
 def test_creator_of_channel(clear_store, create_user, create_user2):
-    user_id_1 = create_user()
-    user_id_2 = create_user2()
+    user_id_1 = create_user
+    user_id_2 = create_user2
     channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_id_2 = channels_create_v1(user_id_2, 'Channel_Name2', False)['channel_id']
-    expected_output_1 = { "'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname0'}], 'all_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname0'}]" }
-    expected_output_2 = { "'name': 'Channel_Name2', 'is_public': False, 'owner_members': [{'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle_str': 'emanemantsal0',}], 'all_members': [{'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle_str': 'emanemantsal0',}]" }
+    expected_output_1 = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname'}], 'all_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname'}]}
+    expected_output_2 = {'name': 'Channel_Name2', 'is_public': False, 'owner_members': [{'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle_str': 'emanemantsal',}], 'all_members': [{'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle_str': 'emanemantsal',}]}
     assert channel_details_v1(user_id_1, channel_id_1) == expected_output_1
     assert channel_details_v1(user_id_2, channel_id_2) == expected_output_2
     
 # Tests for a member and creator getting details of a private channel
-def test_member_of_private_channel(clear_store, create_user, create_user2):
+def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_id_1 = create_user
     user_id_2 = create_user2
-    channel_id = channels_create_v1(user_id_1, 'Channel_Name', False)['channel_id']
-    channel_join_v1(user_id_1, user_id_2)
-    expected_output = { "'name': 'Channel_Name', 'is_public': False, 'owner_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname0'}], 'all_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname0'}, {'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle_str': 'emanemantsal0',}]" }
+    channel_id = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
+    channel_join_v1(user_id_2, channel_id)
+    expected_output = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname'}], 'all_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle_str': 'namelastname'}, {'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle_str': 'emanemantsal',}]}
     assert channel_details_v1(user_id_1, channel_id) == expected_output
     assert channel_details_v1(user_id_2, channel_id) == expected_output
 
