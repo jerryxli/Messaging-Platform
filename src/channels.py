@@ -1,4 +1,3 @@
-from ast import Store
 from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.other import verify_user
@@ -46,4 +45,3 @@ def channels_create_v1(auth_user_id, name, is_public):
     return(
         {'channel_id': new_channel['channel_id']}
     )
-
