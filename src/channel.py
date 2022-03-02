@@ -89,8 +89,5 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     }
 
 def channel_join_v1(auth_user_id, channel_id):
-    channel = get_channel(channel_id)  
-    if check_user_in_channel(auth_user_id, channel) == False:
-        channel['channel_members'].append(auth_user_id)
-
-    return {}
+    return {
+    }
