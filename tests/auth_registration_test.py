@@ -1,6 +1,6 @@
 import pytest
 
-from src.auth import auth_login_v1, auth_register_v1, generate_handle, is_email_taken, is_valid_email, remove_non_alphnum, is_handle_taken
+from src.auth import auth_login_v1, auth_register_v1, generate_handle, is_email_taken, is_valid_email, remove_non_alphanumeric, is_handle_taken
 from src.error import InputError, AccessError
 from src.other import clear_v1, is_valid_dictionary_output
 
@@ -15,13 +15,13 @@ def test_valid_email(clear_store):
     assert is_valid_email("") == False
     assert is_valid_email("        ") == False
 
-def test_remove_non_alphnum(clear_store):
-    assert remove_non_alphnum("") == ""
-    assert remove_non_alphnum("^&^%^&^&") == ""
-    assert remove_non_alphnum("1234567890") == "1234567890"
-    assert remove_non_alphnum("abcdefghijklmnopqrstuvwxyz") == "abcdefghijklmnopqrstuvwxyz"
-    assert remove_non_alphnum("this672^73 is a mixed ** passw8rd **") == "this67273isamixedpassw8rd"
-    assert remove_non_alphnum("              ") == ""
+def test_remove_non_alphanumeric(clear_store):
+    assert remove_non_alphanumeric("") == ""
+    assert remove_non_alphanumeric("^&^%^&^&") == ""
+    assert remove_non_alphanumeric("1234567890") == "1234567890"
+    assert remove_non_alphanumeric("abcdefghijklmnopqrstuvwxyz") == "abcdefghijklmnopqrstuvwxyz"
+    assert remove_non_alphanumeric("this672^73 is a mixed ** passw8rd **") == "this67273isamixedpassw8rd"
+    assert remove_non_alphanumeric("              ") == ""
 
 def test_is_email_taken(clear_store):
     assert is_email_taken("hello@test.unsw.edu.au") == False
