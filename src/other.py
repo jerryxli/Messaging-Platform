@@ -1,7 +1,7 @@
 from src.data_store import data_store
 
 def clear_v1():
-    '''
+    """
     This function clears the data store environment for each test
 
     Arguments:
@@ -10,14 +10,14 @@ def clear_v1():
     Return Value:
         None
 
-    '''
+    """
     store = data_store.get()
     store['users'] = {}
     store['channels'] = {}
     data_store.set(store)
 
 def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dict) -> bool:
-    '''
+    """
     This function takes a dictionary output and determines whether it is structurally isomorphic
     to the template dictionary. This means that the keys must all be the same but the values can
     be anything as long as they are of the type specified in template dictionary.
@@ -39,7 +39,7 @@ def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dic
 
     Return Value:
         Returns a boolean value always
-    '''
+    """
     if not isinstance(dictionary_output,dict):
         return False
     if set(dictionary_output.keys()) != set(template_dictionary.keys()):
@@ -51,7 +51,7 @@ def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dic
 
 
 def verify_user(auth_user_id: int)->bool:
-    '''
+    """
     This function takes a user ID and validates that they are registered in the system
 
     Arguments:
@@ -60,6 +60,6 @@ def verify_user(auth_user_id: int)->bool:
     Return Value:
         Returns True if it is registered, False if not
 
-    '''
+    """
     users = data_store.get()['users']
     return bool(auth_user_id in users.keys())
