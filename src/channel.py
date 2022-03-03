@@ -1,5 +1,6 @@
 from src.data_store import data_store
 from src.error import InputError, AccessError
+from src.other import verify_user
 
 # given a channel id, return a channel dictionary
 def get_channel(id):
@@ -41,9 +42,23 @@ def get_user_details(auth_user_id):
 
 def channel_details_v1(auth_user_id, channel_id):
     '''
-    Returns the details of a channel in the format:
-    { name: , is_public: , owner_members: [], all_members: [], }
+    When a auth_user_id and channel_id is passed in, the details for the channel is returned.
+
+    Exceptions:
+        AccessError when auth_user_id is invalid.
+        AccessError when auth_user_id is not a member in the channel.
+        InputError when channel_id is invalid.
+    
+    Arguments: 
+        int auth_user_id, int channel_id
+        
+    Return Value:
+        The details of a channel in the format:
+        { name: , is_public: , owner_members: [], all_members: [], }
     '''
+    # Checks for when the auth_user_id is not registered
+    if verify_user(auth_user_id) == False:
+        raise(AccessError)
     # Checks for Input error: when the channel_id does not exist
     if get_channel(channel_id) == None:
         raise(InputError)
