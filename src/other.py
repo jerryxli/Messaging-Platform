@@ -31,7 +31,7 @@ def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dic
 
     Arguments:
         dictionary_output (dict)     - The dictionary which needs to be validated
-        template_dictionary (dict)   - A dictionary with all the keys and types of values 
+        template_dictionary (dict)   - A dictionary with all the keys and types of values
                                        which the output will be checked against
 
     Exceptions:
@@ -62,8 +62,4 @@ def verify_user(auth_user_id: int)->bool:
 
     '''
     users = data_store.get()['users']
-    if auth_user_id in users.keys():
-        return True
-    else:
-        return False
-    
+    return bool(auth_user_id in users.keys())

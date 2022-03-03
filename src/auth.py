@@ -22,10 +22,10 @@ def auth_login_v1(email:str, password:str)->dict:
     '''
     store = data_store.get()
     users = store['users']
-    for id, user in users.items():
+    for user_id, user in users.items():
         if email == user['email']:
             if password == user['password']:
-                return {'auth_user_id': id}
+                return {'auth_user_id': user_id}
             else:
                 raise InputError("Incorrect Password")
     raise InputError("Invalid Email")
@@ -65,10 +65,15 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     store = data_store.get()
     users = store['users']
     new_user_id = len(users)
-    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
+    new_user_dictionary = {'name_first': name_first,
+                           'name_last': name_last,
+                           'email': email,
+                           'password': password,
+                           'handle': handle
+                           }
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
-    
+
     return {'auth_user_id': new_user_id}
 
 def generate_handle(name_first:str, name_last:str)->str:

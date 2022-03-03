@@ -44,11 +44,20 @@ def channel_messages_v1(auth_user_id, channel_id, start):
 
 
 # check if the user is already in the channel
-def check_user_in_channel(user_id, channel):
-    if user_id in channel['channel_members']:
-        return True
-    else:
-        return False
+def check_user_in_channel(user_id:int, channel:dict)->bool:
+    '''
+    Checks whether a user is in a channel or not
+
+    Arguments:
+        user_id (int) - the id of the user
+        channel (dict) - the channel to check
+    
+    Returns:
+        A boolean, true if the user is in the channel, false if not
+
+    '''
+    return bool(user_id in channel['channel_members'])
+
 
 def channel_join_v1(auth_user_id, channel_id):
     channel = None
@@ -66,9 +75,6 @@ def channel_join_v1(auth_user_id, channel_id):
         # channel is public and user isn't in the channel yet. Add to channel
         channel['channel_members'].append(auth_user_id)
     else:
-        raise(AccessError)
-    
+        raise AccessError
+
     data_store.set(store)
-    
-
-
