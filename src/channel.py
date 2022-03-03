@@ -46,7 +46,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'messages': [
             {
                 'message_id': 1,
-                'auth_user_id': 1,
+                'u_id': 1,
                 'message': 'Hello world',
                 'time_created': 1582426789,
             }
