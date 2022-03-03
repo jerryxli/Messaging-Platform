@@ -33,9 +33,9 @@ def channels_listall_v1(auth_user_id):
 
     all_channels = []
 
-    for channel in channels:
+    for key, channel in channels.items():
         user_channel = {}
-        user_channel['channel_id'] = channel['channel_id']
+        user_channel['channel_id'] = key 
         user_channel['name'] = channel['name']
 
         all_channels.append(user_channel)
