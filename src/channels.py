@@ -53,8 +53,14 @@ def channels_create_v1(auth_user_id, name, is_public):
         raise(AccessError)
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise(InputError)
-    ignore_keys = set(('password'))
-    altered_users = {k:v for k,v in users.items() if k not in ignore_keys}
+    ignore_keys = ['password']
+    altered_users = users
+    for k,v in altered_users.items():
+        fresh = {}
+        for key, item in v.items():
+            if key not in ignore_keys:
+                fresh[key] = item
+        altered_users[k] = fresh
     new_channel = {}
     new_channel_id = len(channels)
     new_channel['name'] = name
