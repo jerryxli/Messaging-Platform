@@ -3,7 +3,8 @@ from src.error import InputError, AccessError
 from src.other import verify_user
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
-    
+    if verify_user(auth_user_id) is False:
+        raise(AccessError)
     if verify_user(u_id) is False:
         raise InputError("u_id does not refer to a valid user")
     
@@ -12,21 +13,18 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     channel = None
     channels = store['channels']
     if channel_id in channels.keys():
-        channel = channels['channel_id']
+        channel = channels[channel_id]
     else:
         raise InputError("channel_id does not refer to a valid channel")
     
     
-    if verify_user(auth_user_id) is False:
-            raise(AccessError)
     if check_user_in_channel(u_id, channel) == True:
         raise InputError("u_id reders to a user who is already a member of the channel")
     if check_user_in_channel(auth_user_id, channel) == False:
         raise(AccessError)    
 
     
-
-    channel_join_v1(u_id, channel_id)
+    channel['channel_members'].append(u_id)
     data_store.set(store)
 
 def channel_details_v1(auth_user_id, channel_id):

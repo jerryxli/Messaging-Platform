@@ -26,7 +26,7 @@ def create_user3():
     return user_id
 
 
-def test_invite_public(clear_store):
+def test_invite_public(clear_store, create_user, create_user2):
     auth_user_id = create_user
     channel_id_dict = channels_create_v1(auth_user_id, 'Channel1', True)
     u_id = create_user2
@@ -35,7 +35,7 @@ def test_invite_public(clear_store):
     # Check if u_id is now in channel
     assert check_user_in_channel(u_id, channel_id_dict) == True
 
-def test_invite_private(clear_store):
+def test_invite_private(clear_store, create_user, create_user2):
     auth_user_id = create_user
     channel_id_dict = channels_create_v1(auth_user_id, 'Channel1', False)
     u_id = create_user2
@@ -45,7 +45,7 @@ def test_invite_private(clear_store):
     assert check_user_in_channel(u_id, channel_id_dict) == True
 
 # Inviting multiple users to multiple channels & invited users inviting users
-def test_invite_multiple(clear_store):
+def test_invite_multiple(clear_store, create_user, create_user2, create_user3):
     auth_user_id = create_user
     channel_id_dict_1 = channels_create_v1(auth_user_id, 'Channel1', False)
     channel_id_dict_2 = channels_create_v1(auth_user_id, 'Channel2', True)
@@ -65,7 +65,7 @@ def test_invite_multiple(clear_store):
 #-------------------------Error Testing------------------------------#
 
 # Access error when auth_user_id is invalid
-def test_invite_auth_user_id_invalid(clear_store):
+def test_invite_auth_user_id_invalid(clear_store, create_user, create_user2):
     auth_user_id = create_user
     u_id = create_user2
     channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
@@ -73,32 +73,31 @@ def test_invite_auth_user_id_invalid(clear_store):
         channel_invite_v1(None, channel_id, u_id)
 
 # channel_id is not a valid channel
-def test_invite_error_invalid_channel(clear_store):
+def test_invite_error_invalid_channel(clear_store, create_user, create_user2):
     auth_user_id = create_user
     u_id = create_user2
     with pytest.raises(InputError):
         channel_invite_v1(auth_user_id, None, u_id)
 
 # u_id is not a valid user
-def test_invite_error_invalid_user(clear_store):
+def test_invite_error_invalid_user(clear_store, create_user):
     auth_user_id = create_user
     channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
     with pytest.raises(InputError):
         channel_invite_v1(auth_user_id, channel_id, None)
 
 # u_id refers to a member who is already in channel
-def test_invite_error_already_joined(clear_store):
+def test_invite_error_already_joined(clear_store, create_user, create_user2):
     auth_user_id = create_user
     u_id = create_user2
     channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
    
-
     channel_invite_v1(auth_user_id, channel_id, u_id)
     with pytest.raises(InputError):
         channel_invite_v1(auth_user_id, channel_id, u_id)
 
 # channel_id is valid but authorised user is not member of channel
-def test_invite_error_not_member(clear_store):
+def test_invite_error_not_member(clear_store, create_user, create_user2, create_user3):
     auth_user_id_1 = create_user
     auth_user_id_2 = create_user2
     u_id = create_user3
