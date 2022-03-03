@@ -2,6 +2,8 @@ from src.data_store import data_store
 from src.error import InputError, AccessError
 from src.other import verify_user
 
+PAGE_THRESHOLD = 50
+
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     return {
     }
@@ -40,20 +42,31 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     else:
         raise AccessError
     return channel_details
+    
+def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
+    store = data_store.get()
+    user = None
+    users = store['users']
+    if auth_user_id in users.keys():
+        user = users[auth_user_id]
+    else:
+        raise InputError('Invalid auth_user_id')
+    channels = store['channels']
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError('channel_id does not refer to a valid channel')
+    if check_user_in_channel(auth_user_id, channel) == False:
+        raise AccessError("channel_id is valid and the authorised user is not a member of the channel")
+    
+    # determine if start is greater than total number of messages, if so, return InputError
+    if start > len(channel['messages']):
+        raise InputError("start is greater than the total number of messages in the channel")
 
-def channel_messages_v1(auth_user_id, channel_id, start):
-    return {
-        'messages': [
-            {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
-            }
-        ],
-        'start': 0,
-        'end': 50,
-    }
+    messages = []
+    not_displayed = list(reversed(channel['messages']))[start:]
+    end = -1 if len(messages) == len(not_displayed) else start + PAGE_THRESHOLD
+    return {'messages': messages, 'start': start, 'end': end}
 
 
 def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
@@ -66,7 +79,6 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     
     Returns:
         A boolean, true if the user is in the channel, false if not
-
     """
     ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
@@ -84,7 +96,6 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         None
 
     """
-    channel = None
     store = data_store.get()
     channels = store['channels']
     users = store['users']
