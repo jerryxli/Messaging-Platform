@@ -58,4 +58,3 @@ def test_user_already_in_channel(clear_store, create_user, create_user2):
     channels = channels_create_v1(user_id, 'test2', True)
     with pytest.raises(InputError):
         channel_join_v1(user_id, channels['channel_id'])
-
