@@ -93,7 +93,7 @@ def test_invite_error_already_joined(clear_store):
     with pytest.raises(InputError):
         channel_invite_v1(auth_user_id, channel_id_dict['channel_id'], u_id)
 
-#channel_id is valid but authorised user is not member of channel
+# channel_id is valid but authorised user is not member of channel
 def test_invite_error_not_member(clear_store):
     auth_user_id_1 = create_user
     auth_user_id_2 = create_user2
