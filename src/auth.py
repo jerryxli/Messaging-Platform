@@ -8,14 +8,13 @@ MAX_LAST_NAME_LENGTH = 50
 GLOBAL_PERMISSION_OWNER = 2
 GLOBAL_PERMISSION_USER = 1
 
-#New push to test if pipeline will run
 def auth_login_v1(email, password):
     store = data_store.get()
     users = store['users']
-    for user in users:
+    for id, user in users.items():
         if email == user['email']:
             if password == user['password']:
-                return {'auth_user_id': user['auth_user_id']}
+                return {'auth_user_id': id}
             else:
                 raise(InputError("Incorrect Password"))
     raise(InputError("Invalid Email"))
@@ -44,9 +43,9 @@ def auth_register_v1(email, password, name_first, name_last):
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
 
-    new_user_dictionary = {'auth_user_id': new_user_id, 'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle, 'global_permission': global_permission}
+    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle, 'global_permission': global_permission}
 
-    users.append(new_user_dictionary)
+    users[new_user_id] = new_user_dictionary
 
     data_store.set(store)
 
@@ -74,7 +73,7 @@ def generate_handle(name_first, name_last):
 def is_email_taken(email):
     store = data_store.get()
     users = store['users']
-    for user in users:
+    for user in users.values():
         if user['email'] == email:
             return True
     return False
@@ -82,7 +81,7 @@ def is_email_taken(email):
 def is_handle_taken(handle):
     store = data_store.get()
     users = store['users']
-    for user in users:
+    for user in users.values():
         if user['handle'] == handle:
             return True
     return False
