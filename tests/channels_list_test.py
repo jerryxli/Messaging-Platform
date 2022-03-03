@@ -31,23 +31,23 @@ def create_user3():
 # Test for when the user has no channels
 def test_no_channels(clear_store, create_user):
     user_id = create_user
-    expected_outcome = { "channels: []" }
+    expected_outcome = { 'channels': [] }
     assert channels_list_v1(user_id) == expected_outcome
 
 # Test for when the user has created one channel
 def test_one_channel(clear_store, create_user):
     user_id = create_user
-    channels_create_v1(user_id, 'Name', True)
-    expected_outcome = { "channels: [{'channel_id': 0, 'name': 'Name'}]" }
+    channel_id = channels_create_v1(user_id, 'Name', True)['channel_id']
+    expected_outcome = { 'channels': [{'channel_id': channel_id, 'name': 'Name'}] }
     assert channels_list_v1(user_id) == expected_outcome
 
 # Test for when the user has multiple channels
 def test_multiple_channels(clear_store, create_user):
     user_id = create_user
-    channels_create_v1(user_id, 'Name 1', True)
-    channels_create_v1(user_id, 'Name 2', False)
-    channels_create_v1(user_id, 'Name 3', True)
-    expected_outcome = { "channels: [{'channel_id': 0, 'name': 'Name 1'}, {'channel_id': 1, 'name': 'Name 2'}, {'channel_id': 2, 'name': 'Name 3'}]" }
+    channel_id_1 = channels_create_v1(user_id, 'Name 1', True)['channel_id']
+    channel_id_2 = channels_create_v1(user_id, 'Name 2', False)['channel_id']
+    channel_id_3 = channels_create_v1(user_id, 'Name 3', True)['channel_id']
+    expected_outcome = { 'channels': [{'channel_id': channel_id_1, 'name': 'Name 1'}, {'channel_id': channel_id_2, 'name': 'Name 2'}, {'channel_id': channel_id_3, 'name': 'Name 3'}] }
     assert channels_list_v1(user_id) == expected_outcome
 
 # Test for when multiple users have created channels
@@ -56,10 +56,10 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
     user_id_2 = create_user2
     user_id_3 = create_user3
 
-    channels_create_v1(user_id_1, 'Name 1', True)
-    channels_create_v1(user_id_2, 'Name 2', False)
-    channels_create_v1(user_id_3, 'Name 3', True)
-    assert channels_list_v1(user_id_1) == { "channels: [{'channel_id': 0, 'name': 'Name 1'}]" }
-    assert channels_list_v1(user_id_2) == { "channels: [{'channel_id': 1, 'name': 'Name 2'}]" }
-    assert channels_list_v1(user_id_3) == { "channels: [{'channel_id': 2, 'name': 'Name 3'}]" }
+    channel_id_1 = channels_create_v1(user_id_1, 'Name 1', True)['channel_id']
+    channel_id_2 = channels_create_v1(user_id_2, 'Name 2', False)['channel_id']
+    channel_id_3 = channels_create_v1(user_id_3, 'Name 3', True)['channel_id']
+    assert channels_list_v1(user_id_1) == { 'channels': [{'channel_id': channel_id_1, 'name': 'Name 1'}] }
+    assert channels_list_v1(user_id_2) == { 'channels': [{'channel_id': channel_id_2, 'name': 'Name 2'}] }
+    assert channels_list_v1(user_id_3) == { 'channels': [{'channel_id': channel_id_3, 'name': 'Name 3'}] }
 
