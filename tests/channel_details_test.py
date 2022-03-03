@@ -57,17 +57,24 @@ def test_invalid_member(clear_store, create_user):
     channel_id = channels_create_v1(user_id, 'Channel_Name', True)['channel_id']
     with pytest.raises(AccessError):
         channel_details_v1(user_id + 40, channel_id)
+
 # Tests for when the user_id entered is not a member of the channel_id.
 def test_unauthorised_user_id(clear_store, create_user, create_user2, create_user3):
     user_id_1 = create_user
     user_id_2 = create_user2
     user_id_3 = create_user3
     channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', False)['channel_id']
-    channel_id_2 = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
+    channel_id_2 = channels_create_v1(user_id_1, 'Channel_Name1', True)['channel_id']
     with pytest.raises(AccessError):
         channel_details_v1(user_id_2, channel_id_1)
     with pytest.raises(AccessError):
         channel_details_v1(user_id_3, channel_id_2)
+
+def test_double_channel_name(clear_store, create_user):
+    user_id_1 = create_user
+    channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', False)['channel_id']
+    with pytest.raises(InputError):
+        channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
 
 # Tests for when an invalid channel_id is entered.
 def test_invalid_channel_id(clear_store, create_user, create_user2):
