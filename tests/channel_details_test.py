@@ -36,8 +36,11 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
     channel_id_2 = channels_create_v1(user_id_2, 'Channel_Name2', False)['channel_id']
     expected_output_1 = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'all_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}]}
     expected_output_2 = {'name': 'Channel_Name2', 'is_public': False, 'owner_members': [{'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle': 'emanemantsal',}], 'all_members': [{'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle': 'emanemantsal',}]}
-    assert channel_details_v1(user_id_1, channel_id_1) == expected_output_1
-    assert channel_details_v1(user_id_2, channel_id_2) == expected_output_2
+    for i, v in zip(expected_output_1['owner_members'], channel_details_v1(user_id_1, channel_id_1)['owner_members']):
+        assert i == v
+    for i, v in zip(expected_output_2['owner_members'], channel_details_v1(user_id_2, channel_id_2)['owner_members']):
+        assert i == v
+
     
 # Tests for a member and creator getting details of a private channel
 def test_member_of_public_channel(clear_store, create_user, create_user2):
@@ -46,8 +49,10 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     channel_id = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_join_v1(user_id_2, channel_id)
     expected_output = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'all_members': [{'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}, {'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle': 'emanemantsal',}]}
-    assert channel_details_v1(user_id_1, channel_id) == expected_output
-    assert channel_details_v1(user_id_2, channel_id) == expected_output
+    for i, v in zip(expected_output['owner_members'], channel_details_v1(user_id_1, channel_id)['owner_members']):
+        assert i == v
+    for i, v in zip(expected_output['owner_members'], channel_details_v1(user_id_2, channel_id)['owner_members']):
+        assert i == v
 
 # Tests for when the user_id entered is not a member of the channel_id.
 def test_unauthorised_user_id(clear_store, create_user, create_user2, create_user3):

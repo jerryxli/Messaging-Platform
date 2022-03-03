@@ -79,10 +79,14 @@ def channel_join_v1(auth_user_id, channel_id):
     else:
         raise InputError("channel_id does not refer to a valid channel")
     # check if the channel is public
-    print(users)
     ignore_keys = ['password']
-    altered_users = {k:v for k,v in users.items() for item in v if item not in ignore_keys}
-    print(altered_users)
+    altered_users = users
+    for k,v in altered_users.items():
+        fresh = {}
+        for key, item in v.items():
+            if key not in ignore_keys:
+                fresh[key] = item
+        altered_users[k] = fresh
     if channel['is_public']:
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
