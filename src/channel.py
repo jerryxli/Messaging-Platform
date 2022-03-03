@@ -2,6 +2,8 @@ from src.data_store import data_store
 from src.error import InputError, AccessError
 from src.other import verify_user
 
+PAGE_THRESHOLD = 50
+
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     return {
     }
@@ -48,23 +50,19 @@ def channel_details_v1(auth_user_id, channel_id):
         raise AccessError
     return channel_details
     
-def channel_messages_v1(auth_user_id, channel_id, start):
-    start = int(start)
-    page_threshold = 50
+def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
     store = data_store.get()
-
     user = None
     users = store['users']
     if auth_user_id in users.keys():
         user = users[auth_user_id]
-
-    channel = None
+    else:
+        raise InputError('Invalid auth_user_id')
     channels = store['channels']
     if channel_id in channels.keys():
         channel = channels[channel_id]
-
-    if channel == None:
-        raise InputError("channel_id does not refer to a valid channel")
+    else:
+        raise InputError('channel_id does not refer to a valid channel')
     if check_user_in_channel(auth_user_id, channel) == False:
         raise AccessError("channel_id is valid and the authorised user is not a member of the channel")
     
@@ -74,7 +72,7 @@ def channel_messages_v1(auth_user_id, channel_id, start):
 
     messages = []
     not_displayed = list(reversed(channel['messages']))[start:]
-    end = -1 if len(messages) == len(not_displayed) else start + page_threshold
+    end = -1 if len(messages) == len(not_displayed) else start + PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}
 
 
