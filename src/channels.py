@@ -18,11 +18,11 @@ def channels_list_v1(auth_user_id:int)->dict:
 
     # Creats a list to store channels with that user_id
     user_channels = []
-
     # Loops through each channel in the list Channels
     for channel_id, channel_details in channels.items():
         # Loops through each user for the channel
-        if auth_user_id in channel_details['channel_members']:
+        ids = [user['u_id'] for user in channel_details['channel_members']]
+        if auth_user_id in ids:
             # If user_id match occurs, appends a dictionary with channel_id and name
             # into user_channels
             user_channel = {}
@@ -80,18 +80,23 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     '''
     store = data_store.get()
     channels = store['channels']
-    if verify_user(auth_user_id) is False:
+    users = store['users']
+    if verify_user(auth_user_id) == False:
         raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise InputError("Channel name too long or short")
-    if is_channel_taken(name) is True:
+    if is_channel_taken(name):
         raise InputError
+    altered_users = {k: non_password_field(v) for k,v in users.items()}
+    for id, user in altered_users.items():
+        user['u_id'] = id
     new_channel = {}
     new_channel_id = len(channels)
     new_channel['name'] = name
     new_channel['is_public'] = is_public
-    new_channel['channel_owners'] = [auth_user_id]
-    new_channel['channel_members'] = [auth_user_id]
+    altered_users[auth_user_id]['u_id'] = auth_user_id
+    new_channel['channel_owners'] = [altered_users[auth_user_id]]
+    new_channel['channel_members'] = [altered_users[auth_user_id]]
     new_channel['messages'] = []
     channels[new_channel_id] = new_channel
     store['channels'] = channels
@@ -100,11 +105,13 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
         {'channel_id': new_channel_id}
     )
 
+def non_password_field(user):
+    user = {k: v for k,v in user.items() if k != 'password'}
+    return user
 
 def is_channel_taken(name:str)->bool:
     store = data_store.get()
     channels = store['channels']
-    for channel in channels.values():
-        if channel['name'] == name:
-            return True
-    return False
+    names = [channel['name'] for channel in channels.values()]
+    return bool(name in names)
+
