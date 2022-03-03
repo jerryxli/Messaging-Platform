@@ -3,7 +3,7 @@ from src.channels import channels_create_v1
 from src.channel import channel_join_v1
 from src.auth import auth_register_v1
 from src.error import InputError, AccessError
-from src.other import clear_v1
+from src.other import clear_v1, is_valid_dictionary_output
 import pytest
 
 @pytest.fixture
@@ -34,26 +34,19 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
     user_id_2 = create_user2
     channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_id_2 = channels_create_v1(user_id_2, 'Channel_Name2', False)['channel_id']
-    expected_output_1 = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'global_permission': 2, 'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'all_members': [{'global_permission': 2, 'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'messages':[]}
-    expected_output_2 = {'name': 'Channel_Name2', 
-                            'is_public': False, 
-                            'owner_members': 
-                                [{'global_permission': 1, 
-                                    'u_id': 1, 
-                                    'email': 'z536362@unsw.edu.au', 
-                                    'name_first': 'Eman', 
-                                    'name_last': 'Emantsal', 
-                                    'handle': 'emanemantsal',}], 
-                            'all_members': 
-                                    [{'global_permission': 1, 
-                                    'u_id': 1, 
-                                    'email': 'z536362@unsw.edu.au', 
-                                    'name_first': 'Eman', 
-                                    'name_last': 'Emantsal', 
-                                    'handle': 'emanemantsal',}], 
-                            'messages':[]}
-    assert channel_details_v1(user_id_1, channel_id_1) == expected_output_1
-    assert channel_details_v1(user_id_2, channel_id_2) == expected_output_2
+    assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id_1), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
+    for user in channel_details_v1(user_id_1, channel_id_1)['owner_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+
+    for user in channel_details_v1(user_id_1, channel_id_1)['all_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+    
+    assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id_2), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
+    for user in channel_details_v1(user_id_2, channel_id_2)['owner_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+
+    for user in channel_details_v1(user_id_2, channel_id_2)['all_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
 
     
@@ -63,9 +56,21 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_id_2 = create_user2
     channel_id = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_join_v1(user_id_2, channel_id)
-    expected_output = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'global_permission': 2, 'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'all_members': [{'global_permission': 2, 'u_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}, {'global_permission': 1, 'u_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle': 'emanemantsal',}], 'messages':[]}
-    assert channel_details_v1(user_id_1, channel_id) == expected_output
-    assert channel_details_v1(user_id_2, channel_id) == expected_output
+    assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
+    for user in channel_details_v1(user_id_1, channel_id)['owner_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+
+    for user in channel_details_v1(user_id_1, channel_id)['all_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+
+    assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
+    for user in channel_details_v1(user_id_2, channel_id)['owner_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+
+    for user in channel_details_v1(user_id_2, channel_id)['all_members']:
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+
+    assert channel_details_v1(user_id_2, channel_id) == channel_details_v1(user_id_1, channel_id)
 
 
 def test_invalid_member(clear_store, create_user):

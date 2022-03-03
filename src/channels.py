@@ -75,9 +75,10 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
         raise InputError("Channel name too long or short")
     if is_channel_taken(name):
         raise InputError
-    altered_users = {k: non_password_field(v) for k,v in users.items()}
+    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for id, user in altered_users.items():
         user['u_id'] = id
+        user['handle_str'] = user.pop('handle')
     new_channel_id = len(channels)
     channels[new_channel_id] = {'name': name, 'is_public': is_public, 'owner_members': [altered_users[auth_user_id]], 'all_members': [altered_users[auth_user_id]], 'messages': []}
     store['channels'] = channels
@@ -103,7 +104,7 @@ def is_channel_taken(name:str)->bool:
     names = [channel['name'] for channel in channels.values()]
     return bool(name in names)
 
-def non_password_field(user:dict)->dict:
+def non_password_global_permission_field(user:dict)->dict:
     """
     Removes all non-password fields from a user to print them
 
@@ -114,6 +115,6 @@ def non_password_field(user:dict)->dict:
         Dictionary with password field removed
     
     """
-    user = {k: v for k,v in user.items() if k != 'password'}
+    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
     return user
 
