@@ -21,7 +21,7 @@ def channels_list_v1(auth_user_id:int)->dict:
     # Loops through each channel in the list Channels
     for channel_id, channel_details in channels.items():
         # Loops through each user for the channel
-        ids = [user['auth_user_id'] for user in channel_details['channel_members']]
+        ids = [user['auth_user_id'] for user in channel_details['all_members']]
         if auth_user_id in ids:
             # If user_id match occurs, appends a dictionary with channel_id and name
             # into user_channels
@@ -79,7 +79,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     for id, user in altered_users.items():
         user['auth_user_id'] = id
     new_channel_id = len(channels)
-    channels[new_channel_id] = {'name': name, 'is_public': is_public, 'channel_owners': [altered_users[auth_user_id]], 'channel_members': [altered_users[auth_user_id]], 'messages': []}
+    channels[new_channel_id] = {'name': name, 'is_public': is_public, 'owner_members': [altered_users[auth_user_id]], 'all_members': [altered_users[auth_user_id]], 'messages': []}
     store['channels'] = channels
     data_store.set(store)
     return(

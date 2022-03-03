@@ -26,7 +26,7 @@ def create_user3():
     return user_id
 
 # The channels_details_v1 function takes in user_id and channel_id as input.
-# The function then outputs { name: , is_public: , channel_owners: , channel_members: } for the channel.
+# The function then outputs { name: , is_public: , owner_members: , all_members: } for the channel.
 
 # Tests for the creator trying to access the details of a channel with only one member (themselves).
 def test_creator_of_channel(clear_store, create_user, create_user2):
@@ -34,23 +34,24 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
     user_id_2 = create_user2
     channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_id_2 = channels_create_v1(user_id_2, 'Channel_Name2', False)['channel_id']
-    expected_output_1 = {'name': 'Channel_Name', 'is_public': True, 'channel_owners': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'channel_members': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'messages':[]}
+    expected_output_1 = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'all_members': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'messages':[]}
     expected_output_2 = {'name': 'Channel_Name2', 
                             'is_public': False, 
-                            'channel_owners': 
+                            'owner_members': 
                                 [{'global_permission': 1, 
                                     'auth_user_id': 1, 
                                     'email': 'z536362@unsw.edu.au', 
                                     'name_first': 'Eman', 
                                     'name_last': 'Emantsal', 
                                     'handle': 'emanemantsal',}], 
-                            'channel_members': 
+                            'all_members': 
                                     [{'global_permission': 1, 
                                     'auth_user_id': 1, 
                                     'email': 'z536362@unsw.edu.au', 
                                     'name_first': 'Eman', 
                                     'name_last': 'Emantsal', 
-                                    'handle': 'emanemantsal',}], 'messages':[]}
+                                    'handle': 'emanemantsal',}], 
+                            'messages':[]}
     assert channel_details_v1(user_id_1, channel_id_1) == expected_output_1
     assert channel_details_v1(user_id_2, channel_id_2) == expected_output_2
 
@@ -62,7 +63,7 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_id_2 = create_user2
     channel_id = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_join_v1(user_id_2, channel_id)
-    expected_output = {'name': 'Channel_Name', 'is_public': True, 'channel_owners': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'channel_members': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}, {'global_permission': 1, 'auth_user_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle': 'emanemantsal',}], 'messages':[]}
+    expected_output = {'name': 'Channel_Name', 'is_public': True, 'owner_members': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}], 'all_members': [{'global_permission': 2, 'auth_user_id': 0, 'email': 'z432324@unsw.edu.au', 'name_first': 'Name', 'name_last': 'Lastname', 'handle': 'namelastname'}, {'global_permission': 1, 'auth_user_id': 1, 'email': 'z536362@unsw.edu.au', 'name_first': 'Eman', 'name_last': 'Emantsal', 'handle': 'emanemantsal',}], 'messages':[]}
     assert channel_details_v1(user_id_1, channel_id) == expected_output
     assert channel_details_v1(user_id_2, channel_id) == expected_output
 

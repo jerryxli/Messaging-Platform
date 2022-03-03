@@ -33,7 +33,7 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
         channel = channels[channel_id]
     else:
         raise InputError
-    ids = [user['auth_user_id'] for user in channel['channel_members']]
+    ids = [user['auth_user_id'] for user in channel['all_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
         return {k: v for k, v in channel.items()}
@@ -68,10 +68,7 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
         A boolean, true if the user is in the channel, false if not
 
     """
-    for user in channel['channel_members']:
-        print(user)
-        print(user['auth_user_id'])
-    ids = [user['auth_user_id'] for user in channel['channel_members']]
+    ids = [user['auth_user_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
 
 
@@ -104,7 +101,7 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         # channel is public and user isn't in the channel yet. Add to channel
-        channel['channel_members'].append(altered_users[auth_user_id])
+        channel['all_members'].append(altered_users[auth_user_id])
     else:
         raise(AccessError)
     
