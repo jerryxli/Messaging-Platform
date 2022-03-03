@@ -30,7 +30,7 @@ def channels_listall_v1(auth_user_id):
 
         all_channels.append(user_channel)
 
-    return {f"channels: {all_channels}"}
+    return { 'channels': all_channels }
 
 def channels_create_v1(auth_user_id, name, is_public):
     '''
