@@ -1,5 +1,5 @@
 class AccessError(Exception):
-	pass
+    pass
 
 class InputError(Exception):
-	pass
+    pass
