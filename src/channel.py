@@ -105,7 +105,6 @@ def channel_join_v1(auth_user_id, channel_id):
         raise(AccessError)
     
     data_store.set(store)
-    return {}
     
 def non_password_field(user):
     user = {k: v for k,v in user.items() if k != 'password'}
