@@ -127,15 +127,11 @@ def channel_join_v1(auth_user_id, channel_id):
         channel['channel_members'].append(altered_users[auth_user_id])
     else:
         raise(AccessError)
-<<<<<<< HEAD
-    data_store.set(store)
-    
-=======
     
     data_store.set(store)
     
 def non_password_field(user):
     user = {k: v for k,v in user.items() if k != 'password'}
     return user
->>>>>>> 3e2c1ac6b0a43780f3f980daa87bb5da10e4d83d
+
 
