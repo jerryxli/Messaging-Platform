@@ -68,6 +68,8 @@ def test_invite_multiple(clear_store):
 
 #-------------------------Error Testing------------------------------#
 
+
+
 # channel_id is not a valid channel
 def test_invite_error_invalid_channel(clear_store):
     auth_user_id = create_user
