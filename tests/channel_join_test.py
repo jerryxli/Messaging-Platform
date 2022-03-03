@@ -38,8 +38,6 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
     channel_id = channels_create_v1(user_id, 'test2', True)
     expected_outcome = None
     assert expected_outcome == channel_join_v1(user_id2, channel_id['channel_id']) 
-    channels = get_channel(channel_id['channel_id'])
-    assert check_user_in_channel(user_id2, channels) == True
 
 def test_successfully_joined_channel2(clear_store, create_user, create_user2, create_user3):
     user_id = create_user
@@ -49,7 +47,6 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
     expected_outcome = None
     assert expected_outcome == channel_join_v1(user_id2, channel_id['channel_id']) 
     assert expected_outcome == channel_join_v1(user_id3, channel_id['channel_id']) 
-    channels = get_channel(channel_id['channel_id'])
 
 def test_channel_doesnt_exist(clear_store, create_user, create_user2):
     user_id = create_user
@@ -61,4 +58,3 @@ def test_user_already_in_channel(clear_store, create_user, create_user2):
     channels = channels_create_v1(user_id, 'test2', True)
     with pytest.raises(InputError):
         channel_join_v1(user_id, channels['channel_id'])
-

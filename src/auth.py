@@ -8,10 +8,10 @@ MAX_LAST_NAME_LENGTH = 50
 def auth_login_v1(email, password):
     store = data_store.get()
     users = store['users']
-    for user in users:
+    for id, user in users.items():
         if email == user['email']:
             if password == user['password']:
-                return {'auth_user_id': user['auth_user_id']}
+                return {'auth_user_id': id}
             else:
                 raise(InputError("Incorrect Password"))
     raise(InputError("Invalid Email"))
@@ -36,9 +36,9 @@ def auth_register_v1(email, password, name_first, name_last):
 
     new_user_id = len(users)
 
-    new_user_dictionary = {'auth_user_id': new_user_id, 'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
+    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
 
-    users.append(new_user_dictionary)
+    users[new_user_id] = new_user_dictionary
 
     data_store.set(store)
 
@@ -66,7 +66,7 @@ def generate_handle(name_first, name_last):
 def is_email_taken(email):
     store = data_store.get()
     users = store['users']
-    for user in users:
+    for user in users.values():
         if user['email'] == email:
             return True
     return False
@@ -74,7 +74,7 @@ def is_email_taken(email):
 def is_handle_taken(handle):
     store = data_store.get()
     users = store['users']
-    for user in users:
+    for user in users.values():
         if user['handle'] == handle:
             return True
     return False
