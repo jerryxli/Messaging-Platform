@@ -36,17 +36,17 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
     channel_id_2 = channels_create_v1(user_id_2, 'Channel_Name2', False)['channel_id']
     assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id_1), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
     for user in channel_details_v1(user_id_1, channel_id_1)['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     for user in channel_details_v1(user_id_1, channel_id_1)['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
     
     assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id_2), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
     for user in channel_details_v1(user_id_2, channel_id_2)['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     for user in channel_details_v1(user_id_2, channel_id_2)['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
 
     
@@ -58,17 +58,17 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     channel_join_v1(user_id_2, channel_id)
     assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
     for user in channel_details_v1(user_id_1, channel_id)['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     for user in channel_details_v1(user_id_1, channel_id)['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list, 'messages': list})
     for user in channel_details_v1(user_id_2, channel_id)['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     for user in channel_details_v1(user_id_2, channel_id)['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'global_permission': int, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     assert channel_details_v1(user_id_2, channel_id) == channel_details_v1(user_id_1, channel_id)
 

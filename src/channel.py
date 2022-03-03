@@ -93,7 +93,7 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     else:
         raise InputError("channel_id does not refer to a valid channel")
     # check if the channel is public
-    altered_users = {k: non_password_field(v) for k,v in users.items()}
+    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for id, user in altered_users.items():
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
@@ -108,7 +108,7 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     
     data_store.set(store)
     
-def non_password_field(user:dict)->dict:
+def non_password_global_permission_field(user:dict)->dict:
     """
     Removes all non-password fields from a user to print them
 
@@ -119,6 +119,6 @@ def non_password_field(user:dict)->dict:
         Dictionary with password field removed
     
     """
-    user = {k: v for k,v in user.items() if k != 'password'}
+    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
     return user
 
