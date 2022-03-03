@@ -96,6 +96,7 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     altered_users = {k: non_password_field(v) for k,v in users.items()}
     for id, user in altered_users.items():
         user['u_id'] = id
+        user['handle_str'] = user.pop('handle')
     if channel['is_public']:
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):

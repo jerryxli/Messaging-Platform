@@ -78,6 +78,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     altered_users = {k: non_password_field(v) for k,v in users.items()}
     for id, user in altered_users.items():
         user['u_id'] = id
+        user['handle_str'] = user.pop('handle')
     new_channel_id = len(channels)
     channels[new_channel_id] = {'name': name, 'is_public': is_public, 'owner_members': [altered_users[auth_user_id]], 'all_members': [altered_users[auth_user_id]], 'messages': []}
     store['channels'] = channels
