@@ -18,11 +18,11 @@ def channels_list_v1(auth_user_id):
 
     # Creats a list to store channels with that user_id
     user_channels = []
-
     # Loops through each channel in the list Channels
     for channel_id, channel_details in channels.items(): 
         # Loops through each user for the channel
-        if auth_user_id in channel_details['channel_members']:
+        ids = [user['u_id'] for user in channel_details['channel_members']]
+        if auth_user_id in ids:
             # If user_id match occurs, appends a dictionary with channel_id and name
             # into user_channels
             user_channel = {}
@@ -66,8 +66,8 @@ def channels_create_v1(auth_user_id, name, is_public):
     new_channel['name'] = name
     new_channel['is_public'] = is_public
     altered_users[auth_user_id]['u_id'] = auth_user_id
-    new_channel['channel_owners'] = {auth_user_id: altered_users[auth_user_id]}
-    new_channel['channel_members'] = {auth_user_id: altered_users[auth_user_id]}
+    new_channel['channel_owners'] = [altered_users[auth_user_id]]
+    new_channel['channel_members'] = [altered_users[auth_user_id]]
     new_channel['messages'] = []
     channels[new_channel_id] = new_channel
     store['channels'] = channels
@@ -77,11 +77,11 @@ def channels_create_v1(auth_user_id, name, is_public):
     )
 
 
-def is_channel_taken(name):
-    store = data_store.get()
-    channels = store['channels']
-    for channel in channels.values():
-        if channel['name'] == name:
-            return True
+# def is_channel_taken(name):
+#     store = data_store.get()
+#     channels = store['channels']
+#     for channel in channels.values():
+#         if channel['name'] == name:
+#             return True
     
-    return False
+#     return False

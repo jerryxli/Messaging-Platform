@@ -33,17 +33,20 @@ def channel_details_v1(auth_user_id, channel_id):
         channel = channels[channel_id]
     else:
         raise InputError
-    
+    ids = []
+    for user in channel['channel_members']:
+        print(user)
+        ids.append(user['u_id'])
     # Checks for Access error: when the user is not a member of the channel
-    if auth_user_id in channel['channel_members']:
+    if auth_user_id in ids:
         # Create a blank dictionary that will contain the channel details
         channel_details = {}
 
         # Add the details into the channel_details dictionary
         channel_details['name'] = channel['name']
         channel_details['is_public'] = channel['is_public']
-        channel_details['owner_members'] = channel['channel_owners'].values()
-        channel_details['all_members'] = channel['channel_members'].values()
+        channel_details['owner_members'] = channel['channel_owners']
+        channel_details['all_members'] = channel['channel_members']
     else:
         raise AccessError
     return channel_details
@@ -63,7 +66,8 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     }
 
 def check_user_in_channel(auth_user_id, channel):
-    if auth_user_id in channel['channel_members']:
+    ids = [user['u_id'] for user in channel['channel_members']]
+    if auth_user_id in ids:
         return True
     else:
         return False
@@ -86,13 +90,14 @@ def channel_join_v1(auth_user_id, channel_id):
         for key, item in v.items():
             if key not in ignore_keys:
                 fresh[key] = item
+        fresh['u_id'] = auth_user_id
         altered_users[k] = fresh
     if channel['is_public']:
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         # channel is public and user isn't in the channel yet. Add to channel
-        channel['channel_members'][auth_user_id] = altered_users[auth_user_id]
+        channel['channel_members'].append(altered_users[auth_user_id])
     else:
         raise(AccessError)
     
