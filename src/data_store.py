@@ -26,8 +26,8 @@ Example usage:
 
 ## YOU SHOULD MODIFY THIS OBJECT BELOW
 initial_object = {
-    'users': [],
-    'channels': []
+    'users': {},
+    'channels': {}
 }
 ## YOU SHOULD MODIFY THIS OBJECT ABOVE
 
