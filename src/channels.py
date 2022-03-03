@@ -18,6 +18,9 @@ def channels_listall_v1(auth_user_id):
     '''
     Prints out a list of all channels
     '''
+    if verify_user(auth_user_id) == False:
+        raise(AccessError)
+
     store = data_store.get()
     channels = store['channels']
 

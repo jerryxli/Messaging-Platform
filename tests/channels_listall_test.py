@@ -1,6 +1,7 @@
 from src.auth import auth_register_v1
 from src.channels import channels_create_v1
 from src.channels import channels_listall_v1
+from src.error import InputError, AccessError
 from src.other import clear_v1
 
 import pytest
@@ -19,6 +20,10 @@ def create_user2():
     user_id = auth_register_v1("z934183@unsw.edu.au", "password", "Firstname", "Lastname")['auth_user_id']
     return user_id
 
+# Access error when auth_user_id is invalid
+def test_listall_auth_user_id_invalid(clear_store):
+    with pytest.raises(AccessError):
+        channels_listall_v1(None)
 
 # Test for when there are no channels
 def test_listall_no_channels(clear_store, create_user):
