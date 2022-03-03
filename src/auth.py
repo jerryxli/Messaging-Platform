@@ -5,6 +5,9 @@ import re
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
 
+GLOBAL_PERMISSION_OWNER = 2
+GLOBAL_PERMISSION_USER = 1
+
 def auth_login_v1(email, password):
     store = data_store.get()
     users = store['users']
@@ -36,7 +39,11 @@ def auth_register_v1(email, password, name_first, name_last):
 
     new_user_id = len(users)
 
-    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle}
+    global_permission = GLOBAL_PERMISSION_USER
+    if new_user_id == 0:
+        global_permission = GLOBAL_PERMISSION_OWNER
+
+    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle, 'global_permission': global_permission}
 
     users[new_user_id] = new_user_dictionary
 
