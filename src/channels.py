@@ -16,7 +16,14 @@ def channels_list_v1(auth_user_id):
 
 def channels_listall_v1(auth_user_id):
     '''
-    Prints out a list of all channels
+    Allows a registered user to list all public and private channels
+
+    Arguments:
+       int auth_user_id 
+    Exceptions:
+        AccessError when auth_user_id is invalid
+    Return Value:
+        Returns list of channels and all their details in form: { channels }
     '''
     if verify_user(auth_user_id) == False:
         raise(AccessError)
