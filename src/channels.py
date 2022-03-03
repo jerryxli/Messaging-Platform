@@ -53,14 +53,9 @@ def channels_create_v1(auth_user_id, name, is_public):
         raise(AccessError)
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise(InputError)
-    ignore_keys = ['password']
-    altered_users = users
-    for k,v in altered_users.items():
-        fresh = {}
-        for key, item in v.items():
-            if key not in ignore_keys:
-                fresh[key] = item
-        altered_users[k] = fresh
+    altered_users = {k: non_password_field(v) for k,v in users.items()}
+    for id, user in altered_users.items():
+        user['u_id'] = id
     new_channel = {}
     new_channel_id = len(channels)
     new_channel['name'] = name
@@ -77,11 +72,6 @@ def channels_create_v1(auth_user_id, name, is_public):
     )
 
 
-# def is_channel_taken(name):
-#     store = data_store.get()
-#     channels = store['channels']
-#     for channel in channels.values():
-#         if channel['name'] == name:
-#             return True
-    
-#     return False
+def non_password_field(user):
+    user = {k: v for k,v in user.items() if k != 'password'}
+    return user

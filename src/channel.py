@@ -33,10 +33,7 @@ def channel_details_v1(auth_user_id, channel_id):
         channel = channels[channel_id]
     else:
         raise InputError
-    ids = []
-    for user in channel['channel_members']:
-        print(user)
-        ids.append(user['u_id'])
+    ids = [user['u_id'] for user in channel['channel_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
         # Create a blank dictionary that will contain the channel details
@@ -66,6 +63,9 @@ def channel_messages_v1(auth_user_id, channel_id, start):
     }
 
 def check_user_in_channel(auth_user_id, channel):
+    for user in channel['channel_members']:
+        print(user)
+        print(user['u_id'])
     ids = [user['u_id'] for user in channel['channel_members']]
     if auth_user_id in ids:
         return True
@@ -83,15 +83,9 @@ def channel_join_v1(auth_user_id, channel_id):
     else:
         raise InputError("channel_id does not refer to a valid channel")
     # check if the channel is public
-    ignore_keys = ['password']
-    altered_users = users
-    for k,v in altered_users.items():
-        fresh = {}
-        for key, item in v.items():
-            if key not in ignore_keys:
-                fresh[key] = item
-        fresh['u_id'] = auth_user_id
-        altered_users[k] = fresh
+    altered_users = {k: non_password_field(v) for k,v in users.items()}
+    for id, user in altered_users.items():
+        user['u_id'] = id
     if channel['is_public']:
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
@@ -103,5 +97,7 @@ def channel_join_v1(auth_user_id, channel_id):
     
     data_store.set(store)
     
-
+def non_password_field(user):
+    user = {k: v for k,v in user.items() if k != 'password'}
+    return user
 
