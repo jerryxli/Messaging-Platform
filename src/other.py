@@ -12,8 +12,8 @@ def clear_v1():
 
     '''
     store = data_store.get()
-    store['users'] = []
-    store['channels'] = []
+    store['users'] = {}
+    store['channels'] = {}
     data_store.set(store)
 
 def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dict) -> bool:
@@ -61,12 +61,9 @@ def verify_user(auth_user_id: int)->bool:
         Returns True if it is registered, False if not
 
     '''
-    verified = 0
     users = data_store.get()['users']
-    for user in users:
-        if auth_user_id == user['auth_user_id']:
-            verified = 1
-    if verified == 0:
-        return False
-    else:
+    if auth_user_id in users.keys():
         return True
+    else:
+        return False
+    
