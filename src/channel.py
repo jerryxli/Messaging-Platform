@@ -62,15 +62,24 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'end': 50,
     }
 
-def check_user_in_channel(auth_user_id, channel):
+
+def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
+    '''
+    Checks whether a user is in a channel or not
+
+    Arguments:
+        user_id (int) - the id of the user
+        channel (dict) - the channel to check
+    
+    Returns:
+        A boolean, true if the user is in the channel, false if not
+
+    '''
     for user in channel['channel_members']:
         print(user)
         print(user['u_id'])
     ids = [user['u_id'] for user in channel['channel_members']]
-    if auth_user_id in ids:
-        return True
-    else:
-        return False
+    return bool(auth_user_id in ids)
 
 
 def channel_join_v1(auth_user_id, channel_id):
@@ -96,6 +105,7 @@ def channel_join_v1(auth_user_id, channel_id):
         raise(AccessError)
     
     data_store.set(store)
+    return {}
     
 def non_password_field(user):
     user = {k: v for k,v in user.items() if k != 'password'}
