@@ -1,3 +1,6 @@
+from src.data_store import data_store
+from src.error import InputError, AccessError
+
 def channel_invite_v1(auth_user_id, channel_id, u_id):
     return {
     }
@@ -39,6 +42,33 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'end': 50,
     }
 
+
+# check if the user is already in the channel
+def check_user_in_channel(user_id, channel):
+    if user_id in channel['channel_members']:
+        return True
+    else:
+        return False
+
 def channel_join_v1(auth_user_id, channel_id):
-    return {
-    }
+    channel = None
+    store = data_store.get()
+    channels = store['channels']
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError("channel_id does not refer to a valid channel")
+    # check if the channel is public
+    if channel['is_public']:
+        # check if the user is already in the channel
+        if check_user_in_channel(auth_user_id, channel):
+            raise InputError("the authorised user is already a member of the channel")
+        # channel is public and user isn't in the channel yet. Add to channel
+        channel['channel_members'].append(auth_user_id)
+    else:
+        raise(AccessError)
+    
+    data_store.set(store)
+    
+
+
