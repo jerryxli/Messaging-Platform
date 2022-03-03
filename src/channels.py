@@ -21,7 +21,7 @@ def channels_list_v1(auth_user_id:int)->dict:
     # Loops through each channel in the list Channels
     for channel_id, channel_details in channels.items():
         # Loops through each user for the channel
-        ids = [user['auth_user_id'] for user in channel_details['all_members']]
+        ids = [user['u_id'] for user in channel_details['all_members']]
         if auth_user_id in ids:
             # If user_id match occurs, appends a dictionary with channel_id and name
             # into user_channels
@@ -30,7 +30,7 @@ def channels_list_v1(auth_user_id:int)->dict:
     # Returns a dictionary with the key 'channels' which has user_channels as its values
     return { 'channels': user_channels }
 
-def channels_list_all_v1(auth_user_id:int)->dict:
+def channels_listall_v1(auth_user_id:int)->dict:
     """
     Allows a registered user to list all public and private channels
 
@@ -77,7 +77,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
         raise InputError
     altered_users = {k: non_password_field(v) for k,v in users.items()}
     for id, user in altered_users.items():
-        user['auth_user_id'] = id
+        user['u_id'] = id
     new_channel_id = len(channels)
     channels[new_channel_id] = {'name': name, 'is_public': is_public, 'owner_members': [altered_users[auth_user_id]], 'all_members': [altered_users[auth_user_id]], 'messages': []}
     store['channels'] = channels
