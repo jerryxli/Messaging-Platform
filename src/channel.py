@@ -42,8 +42,8 @@ def channel_details_v1(auth_user_id, channel_id):
         # Add the details into the channel_details dictionary
         channel_details['name'] = channel['name']
         channel_details['is_public'] = channel['is_public']
-        channel_details['owner_members'] = channel['channel_owners']
-        channel_details['all_members'] = channel['channel_members']
+        channel_details['owner_members'] = channel['channel_owners'].values()
+        channel_details['all_members'] = channel['channel_members'].values()
     else:
         raise AccessError
     return channel_details
@@ -62,21 +62,31 @@ def channel_messages_v1(auth_user_id, channel_id, start):
         'end': 50,
     }
 
+def check_user_in_channel(auth_user_id, channel):
+    if auth_user_id in channel['channel_members']:
+        return True
+    else:
+        return False
+
+
 def channel_join_v1(auth_user_id, channel_id):
     channel = None
     store = data_store.get()
     channels = store['channels']
+    users = store['users']
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
         raise InputError("channel_id does not refer to a valid channel")
     # check if the channel is public
+    ignore_keys = set(('password'))
+    altered_users = {k:v for k,v in users.items() if k not in ignore_keys}
     if channel['is_public']:
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         # channel is public and user isn't in the channel yet. Add to channel
-        channel['channel_members'].append(auth_user_id)
+        channel['channel_members'][auth_user_id] = altered_users[auth_user_id]
     else:
         raise(AccessError)
     
