@@ -29,18 +29,33 @@ def channel_details_v1(auth_user_id, channel_id):
     }
 
 def channel_messages_v1(auth_user_id, channel_id, start):
-    return {
-        'messages': [
-            {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
-            }
-        ],
-        'start': 0,
-        'end': 50,
-    }
+    start = int(start)
+    page_threshold = 50
+
+    # locate user_id, if not found, return AccessError
+    user = None
+    store = data_store.get()
+    users = store['users']
+    if auth_user_id in users.keys():
+        user = users[user_id]
+    else:
+        raise AccessError("channel_id is valid and the authorised user is not a memeber of the channel")
+    # locate channel_id, if not found, return InputError
+    channel = None
+    channels = store['channels']
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError("channel_id does not refer to a valid channel")
+    # determine if start is greater than total number of messages, if so, return InputError
+    if start > len(channel['messages']):
+        raise InputError("start is greater than the total number of messages in the channel")
+
+    messages = []
+    not_displayed = list(reversed(channel['messages']))[start:]
+    end = -1 if len(messages) == len(not_displayed) else start + page_threshold
+
+    return {'messages': messages, 'start': start, 'end': end}
 
 
 # check if the user is already in the channel
