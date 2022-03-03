@@ -1,7 +1,6 @@
 import pytest
-import datetime
 
-from src.channel import channel_messages_v1, check_user_in_channel
+from src.channel import channel_messages_v1
 from src.channels import channels_create_v1
 from src.auth import auth_register_v1
 from src.error import InputError, AccessError
@@ -26,7 +25,6 @@ def create_channel(user_id):
     channel_id = channels_create_v1(user_id, 'test', True)
     return channel_id
 
-
 def invalid_channel_id(clear_store, create_user):
     user_id = create_user()
     with pytest.raises(InputError):
@@ -42,5 +40,5 @@ def user_not_in_channel(clear_store, create_user, create_user2, create_channel):
 def channel_messages_with_no_messages(clear_store):
     user_id = create_user()
     channel_id = create_channel(user_id)
-    expected_output = { [messages], 0, -1 }
+    expected_output = { [], 0, -1 }
     assert channel_messages_v1(user_id, channel_id, 0) == expected_output
