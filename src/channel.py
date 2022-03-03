@@ -8,8 +8,8 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     return {
     }
 
-def channel_details_v1(auth_user_id, channel_id):
-    '''
+def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
+    """
     When a auth_user_id and channel_id is passed in, the details for the channel is returned.
 
     Exceptions:
@@ -23,7 +23,7 @@ def channel_details_v1(auth_user_id, channel_id):
     Return Value:
         The details of a channel in the format:
         { name: , is_public: , owner_members: [], all_members: [], }
-    '''
+    """
     store = data_store.get()
     channels = store['channels']
     users = store['users']
@@ -35,17 +35,10 @@ def channel_details_v1(auth_user_id, channel_id):
         channel = channels[channel_id]
     else:
         raise InputError
-    ids = [user['u_id'] for user in channel['channel_members']]
+    ids = [user['u_id'] for user in channel['all_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
-        # Create a blank dictionary that will contain the channel details
-        channel_details = {}
-
-        # Add the details into the channel_details dictionary
-        channel_details['name'] = channel['name']
-        channel_details['is_public'] = channel['is_public']
-        channel_details['owner_members'] = channel['channel_owners']
-        channel_details['all_members'] = channel['channel_members']
+        return {k: v for k, v in channel.items()}
     else:
         raise AccessError
     return channel_details
@@ -77,7 +70,7 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
 
 
 def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
-    '''
+    """
     Checks whether a user is in a channel or not
 
     Arguments:
@@ -86,13 +79,23 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     
     Returns:
         A boolean, true if the user is in the channel, false if not
-
-    '''
-    ids = [user['u_id'] for user in channel['channel_members']]
+    """
+    ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
 
-def channel_join_v1(auth_user_id, channel_id):
-    channel = None
+
+def channel_join_v1(auth_user_id:int, channel_id:int)->None:
+    """
+    Adds a new user to a channel provided it is public and they aren't already in it
+
+    Arguments:
+        auth_user_id (int) - the id of the user
+        channel_id (int) - the id of the channel to join
+    
+    Returns:
+        None
+
+    """
     store = data_store.get()
     channels = store['channels']
     users = store['users']
@@ -109,13 +112,23 @@ def channel_join_v1(auth_user_id, channel_id):
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         # channel is public and user isn't in the channel yet. Add to channel
-        channel['channel_members'].append(altered_users[auth_user_id])
+        channel['all_members'].append(altered_users[auth_user_id])
     else:
         raise(AccessError)
     
     data_store.set(store)
     
-def non_password_field(user):
+def non_password_field(user:dict)->dict:
+    """
+    Removes all non-password fields from a user to print them
+
+    Arguments:
+        user (dict) - dictionary of all user details
+    
+    Returns:
+        Dictionary with password field removed
+    
+    """
     user = {k: v for k,v in user.items() if k != 'password'}
     return user
 

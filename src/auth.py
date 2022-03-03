@@ -9,7 +9,7 @@ GLOBAL_PERMISSION_OWNER = 2
 GLOBAL_PERMISSION_USER = 1
 
 def auth_login_v1(email:str, password:str)->dict:
-    '''
+    """
     Logs an existing user into the application
 
     Arguments:
@@ -22,7 +22,7 @@ def auth_login_v1(email:str, password:str)->dict:
     Return Value:
         Returns {auth_user_id} on successful login
 
-    '''
+    """
     store = data_store.get()
     users = store['users']
     for user_id, user in users.items():
@@ -34,7 +34,7 @@ def auth_login_v1(email:str, password:str)->dict:
     raise InputError("Invalid Email")
 
 def auth_register_v1(email: str, password: str, name_first: str, name_last:str)->dict:
-    '''
+    """
     Registers a user into the database, generates a handle upon registration
 
     Arguments:
@@ -51,7 +51,7 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     Return Value:
         Returns {auth_user_id} on successful registration
 
-    '''
+    """
     if not is_valid_email(email):
         raise InputError("Email is not valid")
     if len(password) < 6:
@@ -78,7 +78,7 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
 
 
 def generate_handle(name_first:str, name_last:str)->str:
-    '''
+    """
     This function generates a handle for a user, the users first and last names
     are concatenated and turned lower case (if this is over 20 it is trimmed to 20).
     If that handle is taken a number is added to the end.
@@ -90,8 +90,8 @@ def generate_handle(name_first:str, name_last:str)->str:
     Return Value:
         Returns handle (string)
 
-    '''
-    stripped_concatenated_name = remove_non_alphnum(name_first+name_last)
+    """
+    stripped_concatenated_name = remove_non_alphanumeric(name_first+name_last)
     stripped_concatenated_name = stripped_concatenated_name.lower()
     if len(stripped_concatenated_name) > 20:
         stripped_concatenated_name = stripped_concatenated_name[0:20]
@@ -109,7 +109,7 @@ def generate_handle(name_first:str, name_last:str)->str:
 
 def is_email_taken(email:str)->bool:
 
-    '''
+    """
     Checks whether an email is used in the data store
 
     Arguments:
@@ -119,7 +119,7 @@ def is_email_taken(email:str)->bool:
         Returns True if it is taken
         Returns False if it is not taken
 
-    '''
+    """
     store = data_store.get()
     users = store['users']
     for user in users.values():
@@ -128,7 +128,7 @@ def is_email_taken(email:str)->bool:
     return False
 
 def is_handle_taken(handle:str)->bool:
-    '''
+    """
     This function checks whether a handle is used before in the data store
 
     Arguments:
@@ -138,7 +138,7 @@ def is_handle_taken(handle:str)->bool:
         Returns True if the handle is taken
         Returns False if it is not taken
 
-    '''
+    """
     store = data_store.get()
     users = store['users']
     for user in users.values():
@@ -147,7 +147,7 @@ def is_handle_taken(handle:str)->bool:
     return False
 
 def is_valid_email(email:str)->bool:
-    '''
+    """
     Verifies whether an email is valid or not
 
     Arguments:
@@ -155,11 +155,11 @@ def is_valid_email(email:str)->bool:
 
     Return Value:
         Returns True if the email is valid and False if it is not
-    '''
+    """
     return bool(re.search(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$', email))
 
-def remove_non_alphnum(string:str)->str:
-    '''
+def remove_non_alphanumeric(string:str)->str:
+    """
     Strips all alpha numeric characters from the input string
 
     Arguments:
@@ -167,9 +167,6 @@ def remove_non_alphnum(string:str)->str:
 
     Return Value:
         Returns alnumString (string)
-    '''
-    alnum_string = ''
-    for character in string:
-        if character.isalnum():
-            alnum_string += character
-    return alnum_string
+    """
+    alnum_list = [char for char in string if char.isalnum()]
+    return "".join(alnum_list)
