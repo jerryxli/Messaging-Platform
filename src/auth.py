@@ -5,6 +5,9 @@ from src.error import InputError
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
 
+GLOBAL_PERMISSION_OWNER = 2
+GLOBAL_PERMISSION_USER = 1
+
 def auth_login_v1(email:str, password:str)->dict:
     '''
     Logs an existing user into the application
@@ -65,16 +68,14 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     store = data_store.get()
     users = store['users']
     new_user_id = len(users)
-    new_user_dictionary = {'name_first': name_first,
-                           'name_last': name_last,
-                           'email': email,
-                           'password': password,
-                           'handle': handle
-                           }
+    global_permission = GLOBAL_PERMISSION_USER
+    if new_user_id == 0:
+        global_permission = GLOBAL_PERMISSION_OWNER
+    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle, 'global_permission': global_permission}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
-
     return {'auth_user_id': new_user_id}
+
 
 def generate_handle(name_first:str, name_last:str)->str:
     '''
