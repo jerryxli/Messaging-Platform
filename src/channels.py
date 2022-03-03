@@ -33,14 +33,32 @@ def channels_list_v1(auth_user_id):
     return { 'channels': user_channels }
 
 def channels_listall_v1(auth_user_id):
-    return {
-        'channels': [
-        	{
-        		'channel_id': 1,
-        		'name': 'My Channel',
-        	}
-        ],
-    }
+    '''
+    Allows a registered user to list all public and private channels
+
+    Arguments:
+       int auth_user_id 
+    Exceptions:
+        AccessError when auth_user_id is invalid
+    Return Value:
+        Returns list of channels and all their details in form: { channels }
+    '''
+    if verify_user(auth_user_id) == False:
+        raise(AccessError)
+
+    store = data_store.get()
+    channels = store['channels']
+
+    all_channels = []
+
+    for key, channel in channels.items():
+        user_channel = {}
+        user_channel['channel_id'] = key 
+        user_channel['name'] = channel['name']
+
+        all_channels.append(user_channel)
+
+    return { 'channels': all_channels }
 
 def channels_create_v1(auth_user_id, name, is_public):
     '''
