@@ -30,6 +30,7 @@ def channels_create_v1(auth_user_id, name, is_public):
     '''
     store = data_store.get()
     channels = store['channels']
+    users = store['users']
     if verify_user(auth_user_id) == False:
         raise(AccessError)
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
