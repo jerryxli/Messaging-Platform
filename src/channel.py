@@ -37,13 +37,13 @@ def channel_details_v1(auth_user_id, channel_id):
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in channel['channel_members']:
         # Create a blank dictionary that will contain the channel details
-    channel_details = {}
+        channel_details = {}
 
-    # Add the details into the channel_details dictionary
-    channel_details['name'] = channel['name']
-    channel_details['is_public'] = channel['is_public']
-    channel_details['owner_members'] = channel['channel_owners']
-    channel_details['all_members'] = channel['channel_members']
+        # Add the details into the channel_details dictionary
+        channel_details['name'] = channel['name']
+        channel_details['is_public'] = channel['is_public']
+        channel_details['owner_members'] = channel['channel_owners']
+        channel_details['all_members'] = channel['channel_members']
     else:
         raise AccessError
     return channel_details
