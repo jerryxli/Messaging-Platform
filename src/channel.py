@@ -54,7 +54,6 @@ def channel_join_v1(auth_user_id, channel_id):
     channel = None
     store = data_store.get()
     channels = store['channels']
-    print(channels.keys())
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:

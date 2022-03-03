@@ -29,7 +29,6 @@ def test_private_channel(clear_store, create_user, create_user2):
     user_id = create_user
     user_id2 = create_user2
     channels = channels_create_v1(user_id, 'test2', False)
-    print(channels['channel_id'])
     with pytest.raises(AccessError):
         channel_join_v1(user_id2, channels['channel_id']) 
 
