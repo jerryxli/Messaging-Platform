@@ -1,6 +1,6 @@
 from src.data_store import data_store
 from src.error import InputError, AccessError
-from src.other import verify_user
+from src.other import verify_user, is_global_user
 
 PAGE_THRESHOLD = 50
 
@@ -114,14 +114,14 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     for id, user in altered_users.items():
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
-    if channel['is_public']:
+    if channel['is_public'] or (not channel['is_public'] and is_global_user(auth_user_id)):
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         # channel is public and user isn't in the channel yet. Add to channel
         channel['all_members'].append(altered_users[auth_user_id])
     else:
-        raise(AccessError)
+        raise AccessError
     
     data_store.set(store)
     
