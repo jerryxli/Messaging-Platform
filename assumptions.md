@@ -1,2 +1,1 @@
 1. That the auth_user_id does not need to be assigned in any particular way (by encoding or time of registration etc.)
-2. That two channels cannot be given the same name because this would ruin the functionality of the channel_join_v1 function (which relies solely on the name and not the ID). Hence required a check to stop duplicate names

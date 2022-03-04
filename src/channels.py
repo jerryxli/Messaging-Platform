@@ -77,8 +77,6 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
         raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise InputError("Channel name too long or short")
-    if is_channel_taken(name):
-        raise InputError
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for id, user in altered_users.items():
         user['u_id'] = id
@@ -91,22 +89,6 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
         {'channel_id': new_channel_id}
     )
 
-
-def is_channel_taken(name:str)->bool:
-    """
-    Checks where channel name has already been used
-
-    Arguments:
-        name (str) - the desired name of the new channel
-    
-    Returns:
-        Boolean, true if it already exists, false if it doesn't
-    
-    """
-    store = data_store.get()
-    channels = store['channels']
-    names = [channel['name'] for channel in channels.values()]
-    return bool(name in names)
 
 def non_password_global_permission_field(user:dict)->dict:
     """

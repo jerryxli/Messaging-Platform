@@ -97,13 +97,6 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
         channel_details_v1(user_id_3, channel_id_2)
 
 
-def test_double_channel_name(clear_store, create_user):
-    user_id_1 = create_user
-    channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', False)['channel_id']
-    with pytest.raises(InputError):
-        channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
-
-
 # Tests for when an invalid channel_id is entered.
 def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_id_1 = create_user
