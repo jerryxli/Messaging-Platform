@@ -63,3 +63,7 @@ def verify_user(auth_user_id: int)->bool:
     """
     users = data_store.get()['users']
     return bool(auth_user_id in users.keys())
+
+def is_global_user(auth_user_id: int)->bool:
+    users = data_store.get()['users']
+    return bool(users[auth_user_id]['global_permission'] == 2)

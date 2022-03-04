@@ -1,6 +1,6 @@
 from src.data_store import data_store
 from src.error import InputError, AccessError
-from src.other import verify_user
+from src.other import verify_user, is_global_user
 
 PAGE_THRESHOLD = 50
 
@@ -38,7 +38,7 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     ids = [user['u_id'] for user in channel['all_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
-        return {k: v for k, v in channel.items()}
+        return {k: v for k, v in channel.items() if k not in ['is_public', 'messages']}
     else:
         raise AccessError
     return channel_details
@@ -47,6 +47,10 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
     store = data_store.get()
     user = None
     users = store['users']
+
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
     if auth_user_id in users.keys():
         user = users[auth_user_id]
     else:
@@ -96,6 +100,8 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         None
 
     """
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
     store = data_store.get()
     channels = store['channels']
     users = store['users']
@@ -108,14 +114,14 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     for id, user in altered_users.items():
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
-    if channel['is_public']:
+    if channel['is_public'] or (not channel['is_public'] and is_global_user(auth_user_id)):
         # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         # channel is public and user isn't in the channel yet. Add to channel
         channel['all_members'].append(altered_users[auth_user_id])
     else:
-        raise(AccessError)
+        raise AccessError
     
     data_store.set(store)
     
