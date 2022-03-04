@@ -4,9 +4,47 @@ from src.other import verify_user, is_global_user
 
 PAGE_THRESHOLD = 50
 
+def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
+    '''
+    Checks whether a user is in a channel or not
+
+    Arguments:
+        user_id (int) - the id of the user
+        channel (dict) - the channel to check
+
+    Returns:
+        A boolean, true if the user is in the channel, false if not
+
+    '''
+    ids = [user['u_id'] for user in channel['channel_members']]
+    return bool(auth_user_id in ids)
+
 def channel_invite_v1(auth_user_id, channel_id, u_id):
-    return {
-    }
+    if verify_user(auth_user_id) is False:
+        raise(AccessError)
+    if verify_user(u_id) is False:
+        raise InputError("u_id does not refer to a valid user")
+
+    store = data_store.get()
+    channel = None
+    channels = store['channels']
+    users = store['users']
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError("channel_id does not refer to a valid channel")
+
+    if check_user_in_channel(u_id, channel) == True:
+        raise InputError("u_id refers to a user who is already a member of the channel")
+    if check_user_in_channel(auth_user_id, channel) == False:
+        raise(AccessError)
+
+    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
+    for id, user in altered_users.items():
+        user['u_id'] = id
+        channel['all_members'].append(altered_users[u_id])
+
+    data_store.set(store) 
 
 def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     """
@@ -138,4 +176,5 @@ def non_password_global_permission_field(user:dict)->dict:
     """
     user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
     return user
+
 
