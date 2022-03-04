@@ -46,6 +46,32 @@ def test_6_3_spec_Access_Errors(clear_state):
   #      channel_invite_v1(fake_auth, channel_1, auth_user_1)
 
 
+def test_list_and_join(clear_state):
+    auth_user_1 = auth_register_v1("example@gmail.com","hello123", "Hayden", "Jacobs")['auth_user_id']
+    auth_user_2 = auth_register_v1("exampleabc@gmail.com","hello123", "John", "Jacobs")['auth_user_id']
+
+    channel_id1 = channels_create_v1(auth_user_1, "My Channel", True)['channel_id']
+
+    assert channels_list_v1(auth_user_1) == {'channels': [{'channel_id': channel_id1,'name': 'My Channel'}]}
+    assert channels_listall_v1(auth_user_2) == channels_list_v1(auth_user_1)
+    assert channels_list_v1(auth_user_2) == {'channels': []}
+    channel_join_v1(auth_user_2, channel_id1)
+    assert channels_list_v1(auth_user_2) == {'channels': [{'channel_id': channel_id1,'name': 'My Channel'}]}
 
 
+def test_global_owner_join_private(clear_state):
+    global_owner_id = auth_register_v1("example@gmail.com","hello123", "Hayden", "Jacobs")['auth_user_id']
+    normal_id = auth_register_v1("exampleemail@gmail.com","hello123", "Jake", "Pola")['auth_user_id']
+    normal_id2 = auth_register_v1("sneaky@gmail.com", "38d9hja&**&", "Fake", "Name")['auth_user_id']
 
+    channel_1 = channels_create_v1(normal_id, "Secret Channel", False)['channel_id']
+    #  Test normal member cant get in
+    with pytest.raises(AccessError):
+        channel_join_v1(normal_id2, channel_1)
+
+    # Verify owner is not in the channel    
+    assert channels_list_v1(global_owner_id) == {'channels': []}
+
+    channel_join_v1(global_owner_id, channel_1)
+
+    assert channels_list_v1(global_owner_id) == {'channels': [{'channel_id': channel_1, 'name': 'Secret Channel'}]}
