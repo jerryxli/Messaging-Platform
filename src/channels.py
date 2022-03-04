@@ -12,6 +12,10 @@ def channels_list_v1(auth_user_id:int)->dict:
     Args:
     int auth_user_id
     """
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
+
     # Gets list of channels from data_store
     store = data_store.get()
     channels = store['channels']

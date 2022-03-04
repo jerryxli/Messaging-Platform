@@ -47,6 +47,10 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
     store = data_store.get()
     user = None
     users = store['users']
+
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
     if auth_user_id in users.keys():
         user = users[auth_user_id]
     else:
@@ -96,6 +100,8 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         None
 
     """
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
     store = data_store.get()
     channels = store['channels']
     users = store['users']
