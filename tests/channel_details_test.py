@@ -106,3 +106,29 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
         channel_details_v1(user_id_1, channel_id)
     with pytest.raises(InputError):
         channel_details_v1(user_id_2, channel_id)
+
+
+def test_from_stub_code(clear_store):
+    auth_user_1 = auth_register_v1("example@gmail.com","hello123", "Hayden", "Jacobs")['auth_user_id']
+    channel_created = channels_create_v1(auth_user_1, "Hayden", False)['channel_id']
+    assert channel_details_v1(auth_user_1, channel_created) ==  {
+        'name': 'Hayden',
+        'owner_members': [
+            {
+                'u_id': auth_user_1,
+                'email': 'example@gmail.com',
+                'name_first': 'Hayden',
+                'name_last': 'Jacobs',
+                'handle_str': 'haydenjacobs',
+            }
+        ],
+        'all_members': [
+            {
+                'u_id': auth_user_1,
+                'email': 'example@gmail.com',
+                'name_first': 'Hayden',
+                'name_last': 'Jacobs',
+                'handle_str': 'haydenjacobs',
+            }
+        ],
+    }

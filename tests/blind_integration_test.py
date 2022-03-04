@@ -15,32 +15,6 @@ def clear_state():
 
 
 
-def test_scenario_1(clear_state):
-    auth_user_1 = auth_register_v1("example@gmail.com","hello123", "Hayden", "Jacobs")['auth_user_id']
-    channel_created = channels_create_v1(auth_user_1, "Hayden", False)['channel_id']
-    assert channel_details_v1(auth_user_1, channel_created) ==  {
-        'name': 'Hayden',
-        'owner_members': [
-            {
-                'u_id': auth_user_1,
-                'email': 'example@gmail.com',
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-                'handle_str': 'haydenjacobs',
-            }
-        ],
-        'all_members': [
-            {
-                'u_id': auth_user_1,
-                'email': 'example@gmail.com',
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-                'handle_str': 'haydenjacobs',
-            }
-        ],
-    }
-
-
 def test_6_3_spec_Access_Errors(clear_state):
     auth_user_1 = auth_register_v1("example@gmail.com","hello123", "Hayden", "Jacobs")['auth_user_id']
     # Since there is only one user and the ids must be unique this is a fake user
@@ -66,6 +40,8 @@ def test_6_3_spec_Access_Errors(clear_state):
     with pytest.raises(AccessError):
         channel_join_v1(fake_auth, channel_1)
     
+
+  # Uncomment once channel invite is implemented  
   #  with pytest.raises(AccessError):
   #      channel_invite_v1(fake_auth, channel_1, auth_user_1)
 
