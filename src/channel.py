@@ -38,7 +38,7 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     ids = [user['u_id'] for user in channel['all_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
-        return {k: v for k, v in channel.items()}
+        return {k: v for k, v in channel.items() if (k != 'is_public' and k != 'messages')}
     else:
         raise AccessError
     return channel_details
