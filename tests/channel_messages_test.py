@@ -37,3 +37,19 @@ def test_channel_messages_with_no_messages(clear_store, create_user):
     channel_id = channels_create_v1(user_id, 'test', True)
     expected_output = { 'messages': [], 'start': 0, 'end': -1 }
     assert channel_messages_v1(user_id, channel_id['channel_id'], 0) == expected_output
+
+def test_channel_messages_start_exceeds(clear_store, create_user):
+     user_id = create_user
+     channel_id = channels_create_v1(user_id, 'test', True)['channel_id']
+
+     current = 0
+     messages = channel_messages_v1(user_id, channel_id, current)
+     # Spew through the messages until we reach the end
+     while messages['end'] != -1:
+         current += 50
+         messages = channel_messages_v1(user_id, channel_id, current)
+    
+     with pytest.raises(InputError):
+        channel_messages_v1(user_id, channel_id, current+100)
+
+
