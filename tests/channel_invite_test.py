@@ -1,5 +1,5 @@
 from src.channels import channels_create_v1
-from src.channel import channel_invite_v1, channel_details_v1
+from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1
 from src.auth import auth_register_v1 
 from src.error import InputError, AccessError
 from src.other import clear_v1
@@ -25,54 +25,54 @@ def create_user3():
     user_id = auth_register_v1("z5362601@unsw.edu.au", "password", "Name3", "Lastname")['auth_user_id']
     return user_id
 
-@pytest.fixture
-def check_user_in_channel(auth_user_id, u_id, channel_id):
+
+def check_user(auth_user_id, u_id, channel_id):
     details = channel_details_v1(auth_user_id, channel_id)
 
     user_was_added = False
-    for user in details['all_members']:
-        if user['u_id'] == u_id:
+    members = details['all_members']
+    for member in members:
+        if member['u_id'] == u_id:
             user_was_added = True
-            break
 
     return user_was_added
 
 
-def test_invite_public(clear_store, create_user, create_user2, check_user_in_channel):
+def test_invite_public(clear_store, create_user, create_user2):
     auth_user_id = create_user
-    channel_id_dict = channels_create_v1(auth_user_id, 'Channel1', True)
+    channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
     u_id = create_user2
-    channel_invite_v1(auth_user_id, channel_id_dict['channel_id'], u_id)
+    channel_invite_v1(auth_user_id, channel_id, u_id)
     
     # Check if u_id is now in channel
-    assert check_user_in_channel(auth_user_id, u_id, channel_id_dict['channel_id'])
+    assert check_user(auth_user_id, u_id, channel_id)
 
-def test_invite_private(clear_store, create_user, create_user2, check_user_in_channel):
+def test_invite_private(clear_store, create_user, create_user2):
     auth_user_id = create_user
-    channel_id_dict = channels_create_v1(auth_user_id, 'Channel1', False)
+    channel_id = channels_create_v1(auth_user_id, 'Channel1', False)['channel_id']
     u_id = create_user2
-    channel_invite_v1(auth_user_id, channel_id_dict['channel_id'], u_id)
+    channel_invite_v1(auth_user_id, channel_id, u_id)
     
     # Check if u_id is now in channel
-    assert check_user_in_channel(auth_user_id, u_id, channel_id_dict['channel_id'])
+    assert check_user(auth_user_id, u_id, channel_id)
 
 # Inviting multiple users to multiple channels & invited users inviting users
 def test_invite_multiple(clear_store, create_user, create_user2, create_user3):
     auth_user_id = create_user
-    channel_id_dict_1 = channels_create_v1(auth_user_id, 'Channel1', False)
-    channel_id_dict_2 = channels_create_v1(auth_user_id, 'Channel2', True)
+    channel_id_1 = channels_create_v1(auth_user_id, 'Channel1', False)['channel_id']
+    channel_id_2 = channels_create_v1(auth_user_id, 'Channel2', True)['channel_id']
     u_id_1 = create_user2
     u_id_2 = create_user3
-    channel_invite_v1(auth_user_id, channel_id_dict_1['channel_id'], u_id_1)
+    channel_invite_v1(auth_user_id, channel_id_1, u_id_1)
 
-    assert check_user_in_channel(auth_user_id, u_id_1, channel_id_dict_1['channel_id'])
+    assert check_user(auth_user_id, u_id_1, channel_id_1)
 
-    channel_invite_v1(u_id_1, channel_id_dict_1['channel_id'], u_id_2)
-    channel_invite_v1(auth_user_id, channel_id_dict_2['channel_id'], u_id_2)
+    channel_invite_v1(u_id_1, channel_id_1, u_id_2)
+    channel_invite_v1(auth_user_id, channel_id_2, u_id_2)
     
     # Check if u_id is now in channel
-    assert check_user_in_channel(auth_user_id, u_id_2, channel_id_dict_2['channel_id'])
-    assert check_user_in_channel(auth_user_id, u_id_2, channel_id_dict_2['channel_id'])
+    assert check_user(auth_user_id, u_id_2, channel_id_2)
+    assert check_user(auth_user_id, u_id_2, channel_id_2)
 
 #-------------------------Error Testing------------------------------#
 
@@ -104,7 +104,7 @@ def test_invite_error_already_joined(clear_store, create_user, create_user2):
     u_id = create_user2
     channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
    
-    channel_invite_v1(auth_user_id, channel_id, u_id)
+    channel_join_v1(u_id, channel_id)
     with pytest.raises(InputError):
         channel_invite_v1(auth_user_id, channel_id, u_id)
 
