@@ -53,3 +53,9 @@ def test_channel_messages_start_exceeds(clear_store, create_user):
         channel_messages_v1(user_id, channel_id, current+100)
 
 
+def test_invalid_auth_id(clear_store, create_user):
+    user_id = create_user
+    fake_id = user_id + 1
+    channel_id = channels_create_v1(user_id, "Cool", True)['channel_id']
+    with pytest.raises(AccessError):
+        channel_messages_v1(fake_id, channel_id, 0)
