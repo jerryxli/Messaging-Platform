@@ -33,6 +33,7 @@ def auth_login_v1(email:str, password:str)->dict:
                 raise InputError("Incorrect Password")
     raise InputError("Invalid Email")
 
+
 def auth_register_v1(email: str, password: str, name_first: str, name_last:str)->dict:
     """
     Registers a user into the database, generates a handle upon registration
@@ -107,6 +108,7 @@ def generate_handle(name_first:str, name_last:str)->str:
 
     return stripped_concatenated_name
 
+
 def is_email_taken(email:str)->bool:
 
     """
@@ -127,6 +129,7 @@ def is_email_taken(email:str)->bool:
             return True
     return False
 
+
 def is_handle_taken(handle:str)->bool:
     """
     This function checks whether a handle is used before in the data store
@@ -146,6 +149,7 @@ def is_handle_taken(handle:str)->bool:
             return True
     return False
 
+
 def is_valid_email(email:str)->bool:
     """
     Verifies whether an email is valid or not
@@ -157,6 +161,7 @@ def is_valid_email(email:str)->bool:
         Returns True if the email is valid and False if it is not
     """
     return bool(re.search(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$', email))
+
 
 def remove_non_alphanumeric(string:str)->str:
     """
