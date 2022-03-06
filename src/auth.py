@@ -1,3 +1,13 @@
+"""
+Auth
+Filename: auth.py
+
+Author: Tetian Madfouni (z5361722), Samuel Bell (z5362604)
+Created: 22.02.2022
+
+Description: Allows the user to register an account and login to the account.
+"""
+
 import re
 from src.data_store import data_store
 from src.error import InputError
@@ -72,7 +82,8 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     global_permission = GLOBAL_PERMISSION_USER
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
-    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email, 'password': password, 'handle': handle, 'global_permission': global_permission}
+    new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
+    'password': password, 'handle': handle, 'global_permission': global_permission}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
     return {'auth_user_id': new_user_id}
