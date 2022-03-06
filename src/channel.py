@@ -49,6 +49,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
     data_store.set(store) 
 
+
 def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     """
     Returns assosciated details of a channel.
@@ -85,6 +86,7 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
         raise AccessError
     return channel_details
     
+
 def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
     """
     Returns up to 50 messages between the start index and start + 50.
@@ -189,6 +191,7 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         raise AccessError
     
     data_store.set(store)
+    
     
 def non_password_global_permission_field(user:dict)->dict:
     """
