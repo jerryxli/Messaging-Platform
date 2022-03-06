@@ -1,12 +1,12 @@
 """
-Channel
-Filename: channel.py
+Channels
+Filename: channels.py
 
 Author: Tetian Madfouni (z5361722), Jacqueline Chen (z5360310), Jerry Li (z5362290)
 Created: 22.02.2022
 
-Description: Contains three functions that allow the user to
-list channel info that they are apart of, list channel info for all channels and create channels.
+Description: Allows the user to list channel info that they are apart of,
+list channel info for all channels and create channels.
 """
 
 from src.data_store import data_store
@@ -91,7 +91,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     store = data_store.get()
     channels = store['channels']
     users = store['users']
-    if verify_user(auth_user_id) == False:
+    if not verify_user(auth_user_id):
         raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise InputError("Channel name too long or short")
