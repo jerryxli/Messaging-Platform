@@ -5,6 +5,24 @@ from src.other import verify_user, is_global_user
 PAGE_THRESHOLD = 50
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
+    """
+    Invites a user to join a channel.
+
+    Exceptions:
+        AccessError     - Occurs when auth_user_id is invalid
+        AccessError     - Occurs when auth_user_id is not a member of the channel
+        InputError      - Occurs when u_id is already a member of the channel
+        InputError      - Occurs when channel_id is invalid
+        InputError      - Occurs when u_id is invalid
+    
+    Arguments: 
+        auth_user_id (int)  - The id of the user
+        u_id (int)          - The id of the invited user
+        channel_id (int)    - The id of the channel
+         
+    Return Value:
+        None
+    """
     if verify_user(auth_user_id) is False:
         raise(AccessError)
     if verify_user(u_id) is False:
@@ -33,19 +51,20 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
 
 def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     """
-    When a auth_user_id and channel_id is passed in, the details for the channel is returned.
+    Returns assosciated details of a channel.
 
     Exceptions:
-        AccessError when auth_user_id is invalid.
-        AccessError when auth_user_id is not a member in the channel.
-        InputError when channel_id is invalid.
+        AccessError     - Occurs when auth_user_id is invalid
+        AccessError     - Occurs when auth_user_id is not a member of the channel
+        InputError      - Occurs when channel_id is invalid
     
     Arguments: 
-        int auth_user_id, int channel_id
-        
+        auth_user_id (int)  - The id of the user
+        channel_id (int)    - The id of the channel
+         
     Return Value:
-        The details of a channel in the format:
-        { name: , is_public: , owner_members: [], all_members: [], }
+        Returns { name: , is_public: , owner_members: [], all_members: [], }
+        on successful creation
     """
     store = data_store.get()
     channels = store['channels']
@@ -67,6 +86,23 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     return channel_details
     
 def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
+    """
+    Returns up to 50 messages between the start index and start + 50.
+
+    Exceptions:
+        AccessError     - Occurs when auth_user_id is invalid
+        AccessError     - Occurs when auth_user_id is not a member of the channel
+        InputError      - Occurs when channel_id is invalid
+        InputError      - Occurs when start is greater than the total number of messages
+    
+    Arguments: 
+        auth_user_id (int)  - The id of the user
+        channel_id (int)    - The id of the channel
+        start (int)         - The start index
+         
+    Return Value:
+        Returns { messages, start, end } on successful creation
+    """
     store = data_store.get()
     user = None
     users = store['users']
@@ -101,8 +137,8 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     Checks whether a user is in a channel or not
 
     Arguments:
-        user_id (int) - the id of the user
-        channel (dict) - the channel to check
+        user_id (int)   - the id of the user
+        channel (dict)  - the channel to check
     
     Returns:
         A boolean, true if the user is in the channel, false if not
@@ -116,8 +152,8 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     Adds a new user to a channel provided it is public and they aren't already in it
 
     Arguments:
-        auth_user_id (int) - the id of the user
-        channel_id (int) - the id of the channel to join
+        auth_user_id (int)  - the id of the user
+        channel_id (int)    - the id of the channel to join
     
     Returns:
         None

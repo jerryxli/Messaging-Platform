@@ -9,8 +9,12 @@ def channels_list_v1(auth_user_id:int)->dict:
     Prints out the list of channels that the user is a member of
     In the format: { channels: [{}, {}, {}] }
 
-    Args:
-    int auth_user_id
+    Arguments:
+    auth_user_id (int)  - The id of the user 
+    Exceptions:
+        AccessError     - Occurs when auth_user_id is invalid
+    Return Value:
+        Returns { channels } on successful creation
     """
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
@@ -34,16 +38,17 @@ def channels_list_v1(auth_user_id:int)->dict:
     # Returns a dictionary with the key 'channels' which has user_channels as its values
     return { 'channels': user_channels }
 
+
 def channels_listall_v1(auth_user_id:int)->dict:
     """
     Allows a registered user to list all public and private channels
 
     Arguments:
-       int auth_user_id
+       auth_user_id (int)   - The id of the user
     Exceptions:
-        AccessError when auth_user_id is invalid
+        AccessError         - Occurs when auth_user_id is invalid
     Return Value:
-        Returns list of channels and all their details in form: { channels }
+        Returns { channels } on successful creation
     """
     if verify_user(auth_user_id) is False:
         raise AccessError
@@ -51,6 +56,7 @@ def channels_listall_v1(auth_user_id:int)->dict:
     store = data_store.get()
     channels = store['channels']
     return { 'channels': [{'channel_id': key, 'name': channel['name']} for key, channel in channels.items()] }
+
 
 def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     """
