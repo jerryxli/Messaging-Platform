@@ -151,6 +151,12 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     """
     Adds a new user to a channel provided it is public and they aren't already in it
 
+    Exceptions:
+        AccessError     - Occurs when auth_user_id is invalid
+        AccessError     - Occurs when auth_user_id is not a member of the channel
+        InputError      - Occurs when channel_id is invalid
+        InputError      - Occurs when auth_user_id is already a member of the channel
+
     Arguments:
         auth_user_id (int)  - the id of the user
         channel_id (int)    - the id of the channel to join
