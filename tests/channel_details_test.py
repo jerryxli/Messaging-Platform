@@ -39,14 +39,14 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
     user_id_2 = create_user2
     channel_id_1 = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_id_2 = channels_create_v1(user_id_2, 'Channel_Name2', False)['channel_id']
-    assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id_1), {'name': str, 'owner_members': list, 'all_members': list})
+    assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id_1), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list})
     for user in channel_details_v1(user_id_1, channel_id_1)['owner_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     for user in channel_details_v1(user_id_1, channel_id_1)['all_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
     
-    assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id_2), {'name': str, 'owner_members': list, 'all_members': list})
+    assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id_2), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list})
     for user in channel_details_v1(user_id_2, channel_id_2)['owner_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
@@ -60,14 +60,14 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_id_2 = create_user2
     channel_id = channels_create_v1(user_id_1, 'Channel_Name', True)['channel_id']
     channel_join_v1(user_id_2, channel_id)
-    assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id), {'name': str, 'owner_members': list, 'all_members': list})
+    assert is_valid_dictionary_output(channel_details_v1(user_id_1, channel_id), {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list})
     for user in channel_details_v1(user_id_1, channel_id)['owner_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
     for user in channel_details_v1(user_id_1, channel_id)['all_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
-    assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id), {'name': str,'owner_members': list, 'all_members': list})
+    assert is_valid_dictionary_output(channel_details_v1(user_id_2, channel_id), {'name': str,'is_public': bool, 'owner_members': list, 'all_members': list})
     for user in channel_details_v1(user_id_2, channel_id)['owner_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
@@ -113,6 +113,7 @@ def test_from_stub_code(clear_store):
     channel_created = channels_create_v1(auth_user_1, "Hayden", False)['channel_id']
     assert channel_details_v1(auth_user_1, channel_created) ==  {
         'name': 'Hayden',
+        'is_public': False,
         'owner_members': [
             {
                 'u_id': auth_user_1,
