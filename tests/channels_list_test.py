@@ -66,7 +66,6 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
 def test_invalid_user_id(clear_store, create_user):
     # Since we are only creating one user and each id is unique, then user+1 must be fake
     fake_user = create_user + 1
-    user_id_1 = create_user
     with pytest.raises(AccessError):
         channels_list_v1(fake_user)
 

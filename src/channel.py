@@ -80,7 +80,6 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     """
     store = data_store.get()
     channels = store['channels']
-    users = store['users']
     # Checks for when the auth_user_id is not registered
     if not verify_user(auth_user_id):
         raise AccessError
@@ -116,15 +115,12 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
         Returns { messages, start, end } on successful creation
     """
     store = data_store.get()
-    user = None
     users = store['users']
 
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
 
-    if auth_user_id in users.keys():
-        user = users[auth_user_id]
-    else:
+    if not auth_user_id in users.keys():
         raise InputError('Invalid auth_user_id')
     channels = store['channels']
     if channel_id in channels.keys():
