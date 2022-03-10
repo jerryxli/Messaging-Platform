@@ -38,6 +38,7 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
     channel_id = channels_create_v1(user_id, 'test2', True)
     expected_outcome = {
         'name': 'test2',
+        'is_public': True,
         'owner_members': [
             {
                 'u_id': user_id,
@@ -76,6 +77,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
     channel_join_v1(user_id3, channel_id['channel_id']) 
     assert channel_details_v1(user_id3, channel_id['channel_id']) == {
         'name': 'test2',
+        'is_public': True,
         'owner_members': [
             {
                 'u_id': user_id,
