@@ -7,8 +7,8 @@ from src.other import clear_v1
 import requests
 import pytest
 
-BASE_ADDRESS = 'http://blah'
-BASE_PORT = 'integer'
+BASE_ADDRESS = 'http://127.0.0.1'
+BASE_PORT = '5000'
 BASE_URL = f"{BASE_ADDRESS}:{BASE_PORT}"
 
 
@@ -47,8 +47,8 @@ def test_no_channels(clear_store, create_user):
 def test_one_channel(clear_store, create_user):
     user_token = create_user['token']
     channel_id = channels_create_v2(user_token, 'My Channel!', True)['channel_id']
-    expected_outcome = { 'channels': [{'channel_id': channel_id, 'name': 'My Channel!'}] }
     response = requests.get(f"{BASE_URL}/channels/list/v2", params = user_token)
+    expected_outcome = { 'channels': [{'channel_id': channel_id, 'name': 'My Channel!'}] }
     assert response.json() == expected_outcome
     assert response.status_code == 200
 
