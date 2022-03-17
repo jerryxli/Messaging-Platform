@@ -1,85 +1,53 @@
 import pytest
-
+import requests
 from src.auth import auth_login_v1, auth_register_v1, generate_handle, is_email_taken, is_valid_email, remove_non_alphanumeric, is_handle_taken
 from src.error import InputError, AccessError
 from src.other import clear_v1, is_valid_dictionary_output
+from src.config import port, url
+
+
+REGISTER_URL = f"{url}/auth/register/v2"
 
 @pytest.fixture
 def clear_store():
-    clear_v1()
+    requests.delete(f"{url}/clear/v1", json={})
+
+def test_auth_register_v2(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
+    assert response.status_code == 200
+    assert is_valid_dictionary_output(response.json(), {'token': str, 'auth_user_id': int})
 
 
-def test_valid_email(clear_store):
-    assert is_valid_email("jake@unsw.edu.au") == True
-    assert is_valid_email("djjsksdj") == False
-    assert is_valid_email("") == False
-    assert is_valid_email("        ") == False
+def test_auth_register_v2_error_email_not_valid(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"tsgyd", "password":"34rd^hds)", "name_first": "Johnny", "name_last":"Smith"})
+    assert response.status_code != 200
 
-def test_remove_non_alphanumeric(clear_store):
-    assert remove_non_alphanumeric("") == ""
-    assert remove_non_alphanumeric("^&^%^&^&") == ""
-    assert remove_non_alphanumeric("1234567890") == "1234567890"
-    assert remove_non_alphanumeric("abcdefghijklmnopqrstuvwxyz") == "abcdefghijklmnopqrstuvwxyz"
-    assert remove_non_alphanumeric("this672^73 is a mixed ** passw8rd **") == "this67273isamixedpassw8rd"
-    assert remove_non_alphanumeric("              ") == ""
+def test_auth_register_v2_error_password_short(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"pa33", "name_first":"Marc", "name_last":"Chee"})
+    assert response.status_code != 200
 
-def test_is_email_taken(clear_store):
-    assert is_email_taken("hello@test.unsw.edu.au") == False
-    auth_register_v1("hello@unsw.edu.au", "passwordlong", "Hayden", "Smith")
-    assert is_email_taken("hello@unsw.edu.au") == True
-    assert is_email_taken("ello@test.com.au") == False
-
-def test_is_handle_taken(clear_store):
-    assert is_handle_taken("haydensmith") == False
-    auth_register_v1("z555@unsw.edu.au", "passwordlong", "Hayden", "Smith")
-    assert is_handle_taken("haydensmith") == True
-    assert is_handle_taken("haydensmith1") == False
-
-def test_generate_handle(clear_store):
-    assert generate_handle("Hayden", "Jacobs") == "haydenjacobs"
-    auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs")
-    assert generate_handle("Hayden", "Jacobs") == "haydenjacobs0"
-    auth_register_v1("z09373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs")
-    assert generate_handle("Hayden", "Jacobs") == "haydenjacobs1"
-    auth_register_v1("z328373@unsw.edu.au", "passwordlong", "abcdefghijklmnopqrstuvwxyz", "Jacobs")
-    assert generate_handle("abcdefghijklmnopqrstuvwxyz", "ls") == "abcdefghijklmnopqrst0"
+def test_auth_register_v2_error_email_used(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"thi3isn0t@pa33wor&", "name_first":"Steve", "name_last":"Jobs"})
+    assert response.status_code == 200
+    assert is_valid_dictionary_output(response.json(), {"token": str, "auth_user_id": int})
+    response2 = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"newpassword", "name_first":"Steve", "name_last":"Wozniak"})
+    assert response2.status_code != 200
 
 
-def test_auth_register_v1(clear_store):
-    assert is_valid_dictionary_output(auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella"), {'auth_user_id': int})
-    assert is_valid_dictionary_output(auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs"), {'auth_user_id': int})
+def test_auth_register_v2_error_first_name_short(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"longpassword", "name_first":"", "name_last":"Li"})
+    assert response.status_code != 200
 
-
-def test_auth_register_v1_error_email_not_valid(clear_store):
-    with pytest.raises(InputError):
-        auth_register_v1("tsgyd", "34rd^hds)", "Johnny", "Smith") # Email is not valid
-
-def test_auth_register_v1_error_password_short(clear_store):
-    with pytest.raises(InputError):
-        auth_register_v1("z55555@unsw.edu.au", "pa33", "Marc", "Chee")
-
-
-def test_auth_register_v1_error_email_used(clear_store):
-    auth_register_v1("z123456789@unsw.edu.au", "thi3isn0t@pa33wor&", "Steve", "Jobs")
-    with pytest.raises(InputError):
-        auth_register_v1("z123456789@unsw.edu.au", "newpassword", "Steve", "Wozniak")
-
-
-def test_auth_register_v1_error_first_name_short(clear_store):
-    with pytest.raises(InputError):
-        auth_register_v1("z123456789@unsw.edu.au", "longpassword", "", "Li")
-
-
-def test_auth_register_v1_error_first_name_long(clear_store):
-    with pytest.raises(InputError):
-        auth_register_v1("245324@opedu.nsw.edu.au", "pass", "THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY", "Lastname")
+def test_auth_register_v2_error_first_name_long(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"longpassword", "name_first":"THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY", "name_last":"Li"})
+    assert response.status_code != 200
         
 
-def test_auth_register_v1_error_last_name_short(clear_store):
-    with pytest.raises(InputError):
-        auth_register_v1("z123456789@unsw.edu.au", "goodpass", "Simon", "")
+def test_auth_register_v2_error_last_name_short(clear_store):
+    response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"goodpass", "name_first":"Simon", "name_last":""})
+    assert response.status_code != 200
 
 
 def test_auth_register_v1_error_last_name_long(clear_store):
-    with pytest.raises(InputError):
-        auth_register_v1("245324@opedu.nsw.edu.au", "pass", "Firstname", "THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY")
+    response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"goodpass", "name_first":"Simon", "name_last":"THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY"})
+    assert response.status_code != 200
