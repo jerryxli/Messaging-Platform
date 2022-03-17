@@ -5,6 +5,9 @@ from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
 from src import config
+from src import server_testing_funcs
+from src import server_auth
+
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -26,7 +29,8 @@ CORS(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
-
+APP.register_blueprint(server_testing_funcs.view_users_blueprint)
+APP.register_blueprint(server_auth.user_perm_change)
 #### NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
 
 # Example
