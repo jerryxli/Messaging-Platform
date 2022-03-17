@@ -9,6 +9,7 @@ Description: Allows the user to register an account and login to the account.
 """
 
 import re
+import hashlib
 from src.data_store import data_store
 from src.error import InputError
 
@@ -35,9 +36,12 @@ def auth_login_v1(email:str, password:str)->dict:
     """
     store = data_store.get()
     users = store['users']
+
+    hashed_input = hashlib.sha256(password.encode()).hexdigest()
+
     for user_id, user in users.items():
         if email == user['email']:
-            if password == user['password']:
+            if hashed_input == user['password']:
                 return {'auth_user_id': user_id}
             else:
                 raise InputError("Incorrect Password")
@@ -52,7 +56,7 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
         email (string)      - The email of the prospective user
         password (string)   - the password of the user
         name_first (string) - User's first name
-        name_last (string)  - User's last naem
+        name_last (string)  - User's last name
 
     Exceptions:
         InputError  - Occurs when email is not valid,
@@ -80,10 +84,13 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     users = store['users']
     new_user_id = len(users)
     global_permission = GLOBAL_PERMISSION_USER
+
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-    'password': password, 'handle': handle, 'global_permission': global_permission}
+    'password': hashed_password, 'handle': handle, 'global_permission': global_permission}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
     return {'auth_user_id': new_user_id}
