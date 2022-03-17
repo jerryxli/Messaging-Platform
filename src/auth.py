@@ -1,3 +1,4 @@
+from logging import NullHandler
 import re
 from src.data_store import data_store
 from src.error import InputError
@@ -175,3 +176,26 @@ def remove_non_alphanumeric(string:str)->str:
     """
     alnum_list = [char for char in string if char.isalnum()]
     return "".join(alnum_list)
+
+
+def change_global_permission(u_id:int, new_perm:int)->dict:
+    '''
+    Needs JWT check once implemented by login
+    '''
+    store = data_store.get()
+    users = store['users']
+    print(users)
+    global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
+    if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
+        raise InputError
+    if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
+        raise InputError
+    
+    if u_id in users.keys():
+        user = users[u_id]
+        if user['global_permission'] == new_perm:
+            raise InputError
+        user['global_permission'] = new_perm
+        data_store.set(store)
+    else:
+        raise InputError
