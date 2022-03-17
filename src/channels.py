@@ -1,3 +1,14 @@
+"""
+Channels
+Filename: channels.py
+
+Author: Tetian Madfouni (z5361722), Jacqueline Chen (z5360310), Jerry Li (z5362290)
+Created: 22.02.2022
+
+Description: Allows the user to list channel info that they are apart of,
+list channel info for all channels and create channels.
+"""
+
 from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.other import verify_user
@@ -10,7 +21,7 @@ def channels_list_v1(auth_user_id:int)->dict:
     In the format: { channels: [{}, {}, {}] }
 
     Arguments:
-    auth_user_id (int)  - The id of the user 
+    auth_user_id (int)  - The id of the user
     Exceptions:
         AccessError     - Occurs when auth_user_id is invalid
     Return Value:
@@ -55,7 +66,8 @@ def channels_listall_v1(auth_user_id:int)->dict:
 
     store = data_store.get()
     channels = store['channels']
-    return { 'channels': [{'channel_id': key, 'name': channel['name']} for key, channel in channels.items()] }
+    return { 'channels': [{'channel_id': key, 'name': channel['name']}
+    for key, channel in channels.items()] }
 
 
 def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
@@ -79,16 +91,18 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     store = data_store.get()
     channels = store['channels']
     users = store['users']
-    if verify_user(auth_user_id) == False:
+    if not verify_user(auth_user_id):
         raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise InputError("Channel name too long or short")
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
-    for id, user in altered_users.items():
-        user['u_id'] = id
+    for user_id, user in altered_users.items():
+        user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')
     new_channel_id = len(channels)
-    channels[new_channel_id] = {'name': name, 'is_public': is_public, 'owner_members': [altered_users[auth_user_id]], 'all_members': [altered_users[auth_user_id]], 'messages': []}
+    channels[new_channel_id] = {'name': name, 'is_public': is_public,
+    'owner_members': [altered_users[auth_user_id]],
+    'all_members': [altered_users[auth_user_id]], 'messages': []}
     store['channels'] = channels
     data_store.set(store)
     return(
@@ -102,11 +116,10 @@ def non_password_global_permission_field(user:dict)->dict:
 
     Arguments:
         user (dict) - dictionary of all user details
-    
+
     Returns:
         Dictionary with password field removed
-    
+
     """
     user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
     return user
-
