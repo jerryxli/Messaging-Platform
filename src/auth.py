@@ -46,7 +46,8 @@ def auth_login_v1(email:str, password:str)->dict:
     for user_id, user in users.items():
         if email == user['email']:
             if hashed_input == user['password']:
-                return {'auth_user_id': user_id}
+                jwt = create_JWT(user_id)
+                return {'token': jwt, 'auth_user_id': user_id}
             else:
                 raise InputError("Incorrect Password")
     raise InputError("Invalid Email")
