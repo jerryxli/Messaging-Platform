@@ -10,6 +10,7 @@ Description: Allows the user to register an account and login to the account.
 
 import re
 import hashlib
+import jwt
 from src.data_store import data_store
 from src.error import InputError
 
@@ -18,6 +19,9 @@ MAX_LAST_NAME_LENGTH = 50
 
 GLOBAL_PERMISSION_OWNER = 2
 GLOBAL_PERMISSION_USER = 1
+
+JWT_SECRET = "COMP1531_H13A_CAMEL"
+
 
 def auth_login_v1(email:str, password:str)->dict:
     """
@@ -90,10 +94,11 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-    'password': hashed_password, 'handle': handle, 'global_permission': global_permission}
+    'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions':[]}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
-    return {'auth_user_id': new_user_id}
+    jwt = createJWT(new_user_id)
+    return {'token': jwt, 'auth_user_id': new_user_id}
 
 
 def generate_handle(name_first:str, name_last:str)->str:
@@ -193,3 +198,14 @@ def remove_non_alphanumeric(string:str)->str:
     """
     alnum_list = [char for char in string if char.isalnum()]
     return "".join(alnum_list)
+
+
+def createJWT(auth_user_id):
+    store = data_store.get()
+    new_session = len(store['users'][auth_user_id]['sessions'])
+    store['users'][auth_user_id]['sessions'].append(new_session)
+
+    payload = {'auth_user_id': auth_user_id, 'user_session_id': new_session}
+
+    new_jwt = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+    return new_jwt
