@@ -27,12 +27,12 @@ def test_basic_success(clear_store):
 def test_incorrect_password(clear_store):
     requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
     login_request = requests.post(LOGIN_URL, json={"email":"z55555@unsw.edu.au", "password":"passWRONG"})
-    assert login_request.status_code != 200
+    assert login_request.status_code == 400
 
 def test_invalid_email(clear_store):
     requests.post(REGISTER_URL, json={"email":"z09328373@unsw.edu.au", "password":"passwordlong", "name_first":"Hayden", "name_last":"Jacobs"})
     login_request = requests.post(LOGIN_URL, json={"email":"z1234@unsw.edu.au", "password":"passWRONG"})
-    assert login_request.status_code != 200
+    assert login_request.status_code == 400
 
 def test_complex_success(clear_store):
     requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
@@ -46,6 +46,6 @@ def test_complex_success(clear_store):
     assert is_valid_dictionary_output(login_request_1.json(), {"token": str, "auth_user_id": int})
 
     login_request_2 = requests.post(LOGIN_URL, json={"email": "z123@unsw.edu.au", "password": "wrongpasswordboi"})
-    assert login_request_2.status_code != 200
+    assert login_request_2.status_code == 400
 
 
