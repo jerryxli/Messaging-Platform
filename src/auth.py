@@ -205,8 +205,18 @@ def create_JWT(auth_user_id):
     store = data_store.get()
     new_session = len(store['users'][auth_user_id]['sessions'])
     store['users'][auth_user_id]['sessions'].append(new_session)
-
     payload = {'auth_user_id': auth_user_id, 'user_session_id': new_session}
-
+    data_store.set(store)
     new_jwt = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
     return new_jwt
+
+def is_valid_JWT(jwt_string):
+    jwt_payload = jwt.decode(jwt_string, JWT_SECRET, algorithms=['HS256'])
+    store = data_store.get()
+    users = store['users']
+    if jwt_payload['auth_user_id'] not in users:
+        return False
+    if jwt_payload['user_session_id'] not in users[jwt_payload['auth_user_id']]['sessions']:
+        print("here2")
+        return False
+    return True
