@@ -97,7 +97,7 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions':[]}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
-    jwt = createJWT(new_user_id)
+    jwt = create_JWT(new_user_id)
     return {'token': jwt, 'auth_user_id': new_user_id}
 
 
@@ -200,7 +200,7 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
-def createJWT(auth_user_id):
+def create_JWT(auth_user_id):
     store = data_store.get()
     new_session = len(store['users'][auth_user_id]['sessions'])
     store['users'][auth_user_id]['sessions'].append(new_session)
