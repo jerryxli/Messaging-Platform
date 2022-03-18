@@ -1,38 +1,51 @@
-from src.auth import auth_login_v1
-from src.auth import auth_register_v1
 from src.error import InputError, AccessError
 from src.other import clear_v1, is_valid_dictionary_output
+from src.config import port, url
 import pytest
+import requests
+
+
+REGISTER_URL = f"{url}/auth/register/v2"
+LOGIN_URL = f"{url}/auth/login/v2"
 
 @pytest.fixture
 def clear_store():
-    clear_v1()
+    requests.delete(f"{url}/clear/v1", json={})
 
 
 
 #Basic Tests
 def test_basic_success(clear_store):
-    auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")
-    assert is_valid_dictionary_output(auth_login_v1("z55555@unsw.edu.au", "passwordlong"), {'auth_user_id': int})
+    register_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
+    assert register_request.status_code == 200
+    assert is_valid_dictionary_output(register_request.json(), {"token": str, "auth_user_id": int})
+
+    login_request = requests.post(LOGIN_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong"})
+    assert login_request.status_code == 200
+    assert is_valid_dictionary_output(login_request.json(), {"token": str, "auth_user_id": int})
 
 def test_incorrect_password(clear_store):
-    auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")
-    with pytest.raises(InputError):
-        auth_login_v1("z55555@unsw.edu.au","passWRONG")
+    register_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
+    login_request = requests.post(LOGIN_URL, json={"email":"z55555@unsw.edu.au", "password":"passWRONG"})
+    assert login_request.status_code != 200
 
 def test_invalid_email(clear_store):
-    auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs")   
-    with pytest.raises(InputError):
-        auth_login_v1("z1234@unsw.edu.au","passwordlong")
+    register_request = requests.post(REGISTER_URL, json={"email":"z09328373@unsw.edu.au", "password":"passwordlong", "name_first":"Hayden", "name_last":"Jacobs"})
+    login_request = requests.post(LOGIN_URL, json={"email":"z1234@unsw.edu.au", "password":"passWRONG"})
+    assert login_request.status_code != 200
 
 def test_complex_success(clear_store):
-    auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")
-    auth_register_v1("z09328373@unsw.edu.au", "passwordlong", "Hayden", "Jacobs") 
-    auth_register_v1("z123@unsw.edu.au", "apples123", "Jacob", "Renzellid")
-    auth_register_v1("z12345@unsw.edu.au","bananas&apricots","Apricot","IsNotAFirstName")
-    assert is_valid_dictionary_output(auth_login_v1("z55555@unsw.edu.au", "passwordlong"), {'auth_user_id': int})
-    assert is_valid_dictionary_output(auth_login_v1("z12345@unsw.edu.au", "bananas&apricots"), {'auth_user_id': int})
-    with pytest.raises(InputError):
-        auth_login_v1("z123@unsw.edu.au","wrongpasswordboi")
+    register_request_0 = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
+    register_request_1 = requests.post(REGISTER_URL, json={"email":"z09328373@unsw.edu.au", "password":"passwordlong", "name_first":"Hayden", "name_last":"Jacobs"})
+    register_request_2 = requests.post(REGISTER_URL, json={"email":"z123@unsw.edu.au", "password":"apples123", "name_first":"Jakob", "name_last":"Renzellid"})
+    register_request_3 = requests.post(REGISTER_URL, json={"email":"z12345@unsw.edu.au", "password":"bananas&apricots", "name_first":"Apricot", "name_last":"IsNotAFirstName"})
+
+    login_request_0 = requests.post(REGISTER_URL, json={"email": "z55555@unsw.edu.au", "password": "passwordlong"})
+    assert is_valid_dictionary_output(login_request_0.json(), {"token": str, "auth_user_id": int})
+    login_request_1 = requests.post(REGISTER_URL, json={"email": "z12345@unsw.edu.au", "password": "bananas&apricots"})
+    assert is_valid_dictionary_output(login_request_1.json(), {"token": str, "auth_user_id": int})
+
+    login_request_2 = requests.post(REGISTER_URL, json={"email": "z123@unsw.edu.au", "password": "wrongpasswordboi"})
+    assert login_request_2.status_code != 200
 
 

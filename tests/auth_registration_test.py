@@ -1,7 +1,5 @@
 import pytest
 import requests
-from src.auth import auth_login_v1, auth_register_v1, generate_handle, is_email_taken, is_valid_email, remove_non_alphanumeric, is_handle_taken
-from src.error import InputError, AccessError
 from src.other import clear_v1, is_valid_dictionary_output
 from src.config import port, url
 
