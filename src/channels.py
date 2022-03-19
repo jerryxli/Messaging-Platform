@@ -121,5 +121,5 @@ def non_password_global_permission_field(user:dict)->dict:
         Dictionary with password field removed
 
     """
-    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
+    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission', 'sessions']}
     return user
