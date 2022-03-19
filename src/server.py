@@ -1,12 +1,16 @@
 import sys
+import jwt
 import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
-from src.error import InputError
+from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1
-from src.auth import auth_login_v1, auth_register_v1
+from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
+from src.channels import channels_list_v1
+
+JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -47,6 +51,8 @@ def clear():
     clear_v1()
     return {}
 
+# Auth Server Instructions
+
 @APP.route("/auth/register/v2", methods=['POST'])
 def register_v2():
     request_data = request.get_json()
@@ -66,6 +72,19 @@ def login_v2():
     password = request_data['password']
 
     return auth_login_v1(email, password)
+
+# Channels Server Instructions
+
+@APP.route("channels/list/v2", methods = ["GET"])
+def handle_channels_list_v2():
+    data = request.args.get('token')
+    if not is_valid_JWT(data):
+        raise AccessError(description = 'No message specified')
+    jwt_payload = jwt.decode(data, JWT_SECRET, algorithms=['HS256'])
+    user_id = jwt_payload['auth_user_id']
+
+    return channels_list_v1(user_id)
+
 
 #### NO NEED TO MODIFY BELOW THIS POINT
 
