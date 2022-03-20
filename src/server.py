@@ -76,10 +76,6 @@ def handle_channel_details():
     request_data = request.args.get()
     user_jwt = request_data['token']
     channel_id = request_data['channel_id']
-    if not is_valid_JWT(user_jwt):
-        raise AccessError(description = 'No message specified')
-    if not is_valid_channel(channel_id):
-        raise InputError(description = 'No message specified')
 
     return channel_details_v2(user_jwt, channel_id)
 
