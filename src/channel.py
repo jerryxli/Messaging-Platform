@@ -233,3 +233,20 @@ def is_valid_channel(channel_id:int)->bool:
         return True
     else:
         return False
+
+def is_valid_channel_id(channel_id:int)->bool:
+    """
+    Checks if the channel_id is valid
+
+    Arguments:
+        channel_id (int) - the channel id
+
+    Returns:
+        True if the channel_id is valid, False otherwise
+    """
+    store = data_store.get()
+    channels = store['channels']
+    if channel_id in channels.keys():
+        return True
+    else:
+        return False
