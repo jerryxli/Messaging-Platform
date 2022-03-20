@@ -34,12 +34,13 @@ def test_short_first_name():
     registration_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
     token = registration_request.json()['token']
     setname_request = requests.put(SETNAME_URL, json={"token": token, "name_first": "", "name_last": "Smith"})
+    assert setname_request.status_code == 400
 
 def test_short_last_name():
     registration_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
     token = registration_request.json()['token']
     setname_request = requests.put(SETNAME_URL, json={"token": token, "name_first": "John", "name_last": ""})
-    assert setname_request.status_code == 403
+    assert setname_request.status_code == 400
 
 def test_long_first_name():
     registration_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
