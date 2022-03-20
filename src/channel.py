@@ -222,11 +222,14 @@ def channel_leave_V1(auth_user_token:str, channel_id:int)->None:
         channel = channels[channel_id]
     else:
         raise InputError("Channel id not valid")
-    if users[auth_user_id] in channel['owner_members']:
-        channel['owner_members'].remove(users[auth_user_id])
-        channel['all_members'].remove(users[auth_user_id])
+    user = non_password_global_permission_field(user[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
+    if user in channel['owner_members']:
+        channel['owner_members'].remove(user)
+        channel['all_members'].remove(user)
     elif users[auth_user_id] in channel['all_members']:
-        channel['all_members'].remove(users[auth_user_id])
+        channel['all_members'].remove(user)
     else:
         raise AccessError
     
