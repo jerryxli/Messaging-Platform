@@ -12,10 +12,12 @@ list channel info for all channels and create channels.
 from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.other import verify_user
+import jwt
 
+JWT_SECRET = "COMP1531_H13A_CAMEL"
 MAX_CHANNEL_NAME_LENGTH = 20
 
-def channels_list_v1(auth_user_id:int)->dict:
+def channels_list_v2(auth_user_token:str)->dict:
     """
     Prints out the list of channels that the user is a member of
     In the format: { channels: [{}, {}, {}] }
@@ -27,23 +29,23 @@ def channels_list_v1(auth_user_id:int)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
+    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
-
 
     # Gets list of channels from data_store
     store = data_store.get()
     channels = store['channels']
 
-    # Creats a list to store channels with that user_id
+    # List to store channel info
     user_channels = []
-    # Loops through each channel in the list Channels
+
+    # Loops through each channel in the list Channels to check if 
+    # user is in the channel
     for channel_id, channel_details in channels.items():
-        # Loops through each user for the channel
         ids = [user['u_id'] for user in channel_details['all_members']]
         if auth_user_id in ids:
-            # If user_id match occurs, appends a dictionary with channel_id and name
-            # into user_channels
             user_channel = {'channel_id': channel_id, 'name': channel_details['name']}
             user_channels.append(user_channel)
     # Returns a dictionary with the key 'channels' which has user_channels as its values

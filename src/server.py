@@ -8,7 +8,7 @@ from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1
 from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
-from src.channels import channels_list_v1
+from src.channels import channels_list_v2
 
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
@@ -77,13 +77,11 @@ def login_v2():
 
 @APP.route("channels/list/v2", methods = ["GET"])
 def handle_channels_list_v2():
-    data = request.args.get('token')
-    if not is_valid_JWT(data):
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
         raise AccessError(description = 'No message specified')
-    jwt_payload = jwt.decode(data, JWT_SECRET, algorithms=['HS256'])
-    user_id = jwt_payload['auth_user_id']
 
-    return channels_list_v1(user_id)
+    return channels_list_v2(user_token)
 
 
 #### NO NEED TO MODIFY BELOW THIS POINT
