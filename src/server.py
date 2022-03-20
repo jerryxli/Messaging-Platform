@@ -7,6 +7,7 @@ from src.error import InputError
 from src import config
 from src.other import clear_v1
 from src.auth import auth_login_v1, auth_register_v1
+from src.channel import channel_leave_v1
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -66,6 +67,16 @@ def login_v2():
     password = request_data['password']
 
     return auth_login_v1(email, password)
+
+# Channel Server Instructions
+@APP.route("/channel/leave/v1", methods = ['POST'])
+def handle_channel_leave():
+    request_data = request.get_json()
+    
+    user_token = request_data['token']
+    channel_id = request_data['channel_id']
+
+    return channel_leave_v1(user_token, channel_id)
 
 #### NO NEED TO MODIFY BELOW THIS POINT
 
