@@ -86,8 +86,6 @@ def handle_channels_create_v2():
 @APP.route("/channels/list/v2", methods = ["GET"])
 def handle_channels_list_v2():
     user_token = request.args.get('token')
-    if not is_valid_JWT(user_token):
-        raise AccessError(description = 'No message specified')
 
     return channels_list_v2(user_token)
 
