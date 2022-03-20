@@ -12,7 +12,9 @@ get information of the messages within a channel and join a channel.
 from src.data_store import data_store
 from src.error import InputError, AccessError
 from src.other import verify_user, is_global_user
+import jwt
 
+JWT_SECRET = "COMP1531_H13A_CAMEL"
 PAGE_THRESHOLD = 50
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
@@ -197,6 +199,38 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         raise AccessError
 
     data_store.set(store)
+
+
+def channel_leave_V1(auth_user_token:str, channel_id:int)->None:
+    """
+    This function allows a user to leave a channel
+
+    Exceptions:
+        AccessError     - Occurs when the user_id is invalid
+        AccessError     - Occurs when the user is not a member of the channel
+        InputError      - Occurs when the channel_id is invalid
+    """
+    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+    store = data_store.get()
+    channels = store['channels']
+    users = store['users']
+
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError("Channel id not valid")
+    if users[auth_user_id] in channel['owner_members']:
+        channel['owner_members'].remove(users[auth_user_id])
+        channel['all_members'].remove(users[auth_user_id])
+    elif users[auth_user_id] in channel['all_members']:
+        channel['all_members'].remove(users[auth_user_id])
+    else:
+        raise AccessError
+    
+    data_store.set(store)     
 
 
 def non_password_global_permission_field(user:dict)->dict:
