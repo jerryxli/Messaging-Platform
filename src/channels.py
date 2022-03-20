@@ -72,7 +72,7 @@ def channels_listall_v1(auth_user_id:int)->dict:
     for key, channel in channels.items()] }
 
 
-def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
+def channels_create_v2(auth_user_token:str, name:str, is_public:bool)->dict:
     """
     Creates a new channel
 
@@ -90,6 +90,8 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
 
     Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
     """
+    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+    
     store = data_store.get()
     channels = store['channels']
     users = store['users']

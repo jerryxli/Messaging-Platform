@@ -1,5 +1,4 @@
 import sys
-import jwt
 import signal
 from json import dumps
 from flask import Flask, request
@@ -8,7 +7,7 @@ from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1
 from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
-from src.channels import channels_list_v2
+from src.channels import channels_list_v2, channels_create_v2
 
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
@@ -75,7 +74,16 @@ def login_v2():
 
 # Channels Server Instructions
 
-@APP.route("channels/list/v2", methods = ["GET"])
+@APP.route("/channels/create/v2", methods = ["POST"])
+def handle_channels_create_v2():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_name = request_data['name']
+    is_public = request_data['is_public']
+    
+    return channels_create_v2(user_token, channel_name, is_public)
+
+@APP.route("/channels/list/v2", methods = ["GET"])
 def handle_channels_list_v2():
     user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
