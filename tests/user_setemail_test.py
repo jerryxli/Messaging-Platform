@@ -1,7 +1,6 @@
 import pytest
 import requests
 from src.config import url
-from tests.user_profile_test import PROFILE_URL
 
 REGISTER_URL = f"{url}/auth/register/v2"
 SETEMAIL_URL = f"{url}/user/profile/setemail/v1"
@@ -11,8 +10,6 @@ LOGOUT_URL = f"{url}/auth/logout/v1"
 @pytest.fixture
 def clear_store():
     requests.delete(f"{url}/clear/v1", json={})
-
-
 
 def test_normal_change():
     registration_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
