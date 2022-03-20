@@ -1,4 +1,4 @@
-from src.auth import auth_register_v2
+from src.auth import auth_register_v1
 from src.error import AccessError
 from src.config import port, url
 from src.other import clear_v1
@@ -16,19 +16,22 @@ def clear_store():
 @pytest.fixture
 def create_user():
     user_input = {'email': "z432324@unsw.edu.au", 'password': "badpassword123", 'name_first': "Twix", 'name_last': "Chocolate"}
-    user_info = requests.post(REGISTER_URL, json = user_input)
+    request_data = requests.post(REGISTER_URL, json = user_input)
+    user_info = request_data.json()
     return user_info
 
 @pytest.fixture
 def create_user2():
     user_input = {'email': "z54626@unsw.edu.au", 'password': "Password", 'name_first': "Snickers", 'name_last': "Lickers"}
-    user_info = requests.post(REGISTER_URL, json = user_input)
+    request_data = requests.post(REGISTER_URL, json = user_input)
+    user_info = request_data.json()
     return user_info
 
 @pytest.fixture
 def create_user3():
     user_input = {'email': "z536601@unsw.edu.au", 'password': "1243Bops", 'name_first': "Mars", 'name_last': "Bars"}
-    user_info = requests.post(REGISTER_URL, json = user_input)
+    request_data = requests.post(REGISTER_URL, json = user_input)
+    user_info = request_data.json()
     return user_info
 
 # When channels_list_v2 is called, it should return the channel name and channel id.
@@ -46,7 +49,7 @@ def test_no_channels(clear_store, create_user):
 # Test for when the user has created one channel
 def test_one_channel(clear_store, create_user):
     user_token = create_user['token']
-    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'My Channel!', 'is_public': True})['channel_id']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'My Channel!', 'is_public': True}).json('channel_id')
     response = requests.get(LIST_URL, params = user_token)
     expected_outcome = { 'channels': [{'channel_id': channel_id, 'name': 'My Channel!'}] }
     assert response.json() == expected_outcome
@@ -56,9 +59,9 @@ def test_one_channel(clear_store, create_user):
 # Test for when the user has multiple channels
 def test_multiple_channels(clear_store, create_user):
     user_token = create_user['token']
-    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Cool Channel', 'is_public': True})['channel_id']
-    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'ok channel', 'is_public': False})['channel_id']
-    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'BAD CHANNEL', 'is_public': True})['channel_id']
+    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json('channel_id')
+    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'ok channel', 'is_public': False}).json('channel_id')
+    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'BAD CHANNEL', 'is_public': True}).json('channel_id')
     response = requests.get(LIST_URL, params = user_token)
     expected_outcome = { 'channels': [{'channel_id': channel_id_1, 'name': 'Cool Channel'}, {'channel_id': channel_id_2, 'name': 'ok channel'}, {'channel_id': channel_id_3, 'name': 'BAD CHANNEL'}] }
     assert response.json() == expected_outcome
@@ -71,9 +74,9 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
 
-    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Hangout', 'is_public': True})['channel_id']
-    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': True})['channel_id']
-    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token_3, 'name': 'LOUNGE', 'is_public': True})['channel_id']
+    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Hangout', 'is_public': True}).json('channel_id')
+    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': True}).json('channel_id')
+    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token_3, 'name': 'LOUNGE', 'is_public': True}).json('channel_id')
     response_1 = requests.get(LIST_URL, params = user_token_1)
     assert response_1.json() == { 'channels': [{'channel_id': channel_id_1, 'name': 'Hangout'}] }
     assert response_1.status_code == 200
