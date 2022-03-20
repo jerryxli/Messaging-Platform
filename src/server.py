@@ -1,12 +1,14 @@
 import sys
+import jwt
 import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
-from src.error import InputError
+from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1
-from src.auth import auth_login_v1, auth_register_v1
+from src.channel import channel_details_v2, is_valid_channel
+from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -66,6 +68,20 @@ def login_v2():
     password = request_data['password']
 
     return auth_login_v1(email, password)
+
+
+# Channel Server Instructions
+@APP.route("channel/details/v2", methods = ["GET"])
+def handle_channel_details():
+    request_data = request.args.get()
+    user_jwt = request_data['token']
+    channel_id = request_data['channel_id']
+    if not is_valid_JWT(user_jwt):
+        raise AccessError(description = 'No message specified')
+    if not is_valid_channel(channel_id):
+        raise InputError(description = 'No message specified')
+
+    return channel_details_v2(user_jwt, channel_id)
 
 #### NO NEED TO MODIFY BELOW THIS POINT
 

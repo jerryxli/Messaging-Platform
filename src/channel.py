@@ -12,7 +12,9 @@ get information of the messages within a channel and join a channel.
 from src.data_store import data_store
 from src.error import InputError, AccessError
 from src.other import verify_user, is_global_user
+import jwt
 
+JWT_SECRET = "COMP1531_H13A_CAMEL"
 PAGE_THRESHOLD = 50
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
@@ -61,7 +63,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     data_store.set(store)
 
 
-def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
+def channel_details_v2(auth_user_token:str, channel_id:int)->dict:
     """
     Returns assosciated details of a channel.
 
@@ -80,6 +82,8 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     """
     store = data_store.get()
     channels = store['channels']
+    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+
     # Checks for when the auth_user_id is not registered
     if not verify_user(auth_user_id):
         raise AccessError
@@ -212,3 +216,20 @@ def non_password_global_permission_field(user:dict)->dict:
     """
     user = {k: v for k,v in user.items() if k not in ['password', 'global_permission', 'sessions']}
     return user
+
+def is_valid_channel(channel_id:int)->bool:
+    """
+    Checks if the channel_id is valid
+
+    Arguments:
+        channel_id (int) - the channel id
+
+    Returns:
+        True if the channel_id is valid, False otherwise
+    """
+    store = data_store.get()
+    channels = store['channels']
+    if channel_id in channels:
+        return True
+    else:
+        return False
