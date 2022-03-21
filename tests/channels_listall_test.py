@@ -1,14 +1,14 @@
 from src.config import url
-from src.other import clear_v1
 
 import requests
 import pytest
-import jwt 
+import jwt
 
 LISTALL_URL = f"{url}/channels/listall/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
 JWT_SECRET = "COMP1531_H13A_CAMEL"
+LOGOUT_URL = f"{url}/auth/logout/v1"
 
 @pytest.fixture
 def clear_store():
@@ -97,10 +97,12 @@ def test_listall_v2_not_in_bothprivacy(clear_store, create_user, create_user2):
 
 # Test for when the token is invalid
 def test_invalid_user_token(clear_store):
-    fake_payload = {'auth_user_id': 2, 'user_session_id': 2}
-    fake_user = jwt.encode(fake_payload, JWT_SECRET, algorithm='HS256')
-    response = requests.get(LISTALL_URL, params = {'token': fake_user})
+    user_token = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json = {'token': user_token})
+    response = requests.get(LISTALL_URL, params = {'token': user_token})
     assert response.status_code == 403
+
 
 
 
