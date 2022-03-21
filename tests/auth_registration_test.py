@@ -1,7 +1,7 @@
 import pytest
 import requests
-from src.other import clear_v1, is_valid_dictionary_output
-from src.config import port, url
+from src.other import is_valid_dictionary_output
+from src.config import url
 
 
 REGISTER_URL = f"{url}/auth/register/v2"

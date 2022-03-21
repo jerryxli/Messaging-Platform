@@ -4,11 +4,18 @@ import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
+import jwt
+
+JWT_SECRET = "COMP1531_H13A_CAMEL"
+
 from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1
-from src.channel import channel_details_v2, is_valid_channel
+from src.channel import channel_details_v1, channel_join_v1
+from src.channels import channels_create_v1
 from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
+from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1
+from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -33,24 +40,24 @@ APP.register_error_handler(Exception, defaultHandler)
 
 #### NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
 
-# Example
-@APP.route("/echo", methods=['GET'])
-def echo():
-    data = request.args.get('data')
-    if data == 'echo':
-   	    raise InputError(description='Cannot echo "echo"')
-    return dumps({
-        'data': data
-    })
+# # Example
+# @APP.route("/echo", methods=['GET'])
+# def echo():
+#     data = request.args.get('data')
+#     if data == 'echo':
+#    	    raise InputError(description='Cannot echo "echo"')
+#     return dumps({
+#         'data': data
+#     })
 
 
 @APP.route("/clear/v1", methods=['DELETE'])
-def clear():
+def handle_clear():
     clear_v1()
     return {}
 
 @APP.route("/auth/register/v2", methods=['POST'])
-def register_v2():
+def handle_register_v2():
     request_data = request.get_json()
 
     email = request_data['email']
@@ -61,7 +68,7 @@ def register_v2():
     return auth_register_v1(email,password,name_first, name_last)
 
 @APP.route("/auth/login/v2", methods=['POST'])
-def login_v2():
+def handle_login_v2():
     request_data = request.get_json()
 
     email = request_data['email']
@@ -69,15 +76,65 @@ def login_v2():
 
     return auth_login_v1(email, password)
 
+@APP.route("/auth/logout/v1", methods=['POST'])
+def handle_logout_v1():
+    request_data = request.get_json()
+
+    token = request_data['token']
+
+    return auth_logout_v1(token)
+
+@APP.route("/user/profile/v1", methods=['GET'])
+def handle_profile_v1():
+    
+    token = request.args.get('token')
+    u_id = int(request.args.get('u_id'))
+
+    return user_profile_v1(token, u_id)
+
+@APP.route("/user/profile/setname/v1", methods=['PUT'])
+def handle_setname_v1():
+    request_data = request.get_json()
+    token = request_data['token']
+    name_first = request_data['name_first']
+    name_last = request_data['name_last']
+
+    return user_setname_v1(token, name_first, name_last)
+
+@APP.route("/user/profile/setemail/v1", methods=['PUT'])
+def handle_setemail_v1():
+    request_data = request.get_json()
+    token = request_data['token']
+    email = request_data['email']
+
+    return user_setemail_v1(token, email)
+
+@APP.route("/channels/create/v2", methods = ["POST"])
+def handle_channels_create_v2():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_name = request_data['name']
+    is_public = request_data['is_public']
+    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
+    return channels_create_v1(user_id, channel_name, is_public)
 
 # Channel Server Instructions
-@APP.route("channel/details/v2", methods = ["GET"])
+@APP.route("/channel/details/v2", methods = ["GET"])
 def handle_channel_details():
-    request_data = request.args.get()
-    user_jwt = request_data['token']
-    channel_id = request_data['channel_id']
+    user_token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
 
-    return channel_details_v2(user_jwt, channel_id)
+    return channel_details_v1(user_id, channel_id)
+
+@APP.route("/channel/join/v2", methods = ["POST"])
+def handle_channel_join():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = request_data['channel_id']
+    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
+    channel_join_v1(user_id, channel_id)
+    return {}
 
 #### NO NEED TO MODIFY BELOW THIS POINT
 
