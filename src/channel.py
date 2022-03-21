@@ -80,9 +80,10 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     """
     store = data_store.get()
     channels = store['channels']
+
     # Checks for when the auth_user_id is not registered
     if not verify_user(auth_user_id):
-        raise AccessError
+        raise AccessError("User_id not registered")
     # Checks for Input error: when the channel_id does not exist
     if channel_id in channels.keys():
         channel = channels[channel_id]
@@ -93,7 +94,7 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     if auth_user_id in ids:
         return {k: v for k, v in channel.items() if k not in ['messages']}
     else:
-        raise AccessError
+        raise AccessError("User is not a member of the channel")
 
 
 def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
@@ -199,6 +200,40 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     data_store.set(store)
 
 
+def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
+    """
+    This function allows a user to leave a channel
+
+    Exceptions:
+        AccessError     - Occurs when the user_id is invalid
+        AccessError     - Occurs when the user is not a member of the channel
+        InputError      - Occurs when the channel_id is invalid
+    """
+
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+    store = data_store.get()
+    channels = store['channels']
+    users = store['users']
+
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError("Channel id not valid")
+    user = non_password_global_permission_field(users[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
+    if user in channel['owner_members']:
+        channel['owner_members'].remove(user)
+        channel['all_members'].remove(user)
+    elif user in channel['all_members']:
+        channel['all_members'].remove(user)
+    else:
+        raise AccessError("User not in channel")
+    
+    data_store.set(store)     
+
+
 def non_password_global_permission_field(user:dict)->dict:
     """
     Removes all non-password fields from a user to print them
@@ -210,5 +245,22 @@ def non_password_global_permission_field(user:dict)->dict:
         Dictionary with password field removed
 
     """
-    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
+    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission', 'sessions']}
     return user
+
+def is_valid_channel(channel_id:int)->bool:
+    """
+    Checks if the channel_id is valid
+
+    Arguments:
+        channel_id (int) - the channel id
+
+    Returns:
+        True if the channel_id is valid, False otherwise
+    """
+    store = data_store.get()
+    channels = store['channels']
+    if channel_id in channels:
+        return True
+    else:
+        return False
