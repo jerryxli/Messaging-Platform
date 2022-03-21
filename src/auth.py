@@ -12,7 +12,7 @@ import re
 import hashlib
 import jwt
 from src.data_store import data_store
-from src.error import InputError
+from src.error import AccessError, InputError
 
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
@@ -100,6 +100,21 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     data_store.set(store)
     jwt = create_JWT(new_user_id)
     return {'token': jwt, 'auth_user_id': new_user_id}
+
+def auth_logout_v1(token):
+    
+    if not is_valid_JWT(token):
+        raise AccessError(description="The token provided is not valid.")
+
+    store = data_store.get()
+    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    
+    user = store['users'][jwt_payload['auth_user_id']]
+    user['sessions'].remove(jwt_payload['user_session_id'])
+
+    return {}
+
+
 
 
 def generate_handle(name_first:str, name_last:str)->str:
