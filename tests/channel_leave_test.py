@@ -1,3 +1,4 @@
+from telnetlib import LOGOUT
 from src.error import AccessError
 from src.config import port, url
 from src.other import clear_v1, is_valid_dictionary_output
@@ -11,6 +12,7 @@ JOIN_URL = f"{url}/channel/join/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
 LEAVE_URL = f"{url}/channel/leave/v1"
+LOGOUT_URL = f"{url}/auth/logout/v1"
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 @pytest.fixture
@@ -75,10 +77,11 @@ def test_member_leaves(clear_store, create_user, create_user2):
 
 # Test for when a user_token is invalid
 def test_invalid_member(clear_store, create_user):
-    fake_payload = {'auth_user_id': 2, 'user_session_id': 5}
-    fake_user = jwt.encode(fake_payload, JWT_SECRET, algorithm='HS256')
-    request_data = requests.post(LEAVE_URL, json = {'token': fake_user, 'channel_id': 5})
-    assert request_data.status_code == 403
+    user_token = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json = {'token': user_token})
+    response = requests.post(LEAVE_URL, json = {'token': user_token, 'channel_id': channel_id})
+    assert response.status_code == 403
 
 
 # Tests for when the user_id entered is not a member of the channel_id.
