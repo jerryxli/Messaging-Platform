@@ -174,13 +174,13 @@ def handle_channel_leave():
 
 @APP.route("/channel/messages/v2", methods=['GET'])
 def handle_channel_messages():
-    request_data = request.get_json()
-    user_token = request_data['token']
-    channel_id = request_data['channel_id']
+    user_token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    start = int(request.args.get('start'))
     if not is_valid_JWT(user_token):
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return {channel_messages_v1(user_id, channel_id)}
+    return channel_messages_v1(user_id, channel_id, start)
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
