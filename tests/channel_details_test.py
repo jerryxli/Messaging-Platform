@@ -3,13 +3,12 @@ from src.config import port, url
 from src.other import clear_v1, is_valid_dictionary_output
 import requests
 import pytest
-import jwt
 
 DETAILS_URL = f"{url}/channel/details/v2"
 JOIN_URL = f"{url}/channel/join/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
-JWT_SECRET = "COMP1531_H13A_CAMEL"
+LOGOUT_URL = f"{url}/auth/logout/v1"
 
 @pytest.fixture
 def clear_store():
@@ -92,10 +91,11 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     
 
 # Test for when a user_token is invalid
-def test_invalid_member(clear_store, create_user):
-    fake_payload = {'auth_user_id': 2, 'user_session_id': 5}
-    fake_user = jwt.encode(fake_payload, JWT_SECRET, algorithm='HS256')
-    request_data = requests.get(DETAILS_URL, params = {'token': fake_user, 'channel_id': 5})
+def test_invalid_user(clear_store, create_user):
+    user_token = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json = {'token': user_token})
+    request_data = requests.get(DETAILS_URL, params = {'token': user_token, 'channel_id': channel_id})
     assert request_data.status_code == 403
 
 
