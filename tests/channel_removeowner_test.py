@@ -36,7 +36,7 @@ def create_user3():
 @pytest.fixture
 def create_user4():
     user_input = {'email': "z234019@unsw.edu.au", 'password': "slobknob", 'name_first': "Kit", 'name_last': "Kat"}
-    user_info = requests.post(REGISTER_URL, json = user_input)
+    user_info = requests.post(REGISTER_URL, json = user_input).json()
     return user_info
 
 # The Channel leave function takes in user token and channel id as input
@@ -59,18 +59,18 @@ def test_owner_removeowner(clear_store, create_user, create_user2):
 
     assert channel_details_1['owner_members'] == [
                                                     {
-                                                        'u_id': create_user2['auth_user_id'],
-                                                        'email': "z54626@unsw.edu.au",
-                                                        'name_first': "Snickers",
-                                                        'name_last': "Lickers",
-                                                        'handle_str': "snickerslickers",
-                                                    },
-                                                    {
                                                         'u_id': create_user['auth_user_id'],
                                                         'email': "z432324@unsw.edu.au",
                                                         'name_first': "Twix",
                                                         'name_last': "Fix",
                                                         'handle_str': "twixfix",
+                                                    },
+                                                    {
+                                                        'u_id': create_user2['auth_user_id'],
+                                                        'email': "z54626@unsw.edu.au",
+                                                        'name_first': "Snickers",
+                                                        'name_last': "Lickers",
+                                                        'handle_str': "snickerslickers",
                                                     },   
                                                  ]
     assert channel_details_2['owner_members'] == [
