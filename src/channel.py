@@ -201,7 +201,7 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
     data_store.set(store)
 
 
-def channel_leave_V1(auth_user_token:str, channel_id:int)->None:
+def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
     """
     This function allows a user to leave a channel
 
@@ -210,7 +210,6 @@ def channel_leave_V1(auth_user_token:str, channel_id:int)->None:
         AccessError     - Occurs when the user is not a member of the channel
         InputError      - Occurs when the channel_id is invalid
     """
-    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
 
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
@@ -222,16 +221,16 @@ def channel_leave_V1(auth_user_token:str, channel_id:int)->None:
         channel = channels[channel_id]
     else:
         raise InputError("Channel id not valid")
-    user = non_password_global_permission_field(user[auth_user_id])
+    user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if user in channel['owner_members']:
         channel['owner_members'].remove(user)
         channel['all_members'].remove(user)
-    elif users[auth_user_id] in channel['all_members']:
+    elif user in channel['all_members']:
         channel['all_members'].remove(user)
     else:
-        raise AccessError
+        raise AccessError("User not in channel")
     
     data_store.set(store)     
 
