@@ -1,16 +1,11 @@
-from src.auth import auth_register_v1
-from src.error import AccessError
-from src.config import port, url
-from src.other import clear_v1
+from src.config import url
 import requests
 import pytest
-import jwt
 
 LIST_URL = f"{url}/channels/list/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
 LOGOUT_URL = f"{url}/auth/logout/v1"
-JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 @pytest.fixture
 def clear_store():
