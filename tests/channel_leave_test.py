@@ -69,7 +69,28 @@ def test_member_leaves(clear_store, create_user, create_user2):
     request_data_1 = requests.post(LEAVE_URL, json = {'token': user_token_2, 'channel_id': channel_id})
     channel_details_1 = requests.get(DETAILS_URL, params = {'token': user_token_1, 'channel_id': channel_id})
     channel_details_2 = requests.get(DETAILS_URL, params = {'token': user_token_2, 'channel_id': channel_id})
-
+    expected_output_1 = {   'name': 'My Channel!', 
+                            'is_public': True,
+                            'owner_members': [
+                                {
+                                    'u_id': create_user['auth_user_id'],
+                                    'email': "z432324@unsw.edu.au",
+                                    'name_first': "Twix",
+                                    'name_last': "Chocolate",
+                                    'handle_str': "twixchocolate",
+                                }
+                            ],
+                            'all_members': [
+                                {
+                                    'u_id': create_user['auth_user_id'],
+                                    'email': "z432324@unsw.edu.au",
+                                    'name_first': "Twix",
+                                    'name_last': "Chocolate",
+                                    'handle_str': "twixchocolate",
+                                }
+                            ],
+                        }
+    assert channel_details_1.json() == expected_output_1
     assert request_data_1.json() == {}
     assert request_data_1.status_code == 200
     assert channel_details_1.status_code == 200
