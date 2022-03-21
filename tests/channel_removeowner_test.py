@@ -1,5 +1,4 @@
-from pydoc import resolve
-from src.config import port, url
+from src.config import url
 import requests
 import pytest
 
