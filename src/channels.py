@@ -29,8 +29,8 @@ def channels_list_v2(auth_user_token:str)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
-
+    auth_dict = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+    auth_user_id = auth_dict['auth_user_id']
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
 
@@ -90,7 +90,8 @@ def channels_create_v2(auth_user_token:str, name:str, is_public:bool)->dict:
 
     Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
     """
-    auth_user_id = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+    auth_dict = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
+    auth_user_id = auth_dict['auth_user_id']
     
     store = data_store.get()
     channels = store['channels']
