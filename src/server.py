@@ -7,10 +7,10 @@ from flask_cors import CORS
 from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
-from src.channels import channels_create_v1, channels_listall_v1
+from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1
+from src.channels import channels_create_v1, channels_list_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
-
 
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
@@ -37,15 +37,15 @@ APP.register_error_handler(Exception, defaultHandler)
 
 #### NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
 
-# Example
-@APP.route("/echo", methods=['GET'])
-def echo():
-    data = request.args.get('data')
-    if data == 'echo':
-   	    raise InputError(description='Cannot echo "echo"')
-    return dumps({
-        'data': data
-    })
+# # Example
+# @APP.route("/echo", methods=['GET'])
+# def echo():
+#     data = request.args.get('data')
+#     if data == 'echo':
+#    	    raise InputError(description='Cannot echo "echo"')
+#     return dumps({
+#         'data': data
+#     })
 
 @APP.route("/clear/v1", methods=['DELETE'])
 def handle_clear():
@@ -97,7 +97,6 @@ def handle_logout_v1():
 
     return auth_logout_v1(token)
 
-
 @APP.route("/user/profile/v1", methods=['GET'])
 def handle_profile_v1():
     
@@ -122,6 +121,59 @@ def handle_setemail_v1():
     email = request_data['email']
 
     return user_setemail_v1(token, email)
+
+@APP.route("/channels/create/v2", methods = ["POST"])
+def handle_channels_create_v2():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_name = request_data['name']
+    is_public = request_data['is_public']
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_create_v1(user_id, channel_name, is_public)
+
+@APP.route("/channels/list/v2", methods = ["GET"])
+def handle_channels_list_v2():
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_list_v1(user_id)
+
+# Channel Server Instructions
+
+@APP.route("/channel/details/v2", methods = ["GET"])
+def handle_channel_details():
+    user_token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channel_details_v1(user_id, channel_id)
+
+@APP.route("/channel/join/v2", methods = ["POST"])
+def handle_channel_join():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = request_data['channel_id']
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    channel_join_v1(user_id, channel_id)
+    return {}
+
+@APP.route("/channel/leave/v1", methods = ['POST'])
+def handle_channel_leave():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = int(request_data['channel_id'])
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    channel_leave_v1(user_id, channel_id)
+    return {}
+
 #### NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":
