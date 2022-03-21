@@ -4,12 +4,11 @@ import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
-
 from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
+from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1
-from src.channels import channels_create_v1, channels_list_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
 
@@ -48,7 +47,6 @@ APP.register_error_handler(Exception, defaultHandler)
 #     return dumps({
 #         'data': data
 #     })
-
 
 @APP.route("/clear/v1", methods=['DELETE'])
 def handle_clear():
@@ -134,6 +132,14 @@ def handle_channels_list_v2():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channels_list_v1(user_id)
+
+@APP.route("/channels/listall/v2", methods=['GET'])
+def handle_channels_listall_v2():
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_listall_v1(user_id)
 
 # Channel Server Instructions
 

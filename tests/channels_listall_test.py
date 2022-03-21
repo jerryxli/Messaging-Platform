@@ -1,76 +1,93 @@
-from src.auth import auth_register_v1
-from src.channels import channels_create_v1
-from src.channels import channels_listall_v1
-from src.error import InputError, AccessError
-from src.other import clear_v1
-
+from src.config import url
+import requests
 import pytest
+
+LISTALL_URL = f"{url}/channels/listall/v2"
+CREATE_URL = f"{url}/channels/create/v2"
+REGISTER_URL = f"{url}/auth/register/v2"
+LOGOUT_URL = f"{url}/auth/logout/v1"
 
 @pytest.fixture
 def clear_store():
-    clear_v1()
+    requests.delete(f"{url}/clear/v1", json={})
 
 @pytest.fixture
 def create_user():
-    user_id = auth_register_v1("z2537530@unsw.edu.au", "password", "Firstname", "Lastname")['auth_user_id']
-    return user_id
+    user_input = {'email': "z2537530@unsw.edu.au", 'password': "badpassword123", 'name_first': "Twix", 'name_last': "Chocolate"}
+    request_data = requests.post(REGISTER_URL, json = user_input)
+    user_info = request_data.json()
+    return user_info
 
 @pytest.fixture
 def create_user2():
-    user_id = auth_register_v1("z934183@unsw.edu.au", "password", "Firstname", "Lastname")['auth_user_id']
-    return user_id
-
-# Access error when auth_user_id is invalid
-def test_listall_auth_user_id_invalid(clear_store):
-    with pytest.raises(AccessError):
-        channels_listall_v1(None)
+    user_input = {'email': "z934183@unsw.edu.au", 'password': "Password", 'name_first': "Snickers", 'name_last': "Lickers"}
+    request_data = requests.post(REGISTER_URL, json = user_input)
+    user_info = request_data.json()
+    return user_info
 
 # Test for when there are no channels
-def test_listall_no_channels(clear_store, create_user):
-    user_id = create_user
-    assert channels_listall_v1(user_id) == {'channels': []} 
+def test_listall_v2_no_channels(clear_store, create_user):
+    user_token = create_user['token']
+    response = requests.get(LISTALL_URL, params = {'token': user_token})
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data == {'channels': []} 
 
 # Test for when there is only one public channel
-def test_listall_one_public(clear_store, create_user):
-    user_id = create_user
-    channel_id = channels_create_v1(user_id, 'Channel1', True)['channel_id']
-    assert channels_listall_v1(user_id) == {'channels': [{'channel_id': channel_id, 'name': 'Channel1'}]}
+def test_listall_v2_one_public(clear_store, create_user):
+    user_token = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
     
-# Test for when there is only one private channel
-def test_listall_one_private(clear_store, create_user):
-    user_id = create_user
-    channel_id = channels_create_v1(user_id, 'Channel1', False)['channel_id']
-    assert channels_listall_v1(user_id) == {'channels': [{'channel_id': channel_id, 'name': 'Channel1'}]}
+    response = requests.get(LISTALL_URL, params = {'token': user_token})
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data == {'channels': [{'channel_id': channel_id, 'name': 'Channel1'}]}
 
-# Test for when there are multiple private channel
-def test_listall_mul_private(clear_store, create_user):
-    user_id = create_user
-    channel_id1 = channels_create_v1(user_id, 'Channel1', False)['channel_id']
-    channel_id2 = channels_create_v1(user_id, 'Channel2', False)['channel_id']
-    assert channels_listall_v1(user_id) == {'channels': [{'channel_id': channel_id1, 'name': 'Channel1'}, {'channel_id': channel_id2, 'name': 'Channel2'}]}
-    
-# Test for when there are multiple public and private channel
-def test_listall_both_privacy(clear_store, create_user):
-    user_id = create_user
-    channel_id1 = channels_create_v1(user_id, 'Channel1', True)['channel_id']
-    channel_id2 = channels_create_v1(user_id, 'Channel2', False)['channel_id']
-    channel_id3 = channels_create_v1(user_id, 'Channel3', False)['channel_id']
-    channel_id4 = channels_create_v1(user_id, 'Channel4', True)['channel_id']
-    
-    assert channels_listall_v1(user_id) == {'channels': [{'channel_id': channel_id1, 'name': 'Channel1'}, {'channel_id': channel_id2, 'name': 'Channel2'}, {'channel_id': channel_id3, 'name': 'Channel3'}, {'channel_id': channel_id4, 'name': 'Channel4'}]}
+def test_listall_v2_mul_privacy(clear_store, create_user):
+    # create all the channels
+    user_token = create_user['token']
+    channel_id1 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id2 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel2', 'is_public': False}).json()['channel_id']
+    channel_id3 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel3', 'is_public': True}).json()['channel_id']
+    channel_id4 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel4', 'is_public': False}).json()['channel_id']
 
-#--------- Test for channels user isin't part of -----------#
+    response = requests.get(LISTALL_URL, params = {'token': user_token})
+    response_data = response.json()
+    assert response.status_code == 200
+
+    expected = {'channels': [{'channel_id': channel_id1, 'name': 'Channel1'}, {'channel_id': channel_id2, 'name': 'Channel2'}, {'channel_id': channel_id3, 'name': 'Channel3'}, {'channel_id': channel_id4, 'name': 'Channel4'}]}
+    assert response_data == expected
 
 # Test for public and private channels user isin't part of
-def test_listall_notin_bothprivacy(clear_store, create_user, create_user2):
-    user_id_1 = create_user
-    user_id_2 = create_user2
-    channel_id1 = channels_create_v1(user_id_1, 'Channel1', True)['channel_id']
-    channel_id2 = channels_create_v1(user_id_1, 'Channel2', False)['channel_id']
-    channel_id3 = channels_create_v1(user_id_2, 'Channel3', False)['channel_id']
-    channel_id4 = channels_create_v1(user_id_2, 'Channel4', True)['channel_id']
+def test_listall_v2_not_in_bothprivacy(clear_store, create_user, create_user2):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+
+    channel_id1 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id2 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel2', 'is_public': False}).json()['channel_id']
+    channel_id3 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'Channel3', 'is_public': True}).json()['channel_id']
+    channel_id4 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'Channel4', 'is_public': False}).json()['channel_id']
+
+    response_1 = requests.get(LISTALL_URL, params = {'token': user_token_1})
+    response_data_1 = response_1.json()
+    assert response_1.status_code == 200
+
     expected = {'channels': [{'channel_id': channel_id1, 'name': 'Channel1'}, {'channel_id': channel_id2, 'name': 'Channel2'}, {'channel_id':  channel_id3, 'name': 'Channel3'}, {'channel_id': channel_id4, 'name': 'Channel4'}]}
-    assert channels_listall_v1(user_id_1) == expected
-    assert channels_listall_v1(user_id_2) == expected
-    
+    assert response_data_1 == expected
+
+    response_2 = requests.get(LISTALL_URL, params = {'token': user_token_2})
+    response_data_2 = response_1.json()
+    assert response_2.status_code == 200
+    assert response_data_2 == expected
+
+# Test for when the token is invalid
+def test_invalid_user_token(clear_store, create_user):
+    user_token = create_user['token']
+    requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json = {'token': user_token})
+    response = requests.get(LISTALL_URL, params = {'token': user_token})
+    assert response.status_code == 403
+
+
+
 
