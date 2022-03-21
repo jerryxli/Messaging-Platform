@@ -12,9 +12,7 @@ get information of the messages within a channel and join a channel.
 from src.data_store import data_store
 from src.error import InputError, AccessError
 from src.other import verify_user, is_global_user
-import jwt
 
-JWT_SECRET = "COMP1531_H13A_CAMEL"
 PAGE_THRESHOLD = 50
 
 def channel_invite_v1(auth_user_id, channel_id, u_id):
