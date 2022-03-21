@@ -12,9 +12,7 @@ list channel info for all channels and create channels.
 from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.other import verify_user
-import jwt
 
-JWT_SECRET = "COMP1531_H13A_CAMEL"
 MAX_CHANNEL_NAME_LENGTH = 20
 
 def channels_list_v1(auth_user_id:int)->dict:
