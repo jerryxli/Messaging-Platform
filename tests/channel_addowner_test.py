@@ -93,7 +93,7 @@ def test_global_owner_add_themselves(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_id = create_user['auth_user_id']
-    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
+    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': True}).json()['channel_id']
     join_request = requests.post(JOIN_URL, json = {'token': user_token_1, 'channel_id': channel_id_2})
     response = requests.post(ADDOWNER_URL, json = {'token': user_token_1, 'channel_id': channel_id_2, 'u_id': user_id})
     channel_details = requests.get(DETAILS_URL, params = {'token': user_token_1, 'channel_id': channel_id_2}).json()
