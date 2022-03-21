@@ -7,7 +7,7 @@ from src.error import InputError
 from src import config
 from src.other import clear_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1
-from src.user import user_profile_v1
+from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -85,9 +85,22 @@ def handle_profile_v1():
 
     return user_profile_v1(token, u_id)
 
+@APP.route("/user/profile/setname/v1", methods=['PUT'])
+def handle_setname_v1():
+    request_data = request.get_json()
+    token = request_data['token']
+    name_first = request_data['name_first']
+    name_last = request_data['name_last']
 
+    return user_setname_v1(token, name_first, name_last)
 
+@APP.route("/user/profile/setemail/v1", methods=['PUT'])
+def handle_setemail_v1():
+    request_data = request.get_json()
+    token = request_data['token']
+    email = request_data['email']
 
+    return user_setemail_v1(token, email)
 #### NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":
