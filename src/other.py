@@ -1,4 +1,6 @@
+from src.auth import JWT_SECRET
 from src.data_store import data_store
+import jwt
 
 def clear_v1():
     """
@@ -67,3 +69,7 @@ def verify_user(auth_user_id: int)->bool:
 def is_global_user(auth_user_id: int)->bool:
     users = data_store.get()['users']
     return bool(users[auth_user_id]['global_permission'] == 2)
+
+def user_id_from_JWT(token:str)->int:
+    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    return int(jwt_payload['auth_user_id'])
