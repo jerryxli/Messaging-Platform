@@ -105,8 +105,6 @@ def handle_setemail_v1():
 
     return user_setemail_v1(token, email)
 
-# Channels Server Instructions
-
 @APP.route("/channels/create/v2", methods = ["POST"])
 def handle_channels_create_v2():
     request_data = request.get_json()
@@ -147,6 +145,8 @@ def handle_channel_join():
     user_id = user_id_from_JWT(user_token)
     channel_join_v1(user_id, channel_id)
     return {}
+
+#### NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, quit_gracefully) # For coverage
