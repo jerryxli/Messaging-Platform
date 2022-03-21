@@ -6,6 +6,8 @@ from flask_cors import CORS
 from src.error import InputError
 from src.channels import channels_listall_v1
 from src import config
+from src.other import clear_v1
+from src.auth import auth_login_v1, auth_register_v1
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -40,11 +42,30 @@ def echo():
         'data': data
     })
 
-@APP.route("/channels/listall/v2", methods=['GET'])
-def listall():
-    #check auth
-    token = request.args.get('token')
-    return dumps(channels_listall_v1(token))
+@APP.route("/clear/v1", methods=['DELETE'])
+def clear():
+    clear_v1()
+    return {}
+
+@APP.route("/auth/register/v2", methods=['POST'])
+def register_v2():
+    request_data = request.get_json()
+
+    email = request_data['email']
+    password = request_data['password']
+    name_first = request_data['name_first']
+    name_last = request_data['name_last']
+
+    return auth_register_v1(email,password,name_first, name_last)
+
+@APP.route("/auth/login/v2", methods=['POST'])
+def login_v2():
+    request_data = request.get_json()
+
+    email = request_data['email']
+    password = request_data['password']
+
+    return auth_login_v1(email, password)
 
 #### NO NEED TO MODIFY BELOW THIS POINT
 
