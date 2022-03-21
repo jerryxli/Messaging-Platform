@@ -4,6 +4,7 @@ from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
 from src.error import InputError
+from src.channels import channels_listall_v1
 from src import config
 
 def quit_gracefully(*args):
@@ -38,6 +39,12 @@ def echo():
     return dumps({
         'data': data
     })
+
+@APP.route("/channels/listall/v2", methods=['GET'])
+def listall():
+    #check auth
+    token = request.args.get('token')
+    return dumps(channels_listall_v1(token))
 
 #### NO NEED TO MODIFY BELOW THIS POINT
 
