@@ -4,9 +4,6 @@ import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
-import jwt
-
-JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 from src.error import AccessError, InputError
 from src import config
