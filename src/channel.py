@@ -274,8 +274,6 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         raise InputError("Channel id not valid")
 
     # Check the auth_user and u_id are members of the channel first
-    if not check_user_in_channel(auth_user_id, channel):
-        raise AccessError("Auth_user_id not a member")
     if not check_user_in_channel(u_id, channel):
         raise InputError("U_id not a member")
 
