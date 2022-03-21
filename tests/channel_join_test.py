@@ -46,7 +46,7 @@ def test_private_channel(clear_store, create_user, create_user2):
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': False}).json()['channel_id']
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})
-    assert response.status_code != 200
+    assert response.status_code == 403
 
 
 def test_successfully_joined_channel(clear_store, create_user, create_user2):
@@ -77,7 +77,7 @@ def test_channel_doesnt_exist(clear_store, create_user):
     user_token_1 = create_user['token']
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_1, 'channel_id': 0})
-    assert response.status_code != 200
+    assert response.status_code == 400
 
 
 def test_user_already_in_channel(clear_store, create_user):
@@ -86,7 +86,7 @@ def test_user_already_in_channel(clear_store, create_user):
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_1, 'channel_id': channel_id})
-    assert response.status_code != 200
+    assert response.status_code == 400
 
 # Old tests found below
 
