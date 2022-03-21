@@ -4,14 +4,16 @@ from src.config import port, url
 from src.other import clear_v1
 import requests
 import pytest
+import jwt
 
 LIST_URL = f"{url}/channels/list/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
+JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 @pytest.fixture
 def clear_store():
-    clear_v1()
+    requests.delete(f"{url}/clear/v1", json={})
 
 @pytest.fixture
 def create_user():
@@ -40,7 +42,7 @@ def create_user3():
 # Test for when the user has no channels
 def test_no_channels(clear_store, create_user):
     user_token = create_user['token']
-    response = requests.get(LIST_URL, params = user_token)
+    response = requests.get(LIST_URL, params = {'token': user_token})
     expected_outcome = { 'channels': [] }
     assert response.json() == expected_outcome
     assert response.status_code == 200
@@ -49,20 +51,21 @@ def test_no_channels(clear_store, create_user):
 # Test for when the user has created one channel
 def test_one_channel(clear_store, create_user):
     user_token = create_user['token']
-    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'My Channel!', 'is_public': True}).json('channel_id')
-    response = requests.get(LIST_URL, params = user_token)
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    response = requests.get(LIST_URL, params = {'token': user_token})
     expected_outcome = { 'channels': [{'channel_id': channel_id, 'name': 'My Channel!'}] }
+    assert channel_id == 0
     assert response.json() == expected_outcome
     assert response.status_code == 200
 
 
 # Test for when the user has multiple channels
-def test_multiple_channels(clear_store, create_user):
+def test_multiple_channels(clear_store, create_user,):
     user_token = create_user['token']
-    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json('channel_id')
-    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'ok channel', 'is_public': False}).json('channel_id')
-    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'BAD CHANNEL', 'is_public': True}).json('channel_id')
-    response = requests.get(LIST_URL, params = user_token)
+    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
+    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'ok channel', 'is_public': False}).json()['channel_id']
+    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'BAD CHANNEL', 'is_public': True}).json()['channel_id']
+    response = requests.get(LIST_URL, params = {'token': user_token})
     expected_outcome = { 'channels': [{'channel_id': channel_id_1, 'name': 'Cool Channel'}, {'channel_id': channel_id_2, 'name': 'ok channel'}, {'channel_id': channel_id_3, 'name': 'BAD CHANNEL'}] }
     assert response.json() == expected_outcome
     assert response.status_code == 200
@@ -74,18 +77,18 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
 
-    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Hangout', 'is_public': True}).json('channel_id')
-    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': True}).json('channel_id')
-    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token_3, 'name': 'LOUNGE', 'is_public': True}).json('channel_id')
-    response_1 = requests.get(LIST_URL, params = user_token_1)
+    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Hangout', 'is_public': True}).json()['channel_id']
+    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': True}).json()['channel_id']
+    channel_id_3 = requests.post(CREATE_URL, json = {'token': user_token_3, 'name': 'LOUNGE', 'is_public': True}).json()['channel_id']
+    response_1 = requests.get(LIST_URL, params = {'token': user_token_1})
     assert response_1.json() == { 'channels': [{'channel_id': channel_id_1, 'name': 'Hangout'}] }
     assert response_1.status_code == 200
 
-    response_2 = requests.get(LIST_URL, params = user_token_2)
+    response_2 = requests.get(LIST_URL, params = {'token': user_token_2})
     assert response_2.json() == { 'channels': [{'channel_id': channel_id_2, 'name': 'kitchen'}] }
     assert response_2.status_code == 200
 
-    response_3 = requests.get(LIST_URL, params = user_token_3)
+    response_3 = requests.get(LIST_URL, params = {'token': user_token_3})
     assert response_3.json() == { 'channels': [{'channel_id': channel_id_3, 'name': 'LOUNGE'}] }
     assert response_3.status_code == 200
 
@@ -93,6 +96,7 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
 # Test for when the token is invalid
 def test_invalid_user_token(clear_store, create_user):
     # Since we are only creating one user and each id is unique, then user + 1 must be fake
-    fake_user = create_user['token'] + 1
-    response = response.get(LIST_URL, params = fake_user)
+    fake_payload = {'auth_user_id': 2, 'user_session_id': 5}
+    fake_user = jwt.encode(fake_payload, JWT_SECRET, algorithm='HS256')
+    response = requests.get(LIST_URL, params = {'token': fake_user})
     assert response.status_code == 403
