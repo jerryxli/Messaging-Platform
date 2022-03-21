@@ -7,7 +7,9 @@ from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1
 from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
-from src.channels import channels_list_v2, channels_create_v2
+from src.channels import channels_list_v1, channels_create_v1
+import jwt
+
 
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
@@ -80,14 +82,14 @@ def handle_channels_create_v2():
     user_token = request_data['token']
     channel_name = request_data['name']
     is_public = request_data['is_public']
-    
-    return channels_create_v2(user_token, channel_name, is_public)
+    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
+    return channels_create_v1(user_id, channel_name, is_public)
 
 @APP.route("/channels/list/v2", methods = ["GET"])
 def handle_channels_list_v2():
     user_token = request.args.get('token')
-
-    return channels_list_v2(user_token)
+    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
+    return channels_list_v1(user_id)
 
 
 #### NO NEED TO MODIFY BELOW THIS POINT

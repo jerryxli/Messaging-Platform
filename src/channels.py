@@ -17,7 +17,7 @@ import jwt
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 MAX_CHANNEL_NAME_LENGTH = 20
 
-def channels_list_v2(auth_user_token:str)->dict:
+def channels_list_v1(auth_user_id:int)->dict:
     """
     Prints out the list of channels that the user is a member of
     In the format: { channels: [{}, {}, {}] }
@@ -29,8 +29,6 @@ def channels_list_v2(auth_user_token:str)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    auth_dict = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
-    auth_user_id = auth_dict['auth_user_id']
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
 
@@ -72,7 +70,7 @@ def channels_listall_v1(auth_user_id:int)->dict:
     for key, channel in channels.items()] }
 
 
-def channels_create_v2(auth_user_token:str, name:str, is_public:bool)->dict:
+def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     """
     Creates a new channel
 
@@ -90,8 +88,6 @@ def channels_create_v2(auth_user_token:str, name:str, is_public:bool)->dict:
 
     Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
     """
-    auth_dict = jwt.decode(auth_user_token, JWT_SECRET, algorithms=['HS256'])
-    auth_user_id = auth_dict['auth_user_id']
     
     store = data_store.get()
     channels = store['channels']
