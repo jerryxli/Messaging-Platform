@@ -8,9 +8,10 @@ from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
 from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1
-from src.channels import channels_create_v1, channels_list_v1
+from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
+
 
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
@@ -72,23 +73,6 @@ def handle_login_v2():
 
     return auth_login_v1(email, password)
 
-@APP.route("/channels/create/v2", methods = ["POST"])
-def handle_channels_create_v2():
-    request_data = request.get_json()
-    user_token = request_data['token']
-    channel_name = request_data['name']
-    is_public = request_data['is_public']
-    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
-    return channels_create_v1(user_id, channel_name, is_public)
-
-@APP.route("/channels/listall/v2", methods=['GET'])
-def handle_channels_listall_v2():
-    user_token = request.args.get('token')
-    if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
-    user_id = user_id_from_JWT(user_token)
-    return channels_listall_v1(user_id)
-
 @APP.route("/auth/logout/v1", methods=['POST'])
 def handle_logout_v1():
     request_data = request.get_json()
@@ -140,6 +124,14 @@ def handle_channels_list_v2():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channels_list_v1(user_id)
+
+@APP.route("/channels/listall/v2", methods=['GET'])
+def handle_channels_listall_v2():
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_listall_v1(user_id)
 
 # Channel Server Instructions
 
