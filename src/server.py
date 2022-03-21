@@ -1,20 +1,17 @@
 import sys
+import jwt
 import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
+
 from src.error import AccessError, InputError
 from src import config
-from src.other import clear_v1
-from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1
+from src.other import clear_v1, user_id_from_JWT
+from src.channel import channel_details_v1, channel_join_v1
+from src.channels import channels_create_v1, channels_list_v1
+from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
-from src.auth import auth_login_v1, auth_register_v1, is_valid_JWT
-from src.channels import channels_list_v1, channels_create_v1
-
-import jwt
-
-
-JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 def quit_gracefully(*args):
     '''For coverage'''
@@ -55,8 +52,6 @@ def handle_clear():
     clear_v1()
     return {}
 
-# Auth Server Instructions
-
 @APP.route("/auth/register/v2", methods=['POST'])
 def handle_register_v2():
     request_data = request.get_json()
@@ -77,23 +72,6 @@ def handle_login_v2():
 
     return auth_login_v1(email, password)
 
-# Channels Server Instructions
-
-@APP.route("/channels/create/v2", methods = ["POST"])
-def handle_channels_create_v2():
-    request_data = request.get_json()
-    user_token = request_data['token']
-    channel_name = request_data['name']
-    is_public = request_data['is_public']
-    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
-    return channels_create_v1(user_id, channel_name, is_public)
-
-@APP.route("/channels/list/v2", methods = ["GET"])
-def handle_channels_list_v2():
-    user_token = request.args.get('token')
-    user_id = jwt.decode(user_token, JWT_SECRET, algorithms=['HS256'])['auth_user_id']
-    return channels_list_v1(user_id)
-
 @APP.route("/auth/logout/v1", methods=['POST'])
 def handle_logout_v1():
     request_data = request.get_json()
@@ -101,7 +79,6 @@ def handle_logout_v1():
     token = request_data['token']
 
     return auth_logout_v1(token)
-
 
 @APP.route("/user/profile/v1", methods=['GET'])
 def handle_profile_v1():
@@ -127,6 +104,49 @@ def handle_setemail_v1():
     email = request_data['email']
 
     return user_setemail_v1(token, email)
+
+# Channels Server Instructions
+
+@APP.route("/channels/create/v2", methods = ["POST"])
+def handle_channels_create_v2():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_name = request_data['name']
+    is_public = request_data['is_public']
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_create_v1(user_id, channel_name, is_public)
+
+@APP.route("/channels/list/v2", methods = ["GET"])
+def handle_channels_list_v2():
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_list_v1(user_id)
+
+# Channel Server Instructions
+
+@APP.route("/channel/details/v2", methods = ["GET"])
+def handle_channel_details():
+    user_token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channel_details_v1(user_id, channel_id)
+
+@APP.route("/channel/join/v2", methods = ["POST"])
+def handle_channel_join():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = request_data['channel_id']
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    channel_join_v1(user_id, channel_id)
+    return {}
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, quit_gracefully) # For coverage
