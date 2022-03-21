@@ -72,22 +72,40 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     channel_join = requests.post(JOIN_URL, json = {'token': user_token_2, 'channel_id': channel_id}).json()
     channel_details_1 = requests.get(DETAILS_URL, params = {'token': user_token_1, 'channel_id': channel_id}).json()
     channel_details_2 = requests.get(DETAILS_URL, params = {'token': user_token_2, 'channel_id': channel_id}).json()
+    expected_output =  {   'name': 'My Channel!', 
+                            'is_public': True,
+                            'owner_members': [
+                                {
+                                    'u_id': create_user['auth_user_id'],
+                                    'email': "z432324@unsw.edu.au",
+                                    'name_first': "Twix",
+                                    'name_last': "Chocolate",
+                                    'handle_str': "twixchocolate",
+                                }
+                            ],
+                            'all_members': [
+                                {
+                                    'u_id': create_user['auth_user_id'],
+                                    'email': "z432324@unsw.edu.au",
+                                    'name_first': "Twix",
+                                    'name_last': "Chocolate",
+                                    'handle_str': "twixchocolate",
+                                },
+                                {
+                                    'u_id': create_user2['auth_user_id'],
+                                    'email': "z54626@unsw.edu.au",
+                                    'name_first': "Snickers",
+                                    'name_last': "Lickers",
+                                    'handle_str': "snickerslickers",
+                                },
+                            ],
+                        }
+    
     assert channel_join == {}
-    assert is_valid_dictionary_output(channel_details_1, {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list})
-    for user in channel_details_1['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+    
 
-    for user in channel_details_1['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
-
-    assert is_valid_dictionary_output(channel_details_2, {'name': str,'is_public': bool, 'owner_members': list, 'all_members': list})
-    for user in channel_details_2['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
-
-    for user in channel_details_2['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
-
-    assert channel_details_1 == channel_details_2
+    assert channel_details_1 == expected_output
+    assert channel_details_2 == expected_output
     
 
 # Test for when a user_token is invalid
@@ -108,6 +126,7 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     request_data_1 = requests.get(DETAILS_URL, params = {'token': user_token_2, 'channel_id': channel_id_1})
     request_data_2 = requests.get(DETAILS_URL, params = {'token': user_token_3, 'channel_id': channel_id_2})
+    # Access Error
     assert request_data_1.status_code == 403
     assert request_data_2.status_code == 403
 
@@ -119,6 +138,7 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
     channel_id = 0
     request_data_1 = requests.get(DETAILS_URL, params = {'token': user_token_1, 'channel_id': channel_id})
     request_data_2 = requests.get(DETAILS_URL, params = {'token': user_token_2, 'channel_id': channel_id})
+    # Input Error
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
 
