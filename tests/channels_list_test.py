@@ -54,7 +54,6 @@ def test_one_channel(clear_store, create_user):
     channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.get(LIST_URL, params = {'token': user_token})
     expected_outcome = { 'channels': [{'channel_id': channel_id, 'name': 'My Channel!'}] }
-    assert channel_id == 0
     assert response.json() == expected_outcome
     assert response.status_code == 200
 
