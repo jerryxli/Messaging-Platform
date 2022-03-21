@@ -9,6 +9,7 @@ import jwt
 LIST_URL = f"{url}/channels/list/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
+LOGOUT_URL = f"{url}/auth/logout/v1"
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 @pytest.fixture
@@ -95,7 +96,8 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
 # Test for when the token is invalid
 def test_invalid_user_token(clear_store, create_user):
     # Since we are only creating one user and each id is unique, then user + 1 must be fake
-    fake_payload = {'auth_user_id': 2, 'user_session_id': 5}
-    fake_user = jwt.encode(fake_payload, JWT_SECRET, algorithm='HS256')
-    response = requests.get(LIST_URL, params = {'token': fake_user})
+    user_token = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json = {'token': user_token})
+    response = requests.get(LIST_URL, params = {'token': user_token, 'channel_id': channel_id})
     assert response.status_code == 403
