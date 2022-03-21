@@ -9,7 +9,7 @@ from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
 from src.channel import channel_details_v1, channel_join_v1
-from src.channels import channels_create_v1
+from src.channels import channels_create_v1, channels_list_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
 
@@ -116,7 +116,16 @@ def handle_channels_create_v2():
     user_id = user_id_from_JWT(user_token)
     return channels_create_v1(user_id, channel_name, is_public)
 
+@APP.route("/channels/list/v2", methods = ["GET"])
+def handle_channels_list_v2():
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_list_v1(user_id)
+
 # Channel Server Instructions
+
 @APP.route("/channel/details/v2", methods = ["GET"])
 def handle_channel_details():
     user_token = request.args.get('token')
