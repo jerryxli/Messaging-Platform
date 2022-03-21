@@ -1,13 +1,10 @@
 from src.config import url
-
 import requests
 import pytest
-import jwt
 
 LISTALL_URL = f"{url}/channels/listall/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
-JWT_SECRET = "COMP1531_H13A_CAMEL"
 LOGOUT_URL = f"{url}/auth/logout/v1"
 
 @pytest.fixture
