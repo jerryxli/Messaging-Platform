@@ -169,7 +169,7 @@ def test_list_and_join(clear_store, create_user, create_user2):
                                'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
 
     assert requests.get(LIST_URL, params = {'token': user_token_1}).json() == {'channels': [{'channel_id': channel_id,'name': 'test2'}]}
-    assert requests.get(LISTALL_URL, params = {'token': user_token_1}).json() == requests.get(LIST_URL, params = {'token': user_token_1}).json()
+    assert requests.get(LISTALL_URL, params = {'token': user_token_2}).json() == requests.get(LIST_URL, params = {'token': user_token_1}).json()
     assert requests.get(LIST_URL, params = {'token': user_token_2}).json() == {'channels': []}
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})
