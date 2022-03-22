@@ -11,6 +11,7 @@ from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1, c
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
+from src.message import message_send_v1
 
 
 def quit_gracefully(*args):
@@ -215,6 +216,16 @@ def handle_channel_removeowner():
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
+@APP.route("/message/send/v1", methods = ['POST'])
+def handle_message_send():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = int(request_data['channel_id'])
+    message = request_data['message']
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return message_send_v1(user_id, channel_id, message)    
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, quit_gracefully)  # For coverage

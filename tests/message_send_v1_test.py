@@ -36,7 +36,7 @@ def test_normal_functionality(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(MESSAGE_SEND_URL, params = {'user_token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, params = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200
 
 def test_invalid_message(clear_store, create_user):
@@ -44,7 +44,7 @@ def test_invalid_message(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(MESSAGE_SEND_URL, params = {'user_token': user_token_1, 'channel_id': channel_id, 'message': ""})
+    response = requests.post(MESSAGE_SEND_URL, params = {'token': user_token_1, 'channel_id': channel_id, 'message': ""})
     assert response.status_code == 400
 
 def test_user_not_part_of_channel(clear_store, create_user, create_user2):
@@ -52,10 +52,10 @@ def test_user_not_part_of_channel(clear_store, create_user, create_user2):
     user_token_2 = create_user2['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(MESSAGE_SEND_URL, params = {'user_token': user_token_2, 'channel_id': channel_id, 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, params = {'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 403
 
 def test_channel_not_valid(clear_store, create_user):
     user_token_1 = create_user['token']
-    response = requests.post(MESSAGE_SEND_URL, params = {'user_token': user_token_1, 'channel_id': "100", 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, params = {'token': user_token_1, 'channel_id': "100", 'message': "Hello World"})
     assert response.status_code == 400
