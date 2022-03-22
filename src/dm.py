@@ -1,0 +1,143 @@
+"""
+Dm
+Filename: dm.py
+
+Author: Jacqueline Chen (z5360310), Jerry Li (z5362290), Tetian Madfouni (z5361722)
+Created: 22.03.2022
+
+Description: Allows the user to create a dm, list dms, leave dms,
+message in a dm, get details of a dm, and remove a dm.
+"""
+
+from src.data_store import data_store
+from src.error import InputError, AccessError
+from src.other import verify_user
+
+def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
+    """
+    Creates a dm between the auth_user_id and the user(s) in the u_ids dict
+
+    Exceptions:
+        InputError          - Occurs when any u_id is invalid
+        InputError          - Occurs when duplicate u_id occurs
+
+    Arguments:
+        auth_user_id (int)  - The id of the user
+        u_ids (list)        - List of u_ids to add to the dm
+
+    Return Value:
+        Returns { 'dm_id' } on successful creation
+    """
+    store = data_store.get()
+    dms = store['dms']
+    users = store['users']
+
+    # U_id is not valid
+    if len(u_ids) != 0:
+        if any(verify_user(u_id) for u_id in u_ids) == False:
+            raise InputError("U_id not valid")
+
+    # Check for duplicate u_id
+    user_set = set(u_ids)
+    if len(user_set) < len(u_ids):
+        raise InputError("Duplicate u_ids entered")
+
+    u_ids.append(auth_user_id)
+    # Create name
+    name = ''
+    user_handles = []
+    for id in u_ids:
+        user_handles.append(users[id]['handle'])
+    user_handles.sort()
+    name = ' ,'.join(user_handles)
+
+    # Information for the dm
+    dm_info = {}
+    dm_id = len(dms)
+    dm_info['creator'] = auth_user_id
+    dm_info['name'] = name
+    dm_info['members'] = u_ids
+    dm_info['messages'] = []
+    dms[dm_id] = dm_info
+    store['dms'] = dms
+    data_store.set(store)
+    
+    return {'dm_id': dm_id}
+
+def dm_list_v1(auth_user_id:int)->dict:
+    """
+    Lists all dms auth_user_id is apart of
+
+    Exceptions:
+
+    Arguments:
+        auth_user_id (int)  - The id of the user
+
+    Return Value:
+        Returns { 'dms' } upon successful creation
+    """
+    # Not sure about the output but based on channels_list this is what I think would be printed
+    return {'dms': {'name', 'dm_id'}} 
+
+
+def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
+    """
+    Removes auth_user_id from dm of dm_id
+
+    Exceptions:
+
+    Arguments:
+        auth_user_id (int)  - The id of the user
+        dm_id (int)         - The id of the dm
+
+    Return Value:
+        None
+    """
+    
+
+def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
+    """
+    Returns details of the dm in a dict
+
+    Exceptions:
+
+    Arguments:
+        auth_user_id (int)  - The id of the user
+        dm_id (int)         - The id of the dm
+
+    Return Value:
+        Returns { 'name', 'members' } upon successful creation
+    """
+    return { 'name', 'members' }        
+
+
+def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
+    """
+    Removes auth_user_id from dm of dm_id
+
+    Exceptions:
+
+    Arguments:
+        auth_user_id (int)      - The id of the user
+        dm_id (int)             - The id of the dm
+
+    Return Value:
+        None
+    """
+
+
+def dm_messages_v1(auth_user_id:int, dm_id:int, start: int)->dict:
+    """
+    Returns the messages of a dm from start index + 50
+
+    Exceptions:
+
+    Arguments:
+        auth_user_id (int)      - The id of the user
+        dm_id (int)             - The id of the dm
+        start (int)             - The start index
+
+    Return Value:
+        Returns { 'messages', 'start', 'end' } upon successful creation
+    """
+    return {'messages', 'start', 'end' }

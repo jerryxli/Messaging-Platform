@@ -11,6 +11,7 @@ from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1, c
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
+from src.dm import dm_create_v1
 
 
 def quit_gracefully(*args):
@@ -38,21 +39,12 @@ APP.register_error_handler(Exception, defaultHandler)
 
 # NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
 
-# # Example
-# @APP.route("/echo", methods=['GET'])
-# def echo():
-#     data = request.args.get('data')
-#     if data == 'echo':
-#    	    raise InputError(description='Cannot echo "echo"')
-#     return dumps({
-#         'data': data
-#     })
-
 @APP.route("/clear/v1", methods=['DELETE'])
 def handle_clear():
     clear_v1()
     return {}
 
+# Auth Server Instructions
 
 @APP.route("/auth/register/v2", methods=['POST'])
 def handle_register_v2():
@@ -84,6 +76,7 @@ def handle_logout_v1():
 
     return auth_logout_v1(token)
 
+# User Server Instructions
 
 @APP.route("/user/profile/v1", methods=['GET'])
 def handle_profile_v1():
@@ -112,6 +105,7 @@ def handle_setemail_v1():
 
     return user_setemail_v1(token, email)
 
+# Channels Server Instructions
 
 @APP.route("/channels/create/v2", methods=["POST"])
 def handle_channels_create_v2():
@@ -212,6 +206,16 @@ def handle_channel_removeowner():
     channel_removeowner_v1(user_id, channel_id, u_id)
     return {}
 
+# DM Server Instructions
+@APP.route("/dm/create/v1", methods = ["POST"])
+def handle_dm_create():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    u_ids = request_data['u_ids']
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return dm_create_v1(user_id, u_ids)
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
