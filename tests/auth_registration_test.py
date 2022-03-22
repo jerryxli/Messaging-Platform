@@ -5,6 +5,7 @@ from src.config import url
 
 
 REGISTER_URL = f"{url}/auth/register/v2"
+PROFILE_URL = f"{url}/user/profile/v1"
 
 @pytest.fixture
 def clear_store():
@@ -15,6 +16,21 @@ def test_auth_register_v2(clear_store):
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'token': str, 'auth_user_id': int})
 
+def test_auth_register_handle_generate(clear_store):
+    response_0 = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"abcdefghi", "name_last":"jklmnopqrst"})
+    response_1 = requests.post(REGISTER_URL, json={"email":"z55556@unsw.edu.au", "password":"passwordlong", "name_first":" **(&(abcdefghi__  ", "name_last":"jklmnopqrst&**uv"})
+    response_2 = requests.post(REGISTER_URL, json={"email":"z55557@unsw.edu.au", "password":"passwordlong", "name_first":"ABCDEFGHI", "name_last":"JKLMNOPQRSTUVWXYZ"})
+
+    token = response_0.json()['token']
+    id_0 = response_0.json()['auth_user_id']
+    id_1 = response_1.json()['auth_user_id']
+    id_2 = response_2.json()['auth_user_id']
+    profile_repsonse_0 = requests.get(PROFILE_URL, params={"token": token, "u_id": id_0})
+    assert profile_repsonse_0.json() == {"u_id": id_0, "email":"z55555@unsw.edu.au", "name_first": "abcdefghi", "name_last": "jklmnopqrst", "handle_str": "abcdefghijklmnopqrst"}
+    profile_repsonse_1 = requests.get(PROFILE_URL, params={"token": token, "u_id": id_1})
+    assert profile_repsonse_1.json() == {"u_id": id_1, "email":"z55556@unsw.edu.au", "name_first": " **(&(abcdefghi__  ", "name_last": "jklmnopqrst&**uv", "handle_str": "abcdefghijklmnopqrst0"}
+    profile_repsonse_2 = requests.get(PROFILE_URL, params={"token": token, "u_id": id_2})
+    assert profile_repsonse_2.json() == {"u_id": id_2, "email":"z55557@unsw.edu.au", "name_first": "ABCDEFGHI", "name_last": "JKLMNOPQRSTUVWXYZ", "handle_str": "abcdefghijklmnopqrst1"}
 
 def test_auth_register_v2_error_email_not_valid(clear_store):
     response = requests.post(REGISTER_URL, json={"email":"tsgyd", "password":"34rd^hds)", "name_first": "Johnny", "name_last":"Smith"})
