@@ -65,3 +65,11 @@ def get_channel(channel_id):
         if channel_id == channel['channel_id']:
             return channel
     return None
+
+def get_message(message_id):
+    store = data_store.get()
+    messages = store['messages']
+    for message in messages:
+        if int(message_id) == message['message_id']:
+            return message
+    return None
