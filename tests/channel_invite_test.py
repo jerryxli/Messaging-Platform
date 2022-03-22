@@ -9,8 +9,10 @@ import pytest
 
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
+CHANNEL_JOIN_URL = f"{url}/channel/join/v2"
 CHANNEL_INVITE_URL = f"{url}/channel/invite/v2"
 DETAILS_URL = f"{url}/channel/details/v2"
+LOGOUT_URL = f"{url}/auth/logout/v1"
 
 @pytest.fixture
 def clear_store():
@@ -94,62 +96,51 @@ def test_invite_multiple(clear_store, create_user, create_user2, create_user3):
     assert check_user(user_token_1, u_id_2, channel_id_1)
     assert check_user(user_token_1, u_id_2, channel_id_2)
     
-    
-    # auth_user_id = create_user
-    # channel_id_1 = channels_create_v1(auth_user_id, 'Channel1', False)['channel_id']
-    # channel_id_2 = channels_create_v1(auth_user_id, 'Channel2', True)['channel_id']
-    # u_id_1 = create_user2
-    # u_id_2 = create_user3
-    # channel_invite_v1(auth_user_id, channel_id_1, u_id_1)
-
-    # assert check_user(auth_user_id, u_id_1, channel_id_1)
-
-    # channel_invite_v1(u_id_1, channel_id_1, u_id_2)
-    # channel_invite_v1(auth_user_id, channel_id_2, u_id_2)
-    
-    # # Check if u_id is now in channel
-    # assert check_user(auth_user_id, u_id_2, channel_id_2)
-    # assert check_user(auth_user_id, u_id_2, channel_id_2)
 
 #-------------------------Error Testing------------------------------#
 
 # Access error when auth_user_id is invalid
 def test_invite_auth_user_id_invalid(clear_store, create_user, create_user2):
-    auth_user_id = create_user
-    u_id = create_user2
-    channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
-    with pytest.raises(AccessError):
-        channel_invite_v1(None, channel_id, u_id)
+    user_token_1 = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json = {'token': user_token_1})
+
+    u_id = create_user2['auth_user_id']
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': u_id})
+    assert response.status_code == 403
 
 # channel_id is not a valid channel
 def test_invite_error_invalid_channel(clear_store, create_user, create_user2):
-    auth_user_id = create_user
-    u_id = create_user2
-    with pytest.raises(InputError):
-        channel_invite_v1(auth_user_id, None, u_id)
+    user_token_1 = create_user['token']
+    u_id = create_user2['auth_user_id']
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': None, 'u_id': u_id})
+    assert response.status_code == 400
 
 # u_id is not a valid user
 def test_invite_error_invalid_user(clear_store, create_user):
-    auth_user_id = create_user
-    channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
-    with pytest.raises(InputError):
-        channel_invite_v1(auth_user_id, channel_id, None)
+    user_token_1 = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': None})
+    assert response.status_code == 400
 
 # u_id refers to a member who is already in channel
 def test_invite_error_already_joined(clear_store, create_user, create_user2):
-    auth_user_id = create_user
-    u_id = create_user2
-    channel_id = channels_create_v1(auth_user_id, 'Channel1', True)['channel_id']
-   
-    channel_join_v1(u_id, channel_id)
-    with pytest.raises(InputError):
-        channel_invite_v1(auth_user_id, channel_id, u_id)
+    user_token_1 = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    
+    u_id = create_user2['auth_user_id']
+    u_id_token = create_user2['token']
+    requests.post(CHANNEL_JOIN_URL, json={'token': u_id_token, 'channel_id': channel_id})
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': u_id})
+    assert response.status_code == 400   
 
 # channel_id is valid but authorised user is not member of channel
 def test_invite_error_not_member(clear_store, create_user, create_user2, create_user3):
-    auth_user_id_1 = create_user
-    auth_user_id_2 = create_user2
-    u_id = create_user3
-    channel_id = channels_create_v1(auth_user_id_1, 'Channel1', True)['channel_id']
-    with pytest.raises(AccessError):
-        channel_invite_v1(auth_user_id_2, channel_id, u_id)
+    user_token_1 = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+
+    user_token_2 = create_user2['token']
+    u_id = create_user3['auth_user_id']
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'u_id': u_id})
+    assert response.status_code == 403
+    
