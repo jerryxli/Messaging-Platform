@@ -120,7 +120,7 @@ def test_invite_error_invalid_channel(clear_store, create_user, create_user2):
 def test_invite_error_invalid_user(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
-    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': None})
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': 8})
     assert response.status_code == 400
 
 # u_id refers to a member who is already in channel
