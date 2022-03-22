@@ -209,6 +209,13 @@ def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
         AccessError     - Occurs when the user_id is invalid
         AccessError     - Occurs when the user is not a member of the channel
         InputError      - Occurs when the channel_id is invalid
+
+    Arguments: 
+        auth_user_id (int)      - User id
+        channel_id (int)        - Channel id
+
+    Returns:
+        None         
     """
 
     if not verify_user(auth_user_id):
@@ -217,10 +224,13 @@ def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
     channels = store['channels']
     users = store['users']
 
+    # Check channel_id is valid
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
         raise InputError("Channel id not valid")
+        
+    # Check auth_user_id is in channel
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
@@ -339,8 +349,8 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         owner_members.remove(altered_user)
     else:
         raise InputError("User_id is the only owner")
-
     data_store.set(store)
+
 
 def non_password_global_permission_field(user:dict)->dict:
     """
