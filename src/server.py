@@ -177,7 +177,6 @@ def handle_channel_leave():
     channel_leave_v1(user_id, channel_id)
     return {}
 
-<<<<<<< src/server.py
 @APP.route("/channel/addowner/v1", methods = ["POST"])
 def handle_channel_addowner():
     request_data = request.get_json()
