@@ -31,7 +31,8 @@ FILE_LOCATION = "datastore.p"
 ## YOU SHOULD MODIFY THIS OBJECT BELOW
 initial_object = {
     'users': {},
-    'channels': {}
+    'channels': {},
+    'messages': {}
 }
 ## YOU SHOULD MODIFY THIS OBJECT ABOVE
 
