@@ -61,31 +61,55 @@ def test_invite_public(clear_store, create_user, create_user2):
     assert check_user(user_token_1, u_id, channel_id)
 
 def test_invite_private(clear_store, create_user, create_user2):
-    auth_user_id = create_user
-    channel_id = channels_create_v1(auth_user_id, 'Channel1', False)['channel_id']
-    u_id = create_user2
-    channel_invite_v1(auth_user_id, channel_id, u_id)
+    user_token_1 = create_user['token']
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
+
+    u_id = create_user2['auth_user_id']
+    response = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': u_id})
+    assert response.status_code == 200
     
     # Check if u_id is now in channel
-    assert check_user(auth_user_id, u_id, channel_id)
+    assert check_user(user_token_1, u_id, channel_id)
 
 # Inviting multiple users to multiple channels & invited users inviting users
 def test_invite_multiple(clear_store, create_user, create_user2, create_user3):
-    auth_user_id = create_user
-    channel_id_1 = channels_create_v1(auth_user_id, 'Channel1', False)['channel_id']
-    channel_id_2 = channels_create_v1(auth_user_id, 'Channel2', True)['channel_id']
-    u_id_1 = create_user2
-    u_id_2 = create_user3
-    channel_invite_v1(auth_user_id, channel_id_1, u_id_1)
+    user_token_1 = create_user['token']
+    channel_id_1 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
+    channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'Channel2', 'is_public': True}).json()['channel_id']
 
-    assert check_user(auth_user_id, u_id_1, channel_id_1)
-
-    channel_invite_v1(u_id_1, channel_id_1, u_id_2)
-    channel_invite_v1(auth_user_id, channel_id_2, u_id_2)
+    u_id_1 = create_user2['auth_user_id']
+    user_token_2 = create_user2['token']
+    u_id_2 = create_user3['auth_user_id']
+    
+    response_1 = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id_1, 'u_id': u_id_1})
+    assert response_1.status_code == 200
+    assert check_user(user_token_1, u_id_1, channel_id_1)
+    
+    response_2 = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_2, 'channel_id': channel_id_1, 'u_id': u_id_2})
+    response_3 = requests.post(CHANNEL_INVITE_URL, json = {'token': user_token_1, 'channel_id': channel_id_2, 'u_id': u_id_2})
+    assert response_2.status_code == 200
+    assert response_3.status_code == 200
     
     # Check if u_id is now in channel
-    assert check_user(auth_user_id, u_id_2, channel_id_2)
-    assert check_user(auth_user_id, u_id_2, channel_id_2)
+    assert check_user(user_token_1, u_id_2, channel_id_1)
+    assert check_user(user_token_1, u_id_2, channel_id_2)
+    
+    
+    # auth_user_id = create_user
+    # channel_id_1 = channels_create_v1(auth_user_id, 'Channel1', False)['channel_id']
+    # channel_id_2 = channels_create_v1(auth_user_id, 'Channel2', True)['channel_id']
+    # u_id_1 = create_user2
+    # u_id_2 = create_user3
+    # channel_invite_v1(auth_user_id, channel_id_1, u_id_1)
+
+    # assert check_user(auth_user_id, u_id_1, channel_id_1)
+
+    # channel_invite_v1(u_id_1, channel_id_1, u_id_2)
+    # channel_invite_v1(auth_user_id, channel_id_2, u_id_2)
+    
+    # # Check if u_id is now in channel
+    # assert check_user(auth_user_id, u_id_2, channel_id_2)
+    # assert check_user(auth_user_id, u_id_2, channel_id_2)
 
 #-------------------------Error Testing------------------------------#
 
