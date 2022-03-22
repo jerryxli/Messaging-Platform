@@ -7,17 +7,16 @@ from flask_cors import CORS
 from src.error import AccessError, InputError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
-from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1
+from src.channel import channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
 
 
-JWT_SECRET = "COMP1531_H13A_CAMEL"
-
 def quit_gracefully(*args):
     '''For coverage'''
     exit(0)
+
 
 def defaultHandler(err):
     response = err.get_response()
@@ -30,13 +29,14 @@ def defaultHandler(err):
     response.content_type = 'application/json'
     return response
 
+
 APP = Flask(__name__)
 CORS(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
 
-#### NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
+# NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
 
 # # Example
 # @APP.route("/echo", methods=['GET'])
@@ -53,6 +53,7 @@ def handle_clear():
     clear_v1()
     return {}
 
+
 @APP.route("/auth/register/v2", methods=['POST'])
 def handle_register_v2():
     request_data = request.get_json()
@@ -62,7 +63,8 @@ def handle_register_v2():
     name_first = request_data['name_first']
     name_last = request_data['name_last']
 
-    return auth_register_v1(email,password,name_first, name_last)
+    return auth_register_v1(email, password, name_first, name_last)
+
 
 @APP.route("/auth/login/v2", methods=['POST'])
 def handle_login_v2():
@@ -73,6 +75,7 @@ def handle_login_v2():
 
     return auth_login_v1(email, password)
 
+
 @APP.route("/auth/logout/v1", methods=['POST'])
 def handle_logout_v1():
     request_data = request.get_json()
@@ -81,13 +84,15 @@ def handle_logout_v1():
 
     return auth_logout_v1(token)
 
+
 @APP.route("/user/profile/v1", methods=['GET'])
 def handle_profile_v1():
-    
+
     token = request.args.get('token')
     u_id = int(request.args.get('u_id'))
 
     return user_profile_v1(token, u_id)
+
 
 @APP.route("/user/profile/setname/v1", methods=['PUT'])
 def handle_setname_v1():
@@ -98,6 +103,7 @@ def handle_setname_v1():
 
     return user_setname_v1(token, name_first, name_last)
 
+
 @APP.route("/user/profile/setemail/v1", methods=['PUT'])
 def handle_setemail_v1():
     request_data = request.get_json()
@@ -106,7 +112,8 @@ def handle_setemail_v1():
 
     return user_setemail_v1(token, email)
 
-@APP.route("/channels/create/v2", methods = ["POST"])
+
+@APP.route("/channels/create/v2", methods=["POST"])
 def handle_channels_create_v2():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -117,7 +124,8 @@ def handle_channels_create_v2():
     user_id = user_id_from_JWT(user_token)
     return channels_create_v1(user_id, channel_name, is_public)
 
-@APP.route("/channels/list/v2", methods = ["GET"])
+
+@APP.route("/channels/list/v2", methods=["GET"])
 def handle_channels_list_v2():
     user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
@@ -135,7 +143,8 @@ def handle_channels_listall_v2():
 
 # Channel Server Instructions
 
-@APP.route("/channel/details/v2", methods = ["GET"])
+
+@APP.route("/channel/details/v2", methods=["GET"])
 def handle_channel_details():
     user_token = request.args.get('token')
     channel_id = int(request.args.get('channel_id'))
@@ -144,7 +153,8 @@ def handle_channel_details():
     user_id = user_id_from_JWT(user_token)
     return channel_details_v1(user_id, channel_id)
 
-@APP.route("/channel/join/v2", methods = ["POST"])
+
+@APP.route("/channel/join/v2", methods=["POST"])
 def handle_channel_join():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -155,7 +165,8 @@ def handle_channel_join():
     channel_join_v1(user_id, channel_id)
     return {}
 
-@APP.route("/channel/leave/v1", methods = ['POST'])
+
+@APP.route("/channel/leave/v1", methods=['POST'])
 def handle_channel_leave():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -166,8 +177,45 @@ def handle_channel_leave():
     channel_leave_v1(user_id, channel_id)
     return {}
 
-#### NO NEED TO MODIFY BELOW THIS POINT
+@APP.route("/channel/addowner/v1", methods = ["POST"])
+def handle_channel_addowner():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = int(request_data['channel_id'])
+    u_id = int(request_data['u_id'])
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    channel_addowner_v1(user_id, channel_id, u_id)
+    return {}
+
+@APP.route("/channel/messages/v2", methods=['GET'])
+def handle_channel_messages():
+    user_token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    start = int(request.args.get('start'))
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channel_messages_v1(user_id, channel_id, start)
+
+    
+@APP.route("/channel/removeowner/v1", methods = ["POST"])
+def handle_channel_removeowner():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    channel_id = int(request_data['channel_id'])
+    u_id = int(request_data['u_id'])
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    channel_removeowner_v1(user_id, channel_id, u_id)
+    return {}
+
+
+# NO NEED TO MODIFY BELOW THIS POINT
+
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, quit_gracefully) # For coverage
-    APP.run(port=config.port) # Do not edit this port
+    signal.signal(signal.SIGINT, quit_gracefully)  # For coverage
+    APP.run(port=config.port)  # Do not edit this port
