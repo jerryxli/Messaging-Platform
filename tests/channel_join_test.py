@@ -6,6 +6,9 @@ CHANNEL_JOIN_URL = f"{url}/channel/join/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
 CHANNEL_DETAILS_URL = f"{url}/channel/details/v2"
+LOGOUT_URL = f"{url}/auth/logout/v1"
+LISTALL_URL = f"{url}/channels/listall/v2"
+LIST_URL = f"{url}/channels/list/v2"
 
 
 @pytest.fixture
@@ -157,3 +160,46 @@ def test_user_already_in_channel(clear_store, create_user):
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_1, 'channel_id': channel_id})
     assert response.status_code == 400
+
+
+def test_list_and_join(clear_store, create_user, create_user2):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+    channel_id = requests.post(CREATE_URL, json={
+                               'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
+
+    assert requests.get(LIST_URL, params = {'token': user_token_1}).json() == {'channels': [{'channel_id': channel_id,'name': 'test2'}]}
+    assert requests.get(LISTALL_URL, params = {'token': user_token_1}).json() == requests.get(LIST_URL, params = {'token': user_token_1}).json()
+    assert requests.get(LIST_URL, params = {'token': user_token_2}).json() == {'channels': []}
+    response = requests.post(CHANNEL_JOIN_URL, json={
+                             'token': user_token_2, 'channel_id': channel_id})
+    assert response.status_code == 200
+    assert requests.get(LIST_URL, params = {'token': user_token_2}).json() == {'channels': [{'channel_id': channel_id,'name': 'test2'}]}
+
+def test_global_owner_join_private(clear_store, create_user, create_user2, create_user3):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+    user_token_3 = create_user3['token']
+    channel_id = requests.post(CREATE_URL, json={
+                               'token': user_token_2, 'name': 'secret', 'is_public': False}).json()['channel_id']
+    #  Test normal member cant get in
+    response = requests.post(CHANNEL_JOIN_URL, json={
+                             'token': user_token_3, 'channel_id': channel_id})
+    assert response.status_code == 403
+    # Verify owner is not in the channel
+    assert requests.get(LIST_URL, params = {'token': user_token_1}).json() == {'channels': []}
+    response = requests.post(CHANNEL_JOIN_URL, json={
+                             'token': user_token_1, 'channel_id': channel_id})
+    assert response.status_code == 200
+    assert requests.get(LIST_URL, params = {'token': user_token_1}).json() == {'channels': [{'channel_id': channel_id,'name': 'secret'}]}
+
+
+def test_fake_id(clear_store, create_user, create_user2):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+    channel_id = requests.post(CREATE_URL, json={
+                               'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
+    requests.post(LOGOUT_URL, json={'token': user_token_2})
+    response = requests.post(CHANNEL_JOIN_URL, json={
+                             'token': user_token_2, 'channel_id': channel_id})
+    assert response.status_code == 403
