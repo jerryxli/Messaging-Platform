@@ -1,3 +1,12 @@
+Date: 22/3/2022
+Attendees: Jerry, Leo, Jacqueline, Samuel
+Apologies: Tetian
+Time and place: 1pm on Microsoft Teams
+
+Agenda: Confirm priorities and coordinate between team to raise any blockers if necessary
+
+Discussion:
+
 leo's merge request just needs a small fix and then can be approved
 
 jerry: finished channels_listall, will finish channel_invite today and the dms by friday night
