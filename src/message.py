@@ -32,7 +32,6 @@ def message_send_v1(user_id, channel_id, message):
         Returns { message_id } when successful
     """
     store = data_store.get()
-    messages = store['messages']
     channels = store['channels']
 
     if channel_id in channels.keys():
@@ -43,13 +42,11 @@ def message_send_v1(user_id, channel_id, message):
     if len(message) > 1000 or len(message) < 1:
         raise InputError("Length of message is less than 1 or over 1000 characters")
 
-    
     if check_user_in_channel(user_id, message_channel):
-        new_message_id = len(messages)
-        messages[new_message_id] = {'message_id': new_message_id, 'user_id': user_id, 'message': message}
-        message_channel['messages'].append(new_message_id)
-
-        store['messages'] = messages
+        new_message_id = store['messages']
+        message_channel['messages'].append({'message_id': new_message_id, 'user_id': user_id, 'message': message})
+        store['channels'] = channels
+        store['messages'] += 1
         data_store.set(store)
         return ({'message_id': new_message_id})
     else:
