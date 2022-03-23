@@ -10,15 +10,19 @@ Description: Allows the user to register an account and login to the account.
 """
 
 import re
+import hashlib
+import jwt
 from src.data_store import data_store
-from src.error import InputError
-from logging import NullHandler
+from src.error import AccessError, InputError
 
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
 
 GLOBAL_PERMISSION_OWNER = 2
 GLOBAL_PERMISSION_USER = 1
+
+JWT_SECRET = "COMP1531_H13A_CAMEL"
+
 
 def auth_login_v1(email:str, password:str)->dict:
     """
@@ -37,10 +41,14 @@ def auth_login_v1(email:str, password:str)->dict:
     """
     store = data_store.get()
     users = store['users']
+
+    hashed_input = hashlib.sha256(password.encode()).hexdigest()
+
     for user_id, user in users.items():
         if email == user['email']:
-            if password == user['password']:
-                return {'auth_user_id': user_id}
+            if hashed_input == user['password']:
+                jwt = create_JWT(user_id)
+                return {'token': jwt, 'auth_user_id': user_id}
             else:
                 raise InputError("Incorrect Password")
     raise InputError("Invalid Email")
@@ -54,7 +62,7 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
         email (string)      - The email of the prospective user
         password (string)   - the password of the user
         name_first (string) - User's first name
-        name_last (string)  - User's last naem
+        name_last (string)  - User's last name
 
     Exceptions:
         InputError  - Occurs when email is not valid,
@@ -82,13 +90,32 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     users = store['users']
     new_user_id = len(users)
     global_permission = GLOBAL_PERMISSION_USER
+
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-    'password': password, 'handle': handle, 'global_permission': global_permission}
+    'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions':[]}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
-    return {'auth_user_id': new_user_id}
+    jwt = create_JWT(new_user_id)
+    return {'token': jwt, 'auth_user_id': new_user_id}
+
+def auth_logout_v1(token):
+    
+    if not is_valid_JWT(token):
+        raise AccessError(description="The token provided is not valid.")
+
+    store = data_store.get()
+    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    
+    user = store['users'][jwt_payload['auth_user_id']]
+    user['sessions'].remove(jwt_payload['user_session_id'])
+
+    return {}
+
+
 
 
 def generate_handle(name_first:str, name_last:str)->str:
@@ -190,14 +217,18 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
-def change_global_permission(u_id:int, new_perm:int)->dict:
+def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
     '''
     Needs JWT check once implemented by login
     '''
     store = data_store.get()
     users = store['users']
-    print(users)
     global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
+    if not is_valid_JWT(token):
+        raise AccessError
+    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
+        raise AccessError
     if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
         raise InputError
     if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
@@ -211,3 +242,25 @@ def change_global_permission(u_id:int, new_perm:int)->dict:
         data_store.set(store)
     else:
         raise InputError
+    
+
+def create_JWT(auth_user_id):
+    store = data_store.get()
+    new_session = len(store['users'][auth_user_id]['sessions'])
+    store['users'][auth_user_id]['sessions'].append(new_session)
+    payload = {'auth_user_id': auth_user_id, 'user_session_id': new_session}
+    data_store.set(store)
+    new_jwt = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+    return new_jwt
+
+
+def is_valid_JWT(jwt_string):
+    jwt_payload = jwt.decode(jwt_string, JWT_SECRET, algorithms=['HS256'])
+    store = data_store.get()
+    users = store['users']
+    if jwt_payload['auth_user_id'] not in users:
+        return False
+    if jwt_payload['user_session_id'] not in users[jwt_payload['auth_user_id']]['sessions']:
+        print("here2")
+        return False
+    return True

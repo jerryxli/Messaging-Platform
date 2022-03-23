@@ -24,17 +24,40 @@ Example usage:
     data_store.set(store)
 '''
 
+import pickle
+
+FILE_LOCATION = "datastore.p"
+
 ## YOU SHOULD MODIFY THIS OBJECT BELOW
 initial_object = {
     'users': {},
-    'channels': {}
+    'channels': {},
+    'messages': 0,
+    'dms': {},
 }
 ## YOU SHOULD MODIFY THIS OBJECT ABOVE
+
+
+def pickle_and_store(object_to_persist: dict):
+    with open(FILE_LOCATION, "wb") as file:
+        pickle.dump(object_to_persist, file)
+
+
+def unpickle_and_load() -> dict:
+    data_contents = {}
+    with open(FILE_LOCATION, "rb") as file:
+        data_contents = pickle.load(file)
+    return data_contents
+
 
 ## YOU ARE ALLOWED TO CHANGE THE BELOW IF YOU WISH
 class Datastore:
     def __init__(self):
-        self.__store = initial_object
+        print("Creating Data Store")
+        try:
+            self.__store = unpickle_and_load()
+        except:
+            self.__store = initial_object
 
     def get(self):
         return self.__store
@@ -42,7 +65,9 @@ class Datastore:
     def set(self, store):
         if not isinstance(store, dict):
             raise TypeError('store must be of type dictionary')
+        print("Setting Data Store")
         self.__store = store
+        pickle_and_store(self.__store)
 
 print('Loading Datastore...')
 

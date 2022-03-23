@@ -30,20 +30,18 @@ def channels_list_v1(auth_user_id:int)->dict:
     if not verify_user(auth_user_id):
         raise AccessError("Auth id not valid")
 
-
     # Gets list of channels from data_store
     store = data_store.get()
     channels = store['channels']
 
-    # Creats a list to store channels with that user_id
+    # List to store channel info
     user_channels = []
-    # Loops through each channel in the list Channels
+
+    # Loops through each channel in the list Channels to check if 
+    # user is in the channel
     for channel_id, channel_details in channels.items():
-        # Loops through each user for the channel
         ids = [user['u_id'] for user in channel_details['all_members']]
         if auth_user_id in ids:
-            # If user_id match occurs, appends a dictionary with channel_id and name
-            # into user_channels
             user_channel = {'channel_id': channel_id, 'name': channel_details['name']}
             user_channels.append(user_channel)
     # Returns a dictionary with the key 'channels' which has user_channels as its values
@@ -88,6 +86,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
 
     Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
     """
+    
     store = data_store.get()
     channels = store['channels']
     users = store['users']
@@ -121,5 +120,5 @@ def non_password_global_permission_field(user:dict)->dict:
         Dictionary with password field removed
 
     """
-    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission']}
+    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission', 'sessions']}
     return user
