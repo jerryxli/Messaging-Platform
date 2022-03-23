@@ -1,3 +1,4 @@
+from src.auth import GLOBAL_PERMISSION_USER
 from src.channel import GLOBAL_PERMISSION_OWNER
 from src.error import InputError, AccessError
 from src.other import clear_v1, is_valid_dictionary_output
@@ -29,7 +30,7 @@ def test_basic_success(clear_store, register_user_1, register_user_2):
     response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
     assert response.status_code == 403
     requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
-    response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
+    response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_USER})
     assert response.status_code == 200
     
     
