@@ -51,6 +51,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
         user = non_password_global_permission_field(users[id])
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
+        members.append(user) 
 
     # Create name
     name = ''
@@ -58,7 +59,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     for id in u_ids:
         user_handles.append(users[id]['handle'])
     user_handles.sort()
-    name = ' ,'.join(user_handles)
+    name = ', '.join(user_handles)
 
     # Information for the dm
     dm_info = {}
@@ -94,15 +95,15 @@ def dm_list_v1(auth_user_id:int)->dict:
 
     dm_list = []
 
-    for key, dm_details in dms.items():
-        ids = [user['u_id'] for user in dm_details['members']]
+    for key, dm_info in dms.items():
+        ids = [user['u_id'] for user in dm_info['members']]
         if auth_user_id in ids:
-            dm = {{'dm_id': key, 'name': dm_details['name']}}
+            dm = {'dm_id': key, 'name': dm_info['name']}
             dm_list.append(dm)
     
     data_store.set(store)
-    
-    return { 'channels': dm_list }
+
+    return { 'dms': dm_list }
 
 
     # return { 'dms': [{'dm_id': key, 'name': dm['name']}] 
