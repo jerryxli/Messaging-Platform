@@ -225,6 +225,7 @@ def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
     users = store['users']
     global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
     if not is_valid_JWT(token):
+        print("THANKS")
         raise AccessError
     jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
     if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
