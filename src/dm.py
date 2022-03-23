@@ -99,7 +99,9 @@ def dm_list_v1(auth_user_id:int)->dict:
         if auth_user_id in ids:
             dm = {{'dm_id': key, 'name': dm_details['name']}}
             dm_list.append(dm)
-    # Returns a dictionary with the key 'channels' which has user_channels as its values
+    
+    data_store.set(store)
+    
     return { 'channels': dm_list }
 
 
