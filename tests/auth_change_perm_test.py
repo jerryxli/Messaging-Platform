@@ -67,5 +67,5 @@ def test_unauthorised_attempt(clear_store, register_user_1, register_user_2):
 def test_invalid_jwt(clear_store, register_user_1):
     admin = register_user_1
     response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'] + "1235345", "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
-    assert response.status_code == 403
+    assert response.status_code == 500
     
