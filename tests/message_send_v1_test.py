@@ -37,9 +37,14 @@ def test_normal_functionality(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+                               
     response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
+                                                              'channel_id': channel_id, 'start': 0})
+    assert response.status_code == 200
+    
 
 def test_normal_functionality2(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
@@ -49,11 +54,27 @@ def test_normal_functionality2(clear_store, create_user, create_user2):
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})  
     response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
-    assert response.status_code == 200
+    assert response.status_code == 200 
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
     response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World2"})
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
+
+def test_check_accessibility_of_messages_across_channels(clear_store, create_user, create_user2):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+    channel_id = requests.post(CREATE_URL, json={
+                               'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id2 = requests.post(CREATE_URL, json={
+                               'token': user_token_2, 'name': 'My Channel2!', 'is_public': True}).json()['channel_id'] 
+    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
+    assert response.status_code == 200 
+    assert is_valid_dictionary_output(response.json(), {'message_id': int})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_2,
+                                                              'channel_id': channel_id2, 'start': 0})
+    assert response.status_code == 200
+    # check that channel_id2 has no messages within it
+    assert response.json() == {'messages': [], 'start': 0, 'end': -1}
 
 def test_invalid_message(clear_store, create_user):
     # message invalid when length of message is < 1 or > 1000 characters
