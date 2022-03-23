@@ -10,6 +10,7 @@ message in a dm, get details of a dm, and remove a dm.
 """
 
 from src.data_store import data_store
+from src.channel import non_password_global_permission_field
 from src.error import InputError, AccessError
 from src.other import verify_user
 
@@ -41,8 +42,16 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     user_set = set(u_ids)
     if len(user_set) < len(u_ids):
         raise InputError("Duplicate u_ids entered")
+    if auth_user_id not in u_ids:
+        u_ids.append(auth_user_id)
 
-    u_ids.append(auth_user_id)
+    # Create users list with user info
+    members = []
+    for id in u_ids:
+        user = non_password_global_permission_field(users[id])
+        user['u_id'] = id
+        user['handle_str'] = user.pop('handle')
+
     # Create name
     name = ''
     user_handles = []
@@ -56,7 +65,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     dm_id = len(dms)
     dm_info['creator'] = auth_user_id
     dm_info['name'] = name
-    dm_info['members'] = u_ids
+    dm_info['members'] = members
     dm_info['messages'] = []
     dms[dm_id] = dm_info
     store['dms'] = dms
