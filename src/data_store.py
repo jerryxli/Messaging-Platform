@@ -55,9 +55,9 @@ class Datastore:
     def __init__(self):
         print("Creating Data Store")
         try:
-            self.__store = initial_object
-        except:
             self.__store = unpickle_and_load()
+        except:
+            self.__store = initial_object
 
     def get(self):
         return self.__store
