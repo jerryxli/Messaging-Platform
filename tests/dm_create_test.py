@@ -40,7 +40,6 @@ def test_success_create(clear_store, create_user, create_user2, create_user3):
     user_id_2 = create_user2['auth_user_id']
     user_id_3 = create_user3['auth_user_id']
     response = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': [user_id_2, user_id_3]})
-    assert response.json() == {'dm_id': 0} # WHITE BOX JUST TO TEST FOR NOW
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'dm_id': int})    
 
@@ -48,7 +47,6 @@ def test_success_create(clear_store, create_user, create_user2, create_user3):
 def test_empty_list(clear_store, create_user):
     user_token_1 = create_user['token']
     response = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': []})
-    assert response.json() == {'dm_id': 0} # WHITE BOX JUST TO TEST FOR NOW
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'dm_id': int})    
 
