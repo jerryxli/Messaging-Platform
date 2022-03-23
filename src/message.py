@@ -12,6 +12,7 @@ Description: Allows the user to send, edit and remove messages.
 from src.data_store import data_store
 from src.error import InputError, AccessError
 from src.other import verify_user, is_global_user
+from src.channel import check_user_in_channel
 
 def message_send_v1(user_id, channel_id, message):
     """
@@ -32,44 +33,30 @@ def message_send_v1(user_id, channel_id, message):
     """
     store = data_store.get()
     messages = store['messages']
-    message_channel = get_channel(channel_id)
+    channels = store['channels']
 
+    if channel_id in channels.keys():
+        message_channel = channels[channel_id]
+    else:
+        raise InputError("channel_id does not refer to a valid channel")
+        
     if len(message) > 1000 or len(message) < 1:
         raise InputError("Length of message is less than 1 or over 1000 characters")
-    
-    new_message_id += len(messages)
 
-    if message_channel is None:
-        raise InputError("channel_id does not refer to a valid channel")
-    for user in message_channel['users']:
-        if user['user_id'] == user_id:
-            messages[new_message_id] = {'message_id': new_message_id, 'user_id': user, 'message': message}
-            data_store.set(store)
-            return ({'message_id': new_message_id})
-    raise AccessError("channel_id is valid and the user is not a member of the channel")
+    
+    if check_user_in_channel(user_id, message_channel):
+        new_message_id = len(messages)
+        messages[new_message_id] = {'message_id': new_message_id, 'user_id': user_id, 'message': message}
+        message_channel['messages'].append(new_message_id)
+
+        store['messages'] = messages
+        data_store.set(store)
+        return ({'message_id': new_message_id})
+    else:
+        raise AccessError("channel_id is valid and the user is not a member of the channel")
     
 def message_edit_v1():
     pass
 
 def message_remove_v1():
     pass
-
-def get_user_from_token(token):
-    # something to do with the jwt of token
-    pass
-
-def get_channel(channel_id):
-    store = data_store.get()
-    channels = store['channels']
-    for channel in channels:
-        if channel_id == channel['channel_id']:
-            return channel
-    return None
-
-def get_message(message_id):
-    store = data_store.get()
-    messages = store['messages']
-    for message in messages:
-        if int(message_id) == message['message_id']:
-            return message
-    return None
