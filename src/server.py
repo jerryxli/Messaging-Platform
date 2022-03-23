@@ -218,7 +218,6 @@ def handle_channel_removeowner():
     channel_removeowner_v1(user_id, channel_id, u_id)
     return {}
 
-<<<<<<< src/server.py
 # Message Server Instructions
 
 @APP.route("/message/send/v1", methods = ['POST'])
@@ -231,7 +230,7 @@ def handle_message_send():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return message_send_v1(user_id, channel_id, message) 
-=======
+
 # DM Server Instructions
 @APP.route("/dm/create/v1", methods = ["POST"])
 def handle_dm_create():
@@ -242,7 +241,7 @@ def handle_dm_create():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return dm_create_v1(user_id, u_ids)
->>>>>>> src/server.py
+
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
