@@ -106,6 +106,14 @@ def handle_setemail_v1():
 
     return user_setemail_v1(token, email)
 
+@APP.route("/channels/listall/v2", methods=['GET'])
+def handle_channels_listall_v2():
+    user_token = request.args.get('token')
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return channels_listall_v1(user_id)
+
 # Channels Server Instructions
 
 @APP.route("/channels/create/v2", methods=["POST"])
