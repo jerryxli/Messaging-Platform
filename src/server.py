@@ -244,7 +244,7 @@ def handle_dm_create():
 
 
 # Change User permissions
-@APP.route("/admin/userpermission/change/v1")
+@APP.route("/admin/userpermission/change/v1", methods = ["POST"])
 def handle_userperm_change():
     request_data = request.get_json()
     user_token = request_data['token']
