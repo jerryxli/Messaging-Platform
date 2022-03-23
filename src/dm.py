@@ -92,8 +92,19 @@ def dm_list_v1(auth_user_id:int)->dict:
     store = data_store.get()
     dms = store['dms']
 
-    return { 'dms': [{'dm_id': key, 'name': dm['name']}] 
-            for key, dm in dms.items()}
+    dm_list = []
+
+    for key, dm_details in dms.items():
+        ids = [user['u_id'] for user in dm_details['members']]
+        if auth_user_id in ids:
+            dm = {{'dm_id': key, 'name': dm_details['name']}}
+            dm_list.append(dm)
+    # Returns a dictionary with the key 'channels' which has user_channels as its values
+    return { 'channels': dm_list }
+
+
+    # return { 'dms': [{'dm_id': key, 'name': dm['name']}] 
+    #         for key, dm in dms.items()}
 
 
 
