@@ -15,11 +15,13 @@ def clear_store():
     
 @pytest.fixture
 def register_user_1():
-    requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
+    response = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"}).json()
+    return response
 
 @pytest.fixture
 def register_user_2():
-    requests.post(REGISTER_URL, json = {"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"})
+    response = requests.post(REGISTER_URL, json = {"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).json()
+    return response
 
 def test_basic_success(clear_store, register_user_1, register_user_2):
     admin = register_user_1()
