@@ -33,5 +33,8 @@ def test_basic_success(clear_store, register_user_1, register_user_2):
     response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_USER})
     assert response.status_code == 200
     
-    
+def test_only_one_owner(clear_store, register_user_1):
+    admin = register_user_1
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_USER})
+    assert response.status_code == 403
     
