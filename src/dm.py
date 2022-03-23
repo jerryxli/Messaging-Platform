@@ -83,10 +83,18 @@ def dm_list_v1(auth_user_id:int)->dict:
         auth_user_id (int)  - The id of the user
 
     Return Value:
-        Returns { 'dms' } upon successful creation
+        Returns { 'dms' } upon successful creation 
+        in format {'dms': [{'dm_id': int, 'name': str}] } 
     """
-    # Not sure about the output but based on channels_list this is what I think would be printed
-    return {'dms': {'name', 'dm_id'}} 
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
+    store = data_store.get()
+    dms = store['dms']
+
+    return { 'dms': [{'dm_id': key, 'name': dm['name']}] 
+            for key, dm in dms.items()}
+
 
 
 def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
@@ -103,6 +111,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
         None
     """
     
+
 
 def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     """

@@ -39,40 +39,47 @@ def create_user3():
     return user_info
 
 def test_list_not_in_any_dms(clear_store, create_user):
-    # takes in token and returns { dms }
     user_token = create_user['token']
 
     response = requests.get(DM_LIST_URL, params = {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
-    assert response_data = {'dms': [] }
+    assert response_data == {'dms': [] }
 
 def test_list_in_one_dm(clear_store, create_user):
     user_token = create_user['token']
     user_id_2 = create_user2['auth_user_id']
 
-    response0 = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': [user_id_2]})
+    response0 = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2]})
     dm_name = response0.json()['name'] # BUT DM CREATE ONLY RETURNS DM_ID NOT NAME
     dm_id = response0.json()['dm_id']
 
     response = requests.get(DM_LIST_URL, params = {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
-    assert response_data = {'dms': [{'dm_id': dm_id, 'name': dm_name}] }
+    assert response_data == {'dms': [{'dm_id': dm_id, 'name': dm_name}] }
 
 def test_list_in_multiple_dm(clear_store, create_user):
     user_token = create_user['token']
+    user_id_2 = create_user2['auth_user_id']
+    user_id_3 = create_user3['auth_user_id']
+
+    response_data_1 = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2]}).json()
+    dm_name_1 = response_data_1['name'] # BUT DM CREATE ONLY RETURNS DM_ID NOT NAME
+    dm_id_1 = response_data_1['dm_id']
+    response_data_2 = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2, user_id_3]}).json()
+    dm_name_2 = response_data_2['name'] # BUT DM CREATE ONLY RETURNS DM_ID NOT NAME
+    dm_id_2 = response_data_2['dm_id']
 
     response = requests.get(DM_LIST_URL, params = {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
-    assert response_data = {'dms': [] }
+    assert response_data == {'dms': [{'dm_id': dm_id_1, 'name': dm_name_1}, {'dm_id': dm_id_2, 'name': dm_name_2}]}
 
 def test_invalid_token(clear_store, create_user):
     user_token = create_user['token']
-
+    requests.post(LOGOUT_URL, json = {'token': user_token})
     response = requests.get(DM_LIST_URL, params = {'token': user_token})
-    response_data = response.json()
-    assert response.status_code == 200
-    assert response_data = {'dms': [] }
+    assert response.status_code == 403
+    
 
