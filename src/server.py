@@ -10,8 +10,8 @@ from src.other import clear_v1, user_id_from_JWT
 from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
-from src.user import user_profile_v1, user_setemail_v1, user_setname_v1
-from src.message import message_send_v1
+from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1
 from src.dm import dm_create_v1
 
 
@@ -113,7 +113,6 @@ def handle_users_all_v1():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return users_all_v1(user_id)
-    
 # Channels Server Instructions
 
 @APP.route("/channels/create/v2", methods=["POST"])
@@ -227,7 +226,6 @@ def handle_channel_removeowner():
     return {}
 
 # Message Server Instructions
-
 @APP.route("/message/send/v1", methods = ['POST'])
 def handle_message_send():
     request_data = request.get_json()
