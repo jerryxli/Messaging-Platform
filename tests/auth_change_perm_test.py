@@ -27,8 +27,6 @@ def register_user_2():
 def test_basic_success(clear_store, register_user_1, register_user_2):
     admin = register_user_1
     user = register_user_2
-    response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
-    assert response.status_code == 403
     requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
     response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_USER})
     assert response.status_code == 200
@@ -36,5 +34,38 @@ def test_basic_success(clear_store, register_user_1, register_user_2):
 def test_only_one_owner(clear_store, register_user_1):
     admin = register_user_1
     response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_USER})
+    assert response.status_code == 400
+
+
+def test_invalid_u_id(clear_store, register_user_1, register_user_2):
+    admin = register_user_1
+    user = register_user_2
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'] + 1, "permission_id": GLOBAL_PERMISSION_OWNER})
+    assert response.status_code == 400
+
+
+def test_invalid_permission_id(clear_store, register_user_1, register_user_2):
+    admin = register_user_1
+    user = register_user_2
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": -1})
+    assert response.status_code == 400
+
+
+def test_same_permission_id(clear_store, register_user_1, register_user_2):
+    admin = register_user_1
+    user = register_user_2
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_USER})
+    assert response.status_code == 400
+
+
+def test_unauthorised_attempt(clear_store, register_user_1, register_user_2):
+    user = register_user_2
+    response = requests.post(CHANGE_PERM_URL, json={"token": user['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
+    assert response.status_code == 403
+
+
+def test_invalid_jwt(clear_store, register_user_1):
+    admin = register_user_1
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'] + "1235345", "u_id": admin['auth_user_id'], "permission_id": GLOBAL_PERMISSION_OWNER})
     assert response.status_code == 403
     
