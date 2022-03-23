@@ -138,6 +138,8 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
 
     messages = []
     not_displayed = list(reversed(channel['messages']))[start:]
+    messages.extend(not_displayed[:min(PAGE_THRESHOLD, len(not_displayed))])
+    
     end = -1 if len(messages) == len(not_displayed) else start + PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}
 
