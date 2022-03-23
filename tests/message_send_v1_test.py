@@ -42,9 +42,13 @@ def test_normal_functionality(clear_store, create_user):
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
     response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
-    assert response.json() == {'messages': [{'message_id': 0, 'user_id': 0, 'message': "Hello World"}], 'start': 0, 'end': -1}                                                            
+                                                              'channel_id': channel_id, 'start': 0})                                                        
     assert response.status_code == 200
+    assert response.json()['start'] == 0
+    assert response.json()['end'] == -1
+    assert response.json()['messages'][0]['message'] == "Hello World"
+    assert response.json()['messages'][0]['message_id'] == 0
+    assert response.json()['messages'][0]['u_id'] == 0
     
 
 def test_normal_functionality2(clear_store, create_user, create_user2):
@@ -62,9 +66,16 @@ def test_normal_functionality2(clear_store, create_user, create_user2):
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
     response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
                                                               'channel_id': channel_id, 'start': 0})
-    assert response.json() == {'messages': [{'message_id': 1, 'user_id': 1, 'message': "Hello World2"},
-                                            {'message_id': 0, 'user_id': 0, 'message': "Hello World"}
-                                            ], 'start': 0, 'end': -1} 
+    assert response.status_code == 200
+    assert response.json()['start'] == 0
+    assert response.json()['end'] == -1
+    assert response.json()['messages'][0]['message'] == "Hello World2"
+    assert response.json()['messages'][0]['message_id'] == 1
+    assert response.json()['messages'][0]['u_id'] == 1
+
+    assert response.json()['messages'][1]['message'] == "Hello World"
+    assert response.json()['messages'][1]['message_id'] == 0
+    assert response.json()['messages'][1]['u_id'] == 0
 
 def test_check_accessibility_of_messages_across_channels(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']

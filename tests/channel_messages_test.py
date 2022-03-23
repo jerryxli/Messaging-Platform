@@ -1,6 +1,7 @@
 from src.config import url
 import pytest
 import requests
+from src.other import is_valid_dictionary_output
 
 CHANNEL_JOIN_URL = f"{url}/channel/join/v2"
 CREATE_URL = f"{url}/channels/create/v2"
@@ -44,7 +45,11 @@ def test_normal_functionality(clear_store, create_user):
     response = requests.get(CHANNEL_MESSAGES_URL, params={
                             'token': user_token_1, 'channel_id': channel_id, 'start': 0})
     # check if message is there
-    assert response.json() == {'messages': [{'message_id': 0, 'user_id': 0, 'message': "Leo loves tests!"}], 'start': 0, 'end': -1}        
+    assert response.json()['start'] == 0
+    assert response.json()['end'] == -1
+    assert response.json()['messages'][0]['message'] == "Leo loves tests!"
+    assert response.json()['messages'][0]['message_id'] == 0
+    assert response.json()['messages'][0]['u_id'] == 0
 
 def test_invalid_channel_id(clear_store, create_user):
     user_token_1 = create_user['token']
