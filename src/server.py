@@ -213,8 +213,7 @@ def handle_channel_removeowner():
     channel_removeowner_v1(user_id, channel_id, u_id)
     return {}
 
-
-# NO NEED TO MODIFY BELOW THIS POINT
+# Message Server Instructions
 
 @APP.route("/message/send/v1", methods = ['POST'])
 def handle_message_send():
@@ -225,7 +224,11 @@ def handle_message_send():
     if not is_valid_JWT(user_token):
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return message_send_v1(user_id, channel_id, message)    
+    return message_send_v1(user_id, channel_id, message) 
+
+# NO NEED TO MODIFY BELOW THIS POINT
+
+   
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, quit_gracefully)  # For coverage
