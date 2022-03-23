@@ -8,6 +8,7 @@ Created: 19.03.2022
 
 Description: Allows the user to send, edit and remove messages.
 """
+from time import time
 
 from src.data_store import data_store
 from src.error import InputError, AccessError
@@ -44,7 +45,7 @@ def message_send_v1(user_id, channel_id, message):
 
     if check_user_in_channel(user_id, message_channel):
         new_message_id = store['messages']
-        message_channel['messages'].append({'message_id': new_message_id, 'user_id': user_id, 'message': message})
+        message_channel['messages'].append({'message_id': new_message_id, 'u_id': user_id, 'message': message, 'time_sent': time()})
         store['channels'] = channels
         store['messages'] += 1
         data_store.set(store)
