@@ -124,6 +124,27 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     Return Value:
         None
     """
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
+    store = data_store.get()
+    dms = store['dms']
+
+    if dm_id in dms.keys():
+        dm = dms[dm_id]
+    else:
+        raise InputError("dm_id is not valid")
+    
+    
+
+    
+    
+
+    # AccessError when:
+    #     dm_id is valid and the authorised user is not the original DM creator
+    #     dm_id is valid and the authorised user is no longer in the DM
+    data_store.set(store)
+
     
 
 

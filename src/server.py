@@ -12,7 +12,7 @@ from src.channels import channels_create_v1, channels_list_v1, channels_listall_
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1
 from src.message import message_send_v1
-from src.dm import dm_create_v1, dm_list_v1
+from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1
 
 
 
@@ -265,7 +265,7 @@ def handle_dm_list():
     if not is_valid_JWT(user_token):
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    dm_list_v1(user_id, dm_id)
+    dm_remove_v1(user_id, dm_id)
     return {}
 
 # NO NEED TO MODIFY BELOW THIS POINT
