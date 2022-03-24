@@ -1,6 +1,6 @@
 # Test file for other.py
 import pytest
-from src.other import clear_v1, is_valid_dictionary_output
+from .helper_functions import is_valid_dictionary_output
 
 
 def test_clear_v1():

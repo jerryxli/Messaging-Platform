@@ -13,6 +13,7 @@ import hashlib
 import jwt
 from src.data_store import data_store
 from src.error import AccessError, InputError
+import src.other as other
 
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
@@ -227,12 +228,14 @@ def create_JWT(auth_user_id):
     return new_jwt
 
 def is_valid_JWT(jwt_string):
-    jwt_payload = jwt.decode(jwt_string, JWT_SECRET, algorithms=['HS256'])
+    try:
+        jwt_payload = jwt.decode(jwt_string, JWT_SECRET, algorithms=['HS256'])
+    except:
+        return False
     store = data_store.get()
     users = store['users']
-    if jwt_payload['auth_user_id'] not in users:
+    if not other.verify_user(jwt_payload['auth_user_id']):
         return False
     if jwt_payload['user_session_id'] not in users[jwt_payload['auth_user_id']]['sessions']:
-        print("here2")
         return False
     return True
