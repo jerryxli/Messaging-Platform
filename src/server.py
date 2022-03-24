@@ -238,6 +238,17 @@ def handle_message_send():
     user_id = user_id_from_JWT(user_token)
     return message_send_v1(user_id, channel_id, message) 
 
+@APP.route("/message/remove/v1", methods = ['DELETE'])
+def handle_message_remove():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    message_id = int(request_data['message_id'])
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    message_remove_v1(user_id, message_id)
+    return {} 
+
 # DM Server Instructions
 @APP.route("/dm/create/v1", methods = ["POST"])
 def handle_dm_create():
