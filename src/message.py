@@ -52,9 +52,58 @@ def message_send_v1(user_id, channel_id, message):
         return ({'message_id': new_message_id})
     else:
         raise AccessError("channel_id is valid and the user is not a member of the channel")
+
     
-def message_edit_v1():
-    pass
+def message_edit_v1(user_id, message_id, message):
+    """
+    Given a message, update its text with new text. 
+    If the new message is an empty string, the message is deleted.
+
+    Exceptions:
+        AccessError     - Occurs when the message_id is valid and the message was not sent by the user trying to edit
+        AccessError     - Occurs when the message_id is valid and the user does not have owner permissions in the channel/DM
+        InputError      - Occurs when the length of a message over 1000 characters
+        InputError      - Occurs when message_id does not refer to a valid message within a channel
+
+    Arguments:
+        token (int)         - The token of the user
+        message_id (int)    - The id of the message
+        message (string)    - The message
+
+    Return Value:
+        Returns { } when successful
+    """
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    message_info = get_message_and_channel(message_id)
+
+    if message_info is None:
+        raise InputError("message_id does not refer to a valid message within a channel/DM that the authorised user has joined")
+
+    # check if user is in the channel
+    if not check_user_in_channel(message_info['message']['u_id'], message_info['channel']):
+        raise InputError("message_id does not refer to a valid message within a channel/DM that the authorised user has joined")
+
+    if message_info['message']['u_id'] != user_id:
+        raise AccessError("message_id is valid and the message was not sent by the user trying to edit")
+
+    if len(message) > 1000:
+        raise InputError("message over 1000 characters")
+    
+    if is_owner(user_id, message_info['channel']):
+        if message == '':
+            message_remove_v1(user_id, message_id)
+        # edit the message
+        message_info['message']['message'] = message
+        store['channels'] = channels
+        store['dms'] = dms
+        data_store.set(store)
+        return {}
+    else:
+        raise AccessError("message_id is valid and the user does not have owner permissions in the channel/DM")
+
+
 
 def message_remove_v1(user_id, message_id):
     """
@@ -88,7 +137,7 @@ def message_remove_v1(user_id, message_id):
 
     if message_info['message']['u_id'] != user_id:
         raise AccessError("message_id is valid and the message was not sent by the user trying to edit")
-    
+
     # check for owner
     if is_owner(user_id, message_info['channel']):
         message_info['channel']['messages'].remove(message_info['message'])
@@ -98,7 +147,7 @@ def message_remove_v1(user_id, message_id):
         return {}
     else:
         raise AccessError("message_id is valid and the user does not have owner permissions in the channel/DM")
-
+    
 
 def is_owner(user_id, channel):
     """ Check if a user is an owner of a channel """
