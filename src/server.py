@@ -109,7 +109,6 @@ def handle_setemail_v1():
 
 @APP.route("/users/all/v1", methods = ['GET'])
 def handle_users_all_v1():
-    print("WHYYYYY")
     user_token= request.args.get('token')
     if not is_valid_JWT(user_token):
         raise AccessError("JWT no longer valid")
@@ -283,9 +282,7 @@ def handle_dm_list():
 
 @APP.route("/admin/user/remove/v1", methods = ["DELETE"])
 def handle_user_remove():
-    print("THANKS XXXXX")
     request_data = request.get_json()
-    print(request_data)
     if not is_valid_JWT(request_data['token']):
         raise AccessError
     return user_remove_v1(request_data['token'], request_data['u_id'])

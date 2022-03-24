@@ -78,16 +78,19 @@ def user_remove_v1(token:str, u_id:int)->dict:
     global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
     if len(global_owners) == 1 and u_id in global_owners.keys():
         raise InputError
-    for channel in store['channels']:
+    channels = store['channels']
+    for channel in channels.values():
         admin_u_ids = [user['u_id'] for user in channel['owner_members']]
         member_u_ids = [user['u_id'] for user in channel['all_members']]
         if u_id in admin_u_ids:
-            channel['owner_members'].remove(u_id)
+            channel['owner_members'].pop(admin_u_ids.index(u_id))
         if u_id in member_u_ids:
-            channel['all_members'].remove(u_id)
-        for message in channel['messages']:
+            channel['all_members'].pop(member_u_ids.index(u_id))
+        messages = channel['messages']
+        for message in messages:
             if message['u_id'] == u_id:
-                message['message'] == "Removed user"
+                message['message'] = "Removed user"
+        channel['messages'] = messages
     dms = dm_list_v1(u_id)['dms']
     dm_ids = [dm['dm_id'] for dm in dms]
     for dm in store['dms']:
@@ -97,6 +100,9 @@ def user_remove_v1(token:str, u_id:int)->dict:
             if message['u_id'] == u_id:
                 message['message'] = 'Removed user'
     users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': GLOBAL_PERMISSION_REMOVED, 'sessions': []}
+    store['channels'] = channels
+    store['users'] = users
+    data_store.set(store)
     return {}
     
     
