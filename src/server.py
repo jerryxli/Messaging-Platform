@@ -258,7 +258,7 @@ def handle_dm_list():
     return dm_list_v1(user_id)
 
 @APP.route("/dm/remove/v1", methods = ["DELETE"])
-def handle_dm_list():
+def handle_dm_remove():
     request_data = request.get_json()
     user_token = request_data['token']
     dm_id = int(request_data['dm_id'])
