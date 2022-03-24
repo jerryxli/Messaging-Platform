@@ -58,7 +58,7 @@ def test_multiple_users(clear_store, create_user, create_user2):
     assert response.status_code == 200
     requests.delete(REMOVE_URL, json = {'token': user_token, 'u_id': user_id2})
     response = requests.get(USERS_ALL_URL, params = {'token': user_token})
-    assert response.json() == [{"u_id": user_id, 'email': "z432324@unsw.edu.au", 'name_first': "Ji", 'name_last': "Sun", 'handle_str': "jisun"}]
+    assert response.json() == {'users': [{"u_id": user_id, 'email': "z432324@unsw.edu.au", 'name_first': "Ji", 'name_last': "Sun", 'handle_str': "jisun"}]}
     
 
 # Test for invalid token
