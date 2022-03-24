@@ -257,7 +257,7 @@ def handle_dm_list():
     user_id = user_id_from_JWT(user_token)
     return dm_list_v1(user_id)
 
-@APP.route("admin/user/remove/v1", methods = ["DELETE"])
+@APP.route("/admin/user/remove/v1", methods = ["DELETE"])
 def handle_user_remove():
     request_data = request.get_json()
     if not is_valid_JWT(request_data['token']):
