@@ -67,17 +67,15 @@ def users_all_v1(auth_user_id:int)->dict:
 
 def user_remove_v1(token:str, u_id:int)->dict:
     store = data_store.get()
-    if not is_valid_JWT(token):
-        raise AccessError
     users = store['users']
     admin_user = users[user_id_from_JWT(token)]
     if admin_user['global_permission'] != GLOBAL_PERMISSION_OWNER:
-        raise AccessError
+        raise AccessError(description = "Insufficient permissions")
     if u_id not in users:
-        raise InputError
+        raise InputError(description = "Invalid user id")
     global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
     if len(global_owners) == 1 and u_id in global_owners.keys():
-        raise InputError
+        raise InputError(description = "Would cause 0 owners of Seams")
     channels = store['channels']
     for channel in channels.values():
         admin_u_ids = [user['u_id'] for user in channel['owner_members']]
