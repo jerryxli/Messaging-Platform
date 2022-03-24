@@ -1,7 +1,8 @@
 from src.channels import channels_create_v1 
 from src.auth import auth_register_v1, auth_login_v1
 from src.error import InputError, AccessError
-from src.other import clear_v1, is_valid_dictionary_output
+from src.other import clear_v1
+from .helper_functions import is_valid_dictionary_output
 import pytest
 
 @pytest.fixture
