@@ -51,6 +51,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
         user = non_password_global_permission_field(users[id])
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
+        members.append(user) 
 
     # Create name
     name = ''
@@ -58,7 +59,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     for id in u_ids:
         user_handles.append(users[id]['handle'])
     user_handles.sort()
-    name = ' ,'.join(user_handles)
+    name = ', '.join(user_handles)
 
     # Information for the dm
     dm_info = {}
@@ -83,10 +84,31 @@ def dm_list_v1(auth_user_id:int)->dict:
         auth_user_id (int)  - The id of the user
 
     Return Value:
-        Returns { 'dms' } upon successful creation
+        Returns { 'dms' } upon successful creation 
+        in format {'dms': [{'dm_id': int, 'name': str}] } 
     """
-    # Not sure about the output but based on channels_list this is what I think would be printed
-    return {'dms': {'name', 'dm_id'}} 
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
+    store = data_store.get()
+    dms = store['dms']
+
+    dm_list = []
+
+    for key, dm_info in dms.items():
+        ids = [user['u_id'] for user in dm_info['members']]
+        if auth_user_id in ids:
+            dm = {'dm_id': key, 'name': dm_info['name']}
+            dm_list.append(dm)
+    
+    data_store.set(store)
+
+    return { 'dms': dm_list }
+
+
+    # return { 'dms': [{'dm_id': key, 'name': dm['name']}] 
+    #         for key, dm in dms.items()}
+
 
 
 def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
@@ -103,6 +125,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
         None
     """
     
+
 
 def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     """

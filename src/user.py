@@ -2,6 +2,7 @@ from src.data_store import data_store
 from src.error import AccessError, InputError
 from src.auth import MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, is_email_taken, is_valid_JWT, is_valid_email
 from src.other import user_id_from_JWT, verify_user
+from src.channel import non_password_global_permission_field
 
 def user_profile_v1(token:str, u_id:int)->dict:
 
@@ -49,3 +50,14 @@ def user_setemail_v1(token:str, email:str)->dict:
     user['email'] = email
 
     return {}
+
+def users_all_v1(auth_user_id:int)->dict:
+    store = data_store.get()
+    users = store['users']
+    all_users = []
+    for user_id, user in users.items():
+        user = non_password_global_permission_field(user)
+        user['u_id'] = user_id
+        user['handle_str'] = user.pop('handle')
+        all_users.append(user)
+    return { 'users': all_users }
