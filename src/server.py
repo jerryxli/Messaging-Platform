@@ -10,7 +10,7 @@ from src.other import clear_v1, user_id_from_JWT
 from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT
-from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1
+from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
 from src.message import message_send_v1
 from src.dm import dm_create_v1, dm_list_v1
 
@@ -256,6 +256,13 @@ def handle_dm_list():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return dm_list_v1(user_id)
+
+@APP.route("admin/user/remove/v1", methods = ["DELETE"])
+def handle_user_remove():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError
+    return user_remove_v1(request_data['token'], request_data['u_id'])
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
