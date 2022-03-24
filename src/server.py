@@ -257,6 +257,17 @@ def handle_dm_list():
     user_id = user_id_from_JWT(user_token)
     return dm_list_v1(user_id)
 
+@APP.route("/dm/remove/v1", methods = ["DELETE"])
+def handle_dm_list():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    dm_id = int(request_data['dm_id'])
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    dm_list_v1(user_id, dm_id)
+    return {}
+
 # NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":
