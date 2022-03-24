@@ -27,9 +27,6 @@ def channels_list_v1(auth_user_id:int)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
-
     # Gets list of channels from data_store
     store = data_store.get()
     channels = store['channels']
@@ -59,8 +56,6 @@ def channels_listall_v1(auth_user_id:int)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    if verify_user(auth_user_id) is False:
-        raise AccessError
 
     store = data_store.get()
     channels = store['channels']
@@ -90,8 +85,6 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     store = data_store.get()
     channels = store['channels']
     users = store['users']
-    if not verify_user(auth_user_id):
-        raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise InputError("Channel name too long or short")
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
