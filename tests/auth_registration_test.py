@@ -1,6 +1,6 @@
 import pytest
 import requests
-from src.other import is_valid_dictionary_output
+from .helper_functions import is_valid_dictionary_output
 from src.config import url
 
 
