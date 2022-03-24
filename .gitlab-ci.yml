@@ -17,7 +17,7 @@ pytest:
     - pytest tests/
     - kill -SIGINT %1
     - cat $SERVER_LOG
-    - coverage report
+    - coverage -m report
     - coverage html
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
