@@ -1,7 +1,6 @@
 from src.auth import GLOBAL_PERMISSION_USER
 from src.channel import GLOBAL_PERMISSION_OWNER
 from src.error import InputError, AccessError
-from src.other import clear_v1, is_valid_dictionary_output
 from src.config import port, url
 from src.user import user_remove_v1
 import pytest
