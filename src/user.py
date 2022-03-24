@@ -72,7 +72,7 @@ def user_remove_v1(token:str, u_id:int)->dict:
     users = store['users']
     admin_user = users[user_id_from_JWT(token)]
     if admin_user['global_permission'] != GLOBAL_PERMISSION_OWNER:
-        return AccessError
+        raise AccessError
     if u_id not in users:
         raise InputError
     global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
