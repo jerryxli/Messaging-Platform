@@ -137,14 +137,17 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     
     owner_members = dm['creator'] # dm['owner_members']
     user = non_password_global_permission_field(users[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
     if user in owner_members:
         # remove DM
-        dm.clear()
+        dms.remove(dm_id)
     elif user in dm['members']:
         raise AccessError("User is not the original DM creator")
     else:
         raise AccessError("User is not in DM")
-    
+
+    store['dms'] = dms
     data_store.set(store)
 
     
