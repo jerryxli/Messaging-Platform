@@ -1,6 +1,7 @@
-from src.auth import JWT_SECRET
 from src.data_store import data_store
 import jwt
+
+JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 def clear_v1():
     """

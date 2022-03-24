@@ -1,3 +1,4 @@
+
 """
 Auth
 Filename: auth.py
@@ -218,6 +219,33 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
+def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
+    '''
+    Needs JWT check once implemented by login
+    '''
+    store = data_store.get()
+    users = store['users']
+    global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
+    if not is_valid_JWT(token):
+        raise AccessError(description = "JWT is not valid")
+    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
+        raise AccessError(description = "User is not an owner")
+    if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
+        raise InputError(description = "This action would leave server without any owners")
+    if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
+        raise InputError(description = "This permission doesn't exist")
+    
+    if u_id in users.keys():
+        user = users[u_id]
+        if user['global_permission'] == new_perm:
+            raise InputError(description = "This user already has this permission")
+        user['global_permission'] = new_perm
+        data_store.set(store)
+    else:
+        raise InputError(description = "There is no user with this id")
+    
+
 def create_JWT(auth_user_id):
     store = data_store.get()
     new_session = len(store['users'][auth_user_id]['sessions'])
@@ -226,6 +254,7 @@ def create_JWT(auth_user_id):
     data_store.set(store)
     new_jwt = jwt.encode(payload, JWT_SECRET, algorithm='HS256')
     return new_jwt
+
 
 def is_valid_JWT(jwt_string):
     try:
