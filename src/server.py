@@ -11,6 +11,7 @@ from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1, 
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT, change_global_permission
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1,users_all_v1
+from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
 from src.message import message_send_v1, message_remove_v1, message_edit_v1
 from src.dm import dm_create_v1, dm_list_v1
 
@@ -289,7 +290,14 @@ def handle_userperm_change():
     permission_id = request_data['permission_id']
     change_global_permission(user_token, u_id, permission_id)
     return {}
-    
+
+@APP.route("/admin/user/remove/v1", methods = ["DELETE"])
+def handle_user_remove():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError
+    return user_remove_v1(request_data['token'], request_data['u_id'])
+
 # NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":

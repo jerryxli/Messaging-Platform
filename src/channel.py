@@ -35,8 +35,6 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     Return Value:
         None
     """
-    if verify_user(auth_user_id) is False:
-        raise AccessError
     if verify_user(u_id) is False:
         raise InputError("u_id does not refer to a valid user")
 
@@ -82,9 +80,6 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     store = data_store.get()
     channels = store['channels']
 
-    # Checks for when the auth_user_id is not registered
-    if not verify_user(auth_user_id):
-        raise AccessError("User_id not registered")
     # Checks for Input error: when the channel_id does not exist
     if channel_id in channels.keys():
         channel = channels[channel_id]
@@ -117,13 +112,6 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
         Returns { messages, start, end } on successful creation
     """
     store = data_store.get()
-    users = store['users']
-
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
-
-    if not auth_user_id in users.keys():
-        raise InputError('Invalid auth_user_id')
     channels = store['channels']
     if channel_id in channels.keys():
         channel = channels[channel_id]
@@ -177,8 +165,6 @@ def channel_join_v1(auth_user_id:int, channel_id:int)->None:
         None
 
     """
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
     store = data_store.get()
     channels = store['channels']
     users = store['users']
@@ -219,9 +205,6 @@ def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
     Returns:
         None         
     """
-
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
     store = data_store.get()
     channels = store['channels']
     users = store['users']
