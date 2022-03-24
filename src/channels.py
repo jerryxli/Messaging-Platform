@@ -27,9 +27,6 @@ def channels_list_v1(auth_user_id:int)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
-
     # Gets list of channels from data_store
     store = data_store.get()
     channels = store['channels']
@@ -59,8 +56,6 @@ def channels_listall_v1(auth_user_id:int)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    if verify_user(auth_user_id) is False:
-        raise AccessError
 
     store = data_store.get()
     channels = store['channels']
