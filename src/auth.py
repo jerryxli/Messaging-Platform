@@ -226,24 +226,23 @@ def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
     users = store['users']
     global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
     if not is_valid_JWT(token):
-        print("THANKS")
-        raise AccessError
+        raise AccessError(description = "JWT is not valid")
     jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
     if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
-        raise AccessError
+        raise AccessError(description = "User is not an owner")
     if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
-        raise InputError
+        raise InputError(description = "This action would leave server without any owners")
     if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
-        raise InputError
+        raise InputError(description = "This permission doesn't exist")
     
     if u_id in users.keys():
         user = users[u_id]
         if user['global_permission'] == new_perm:
-            raise InputError
+            raise InputError(description = "This user already has this permission")
         user['global_permission'] = new_perm
         data_store.set(store)
     else:
-        raise InputError
+        raise InputError(description = "There is no user with this id")
     
 
 def create_JWT(auth_user_id):
