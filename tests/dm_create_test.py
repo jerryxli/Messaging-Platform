@@ -1,7 +1,7 @@
 from src.config import url
 import requests
 import pytest
-from src.other import is_valid_dictionary_output
+from .helper_functions import is_valid_dictionary_output
 
 REGISTER_URL = f"{url}/auth/register/v2"
 LOGOUT_URL = f"{url}/auth/logout/v1"

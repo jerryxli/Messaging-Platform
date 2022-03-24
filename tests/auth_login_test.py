@@ -1,5 +1,5 @@
 from src.error import InputError, AccessError
-from src.other import clear_v1, is_valid_dictionary_output
+from .helper_functions import is_valid_dictionary_output
 from src.config import port, url
 import pytest
 import requests
@@ -11,7 +11,6 @@ LOGIN_URL = f"{url}/auth/login/v2"
 @pytest.fixture
 def clear_store():
     requests.delete(f"{url}/clear/v1", json={})
-
 
 
 #Basic Tests
