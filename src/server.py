@@ -317,6 +317,13 @@ def handle_user_remove():
         raise AccessError
     return user_remove_v1(request_data['token'], request_data['u_id'])
 
+@APP.route("/message/senddm/v1", methods = ["POST"])
+def handle_dm_send():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError("JWT no longer valid")
+    return dm_send_v1(user_id_from_JWT(request_data['token']), request_data['message'], request_data['dm_id'])
+
 # NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":

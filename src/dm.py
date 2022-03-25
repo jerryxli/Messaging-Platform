@@ -8,7 +8,7 @@ Created: 22.03.2022
 Description: Allows the user to create a dm, list dms, leave dms,
 message in a dm, get details of a dm, and remove a dm.
 """
-
+from time import time
 from src.data_store import data_store
 from src.channel import non_password_global_permission_field
 from src.error import InputError, AccessError
@@ -220,3 +220,24 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start: int)->dict:
         Returns { 'messages', 'start', 'end' } upon successful creation
     """
     return {'messages', 'start', 'end' }
+
+
+
+def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
+    store = data_store.get()
+    dms = store['dms']
+    if dm_id not in dms:
+        raise InputError(description = "dm_id is invalid")
+    if len(message) > 1000 or len(message) < 1:
+        raise InputError(description = "Invalid message length")
+    dm = dms[dm_id]
+    u_ids = [user['u_id'] for user in dm['members']]
+    if auth_user_id not in u_ids:
+        raise AccessError(description = "User is not part of DM")
+    message_id = store['messages']
+    dm['messages'].append({'message_id': message_id, 'u_id': auth_user_id, 'message': message, 'time_sent': time()})
+    store['messages'] += 1
+    dms[dm_id] = dm
+    store['dms'] = dms
+    data_store.set(store)
+    return {'message_id': message_id}
