@@ -16,6 +16,7 @@ from src.message import message_send_v1, message_remove_v1, message_edit_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1
 
 
+
 def quit_gracefully(*args):
     '''For coverage'''
     exit(0)
@@ -279,6 +280,18 @@ def handle_dm_list():
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return dm_list_v1(user_id)
+
+
+@APP.route("/dm/remove/v1", methods = ["DELETE"])
+def handle_dm_remove():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    dm_id = int(request_data['dm_id'])
+    if not is_valid_JWT(user_token):
+        raise AccessError("JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    dm_remove_v1(user_id, dm_id)
+    return {}
 
 @APP.route("/dm/details/v1", methods = ["GET"])
 def handle_dm_details():
