@@ -174,6 +174,34 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     Return Value:
         None
     """
+    if not verify_user(auth_user_id):
+        raise AccessError("Auth id not valid")
+
+    store = data_store.get()
+    dms = store['dms']
+    users = store['users']
+
+    if dm_id in dms.keys():
+        dm = dms[dm_id]
+    else:
+        raise InputError("Dm_id not valid")
+
+    user = non_password_global_permission_field(users[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
+    if dm['creator'] == auth_user_id:
+        # user is owner of channel
+        dm['creator'] = None
+        dm['members'].remove(user)
+    elif user in dm['members']:
+        dm['members'].remove(user)
+    else:
+        raise AccessError("User is not in DM")
+
+    store['dms'] = dms
+    data_store.set(store)
+    return
+
 
 
 def dm_messages_v1(auth_user_id:int, dm_id:int, start: int)->dict:
