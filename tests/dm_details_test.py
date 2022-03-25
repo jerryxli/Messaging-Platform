@@ -47,7 +47,8 @@ def test_creator_of_dm(clear_store, create_user, create_user2):
     dm_id_2 = requests.post(DM_CREATE_URL, json = {'token': user_token_2, 'u_ids': [create_user2['auth_user_id']]}).json()['dm_id']
     dm_details_1 = requests.get(DM_DETAILS_URL, params = {'token': user_token_1, 'dm_id': dm_id_1})
     dm_details_2 = requests.get(DM_DETAILS_URL, params = {'token': user_token_2, 'dm_id': dm_id_2})
-    expected_output =   {   'name': 'twixchocolate', 
+    expected_output =   {   'creator': create_user['auth_user_id'],
+                            'name': 'twixchocolate', 
                             'members': 
                             [
                             {
@@ -71,7 +72,8 @@ def test_member_of_dm(clear_store, create_user, create_user2):
     user_id_2 = create_user2['auth_user_id']
     dm_id = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': [user_id_2]}).json()['dm_id']
     dm_details_1 = requests.get(DM_DETAILS_URL, params = {'token': user_token_2, 'dm_id': dm_id})
-    expected_output =  {   'name': 'snickerslickers, twixchocolate', 
+    expected_output =  {    'creator': create_user['auth_user_id'],
+                            'name': 'snickerslickers, twixchocolate', 
                             'members': [
                                 {
                                     'u_id': create_user2['auth_user_id'],
@@ -134,6 +136,7 @@ def test_from_stub_code(clear_store, create_stub_user):
     dm_details = requests.get(DM_DETAILS_URL, params = {'token': stub_token, 'dm_id': dm_id})
     
     assert dm_details.json() ==  {
+        'creator': stub_uid,
         'name': 'haydenjacobs',
         'members': [
             {
