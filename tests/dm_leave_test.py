@@ -39,6 +39,7 @@ def create_user3():
 def check_user_left(user_token, user_id, dm_id):
     dm_details = requests.get(DM_DETAILS_URL, params = {'token': user_token, 'dm_id': dm_id}).json()
     user_has_left = True
+
     list_members = dm_details['members']
     for member in list_members:
             if member['u_id'] == user_id:
