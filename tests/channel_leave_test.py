@@ -1,7 +1,6 @@
 from telnetlib import LOGOUT
 from src.error import AccessError
 from src.config import port, url
-from src.other import clear_v1, is_valid_dictionary_output
 import requests
 import pytest
 import jwt

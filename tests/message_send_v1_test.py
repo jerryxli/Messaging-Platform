@@ -1,7 +1,7 @@
 from src.config import url
 import pytest
 import requests
-from src.other import is_valid_dictionary_output
+from .helper_functions import is_valid_dictionary_output
 
 CHANNEL_JOIN_URL = f"{url}/channel/join/v2"
 CREATE_URL = f"{url}/channels/create/v2"

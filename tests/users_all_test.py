@@ -5,7 +5,7 @@ from src.config import url
 REGISTER_URL = f"{url}/auth/register/v2"
 PROFILE_URL = f"{url}/user/profile/v1"
 USERS_ALL_URL = f"{url}/users/all/v1"
-
+REMOVE_URL = f"{url}admin/user/remove/v1"
 
 @pytest.fixture
 def clear_store():
@@ -56,6 +56,10 @@ def test_multiple_users(clear_store, create_user, create_user2):
                                                                    ]
     assert response.json()['users'] == [profile_response1.json(), profile_response2.json()]
     assert response.status_code == 200
+    requests.delete(REMOVE_URL, json = {'token': user_token, 'u_id': user_id2})
+    response = requests.get(USERS_ALL_URL, params = {'token': user_token})
+    assert response.json() == {'users': [{"u_id": user_id, 'email': "z432324@unsw.edu.au", 'name_first': "Ji", 'name_last': "Sun", 'handle_str': "jisun"}]}
+    
 
 # Test for invalid token
 def test_invalid_token(clear_store, create_user):
