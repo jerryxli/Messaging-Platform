@@ -118,7 +118,6 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     assert request_data_1.status_code == 403
     assert request_data_2.status_code == 403
 
-
 # Tests for when an invalid dm_id is entered.
 def test_invalid_dm_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
@@ -129,7 +128,6 @@ def test_invalid_dm_id(clear_store, create_user, create_user2):
     # Input Error
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
-
 
 # Test against the stub code output
 def test_from_stub_code(clear_store, create_stub_user):
