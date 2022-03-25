@@ -157,7 +157,8 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     else:
         raise AccessError("Auth_user_id not a member")
 
-    return dm_details      
+    data_store.set(store)
+    return dm_details
 
 
 def dm_leave_v1(auth_user_id:int, dm_id:int)->None:

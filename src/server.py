@@ -284,7 +284,7 @@ def handle_dm_list():
 @APP.route("/dm/details/v1", methods = ["GET"])
 def handle_dm_details():
     user_token = request.args.get('token')
-    dm_id = request.args.get('dm_id')
+    dm_id = int(request.args.get('dm_id'))
     if not is_valid_JWT(user_token):
         raise AccessError("JWT no longer valid")
     user_id = user_id_from_JWT(user_token)

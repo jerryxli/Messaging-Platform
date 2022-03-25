@@ -1,6 +1,5 @@
 from src.error import AccessError
 from src.config import port, url
-from src.other import clear_v1, is_valid_dictionary_output
 import requests
 import pytest
 
@@ -60,8 +59,7 @@ def test_creator_of_dm(clear_store, create_user, create_user2):
                             } 
                             ]
                         }
-    assert dm_id_1 == 0
-    assert dm_id_2 == 1
+
     assert dm_details_1.json() == expected_output
     assert dm_details_1.status_code == 200
     assert dm_details_2.status_code == 200
@@ -91,7 +89,6 @@ def test_member_of_dm(clear_store, create_user, create_user2):
                                 }
                             ],
                         }
-    assert dm_id == 0
     assert dm_details_1.status_code == 200
     assert dm_details_1.json() == expected_output
     
