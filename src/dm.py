@@ -152,9 +152,9 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     member_ids = [member['u_id'] for member in dm['members']]
 
     if auth_user_id in member_ids:
-            dm_details['creator'] = dm['creator']
-            dm_details['name'] = dm['name']
-            dm_details['members'] = dm['members']
+        dm_details['creator'] = dm['creator']
+        dm_details['name'] = dm['name']
+        dm_details['members'] = dm['members']
     else:
         raise AccessError("Auth_user_id not a member")
 
