@@ -113,7 +113,8 @@ def dm_list_v1(auth_user_id:int)->dict:
 
 def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     """
-    Removes auth_user_id from dm of dm_id
+    Remove an existing DM, so all members are no longer in the DM. 
+    This can only be done by the original creator of the DM.
 
     Exceptions:
 
@@ -135,13 +136,12 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     else:
         raise InputError("dm_id is not valid")
     
-    owner_members = dm['creator'] # dm['owner_members']
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
-    if user in owner_members:
+    if auth_user_id == dm['creator']: # dm['owner_members']
         # remove DM
-        dms.remove(dm_id)
+        del dms[dm_id]
     elif user in dm['members']:
         raise AccessError("User is not the original DM creator")
     else:
@@ -149,7 +149,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
 
     store['dms'] = dms
     data_store.set(store)
-
+    return
     
 
 
