@@ -13,7 +13,7 @@ from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_J
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1,users_all_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
 from src.message import message_send_v1, message_remove_v1, message_edit_v1
-from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1
+from src.dm import dm_create_v1, dm_list_v1, dm_send_v1, dm_details_v1
 
 
 
@@ -306,6 +306,13 @@ def handle_user_remove():
     if not is_valid_JWT(request_data['token']):
         raise AccessError
     return user_remove_v1(request_data['token'], request_data['u_id'])
+
+@APP.route("/message/senddm/v1", methods = ["POST"])
+def handle_dm_send():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError("JWT no longer valid")
+    return dm_send_v1(user_id_from_JWT(request_data['token']), request_data['message'], request_data['dm_id'])
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
