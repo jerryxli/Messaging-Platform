@@ -36,14 +36,11 @@ def create_user3():
     user_info = request_data.json()
     return user_info
 
-def check_user_left(owner, token, user_id, dm_id):
-    dm_details = requests.get(DM_DETAILS_URL, params = {'token': token, 'dm_id': dm_id})
-    user_has_left = False
-    if owner:
-        if user_id not in dm_details['creator']:
-            user_has_left = True
-    else:
-        for member in dm_details['members']:
+def check_user_left(user_token, user_id, dm_id):
+    dm_details = requests.get(DM_DETAILS_URL, params = {'token': user_token, 'dm_id': dm_id}).json()
+    user_has_left = True
+    list_members = dm_details['members']
+    for member in list_members:
             if member['u_id'] == user_id:
                 return False
     return user_has_left
@@ -57,7 +54,7 @@ def test_owner_leaves(clear_store, create_user, create_user2):
     
     response = requests.post(DM_LEAVE_URL, json = {'token': user_token_1, 'dm_id': dm_id})
     assert response.status_code == 200
-    assert check_user_left(True, user_token_2, user_id_1, dm_id)
+    assert check_user_left(user_token_2, user_id_1, dm_id)
     
 
 def test_member_leaves(clear_store, create_user, create_user2):
@@ -68,7 +65,7 @@ def test_member_leaves(clear_store, create_user, create_user2):
     
     response = requests.post(DM_LEAVE_URL, json = {'token': user_token_2, 'dm_id': dm_id})
     assert response.status_code == 200
-    assert check_user_left(True, user_token_1, user_id_2, dm_id)
+    assert check_user_left(user_token_1, user_id_2, dm_id)
 
 def test_not_a_member(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
