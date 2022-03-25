@@ -67,12 +67,12 @@ def test_not_dm_creator(clear_store, create_user, create_user2):
     response = requests.delete(DM_REMOVE_URL, json = {'token': user_token_2, 'dm_id': dm_id})
     assert response.status_code == 403
 
-# def test_auth_user_no_longer_in_dm(clear_store, create_user):
-#     user_token = create_user['token']
-#     user_id_2 = create_user2['auth_user_id']
+def test_auth_user_no_longer_in_dm(clear_store, create_user, create_user2):
+    user_token = create_user['token']
+    user_id_2 = create_user2['auth_user_id']
 
-#     dm_id = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2]}).json()['dm_id']
-#     requests.post(DM_LEAVE_URL, json = {'token': user_token, 'dm_id': dm_id})
+    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2]}).json()['dm_id']
+    requests.post(DM_LEAVE_URL, json = {'token': user_token, 'dm_id': dm_id})
 
-#     response = requests.delete(DM_REMOVE_URL, json = {'token': user_token, 'dm_id': dm_id})
-#     assert response.status_code == 403
+    response = requests.delete(DM_REMOVE_URL, json = {'token': user_token, 'dm_id': dm_id})
+    assert response.status_code == 403
