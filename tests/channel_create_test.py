@@ -27,27 +27,14 @@ def create_user2():
     return user_info
 
 @pytest.fixture
-def create_user3():
-    user_input = {'email': "z536601@unsw.edu.au", 'password': "1243Bops", 'name_first': "Mars", 'name_last': "Bars"}
-    user_info = requests.post(REGISTER_URL, json = user_input).json()
-    return user_info
-
-@pytest.fixture
-def create_stub_user():
-    user_input = {'email': "example@gmail.com", 'password': "hello123", 'name_first': "Hayden",'name_last': "Jacobs"}
-    user_info = requests.post(REGISTER_URL, json = user_input).json()
-    return user_info
-
-@pytest.fixture
 def clear_store():
-    clear_v1()
-
+    requests.delete(f"{url}/clear/v1", json={})
 
 def test_add_public_channel(clear_store, create_user, create_user2):
     user1 = create_user
     channel_id = requests.post(CREATE_URL, json = {'token': user1['token'], 'name': 'my house', 'is_public': True}).json()['channel_id']
     response = requests.get(LIST_URL, json = {'token': user1['token']})
-    assert response.json() == { 'channels': [{'channel_id': channel_id, 'name': 'Cool Channel'}]}
+    assert response.json() == { 'channels': [{'channel_id': channel_id, 'name': 'my house'}]}
     response = requests.get(DETAILS_URL, json = {'token': user1['token'], 'channel_id': channel_id})
 
 
@@ -55,7 +42,7 @@ def test_add_private_channel(clear_store, create_user):
     user1 = create_user
     channel_id = requests.post(CREATE_URL, json = {'token': user1['token'], 'name': 'my house', 'is_public': False}).json()['channel_id']
     response = requests.get(LIST_URL, json = {'token': user1['token']})
-    assert response.json() == { 'channels': [{'channel_id': channel_id, 'name': 'Cool Channel'}]}
+    assert response.json() == { 'channels': [{'channel_id': channel_id, 'name': 'my house'}]}
     
 
 def test_null_name(clear_store, create_user):
