@@ -294,7 +294,6 @@ def handle_dm_remove():
 
 @APP.route("/dm/details/v1", methods = ["GET"])
 def handle_dm_details():
-    print(request.get_json())
     user_token = request.get_json()['token']
     dm_id = int(request.args.get('dm_id'))
     if not is_valid_JWT(user_token):

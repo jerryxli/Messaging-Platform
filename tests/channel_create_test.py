@@ -12,7 +12,6 @@ def clear_store():
 
 def test_add_public_channel(clear_store):
     user_id = auth_register_v1("z55555@unsw.edu.au", "passwordlong", "Jake", "Renzella")['auth_user_id']
-    print(user_id)
     assert is_valid_dictionary_output(channels_create_v1(user_id, 'Jake\'s Room', True), {'channel_id': int})
 
 def test_add_private_channel(clear_store):
