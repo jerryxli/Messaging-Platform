@@ -38,12 +38,12 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     # U_id is not valid
     if len(u_ids) != 0:
         if any(verify_user(u_id) for u_id in u_ids) == False:
-            raise InputError("U_id not valid")
+            raise InputError(description = "U_id not valid")
 
     # Check for duplicate u_id
     user_set = set(u_ids)
     if len(user_set) < len(u_ids):
-        raise InputError("Duplicate u_ids entered")
+        raise InputError(description = "Duplicate u_ids entered")
     if auth_user_id not in u_ids:
         u_ids.append(auth_user_id)
 
@@ -90,7 +90,7 @@ def dm_list_v1(auth_user_id:int)->dict:
         in format {'dms': [{'dm_id': int, 'name': str}] } 
     """
     if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
+        raise AccessError(description = "Auth id not valid")
 
     store = data_store.get()
     dms = store['dms']
@@ -128,7 +128,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
         None
     """
     if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
+        raise AccessError(description = "Auth id not valid")
 
     store = data_store.get()
     dms = store['dms']
@@ -136,7 +136,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError("dm_id is not valid")
+        raise InputError(description = "dm_id is not valid")
     
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
@@ -145,9 +145,9 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
         # remove DM
         del dms[dm_id]
     elif user in dm['members']:
-        raise AccessError("User is not the original DM creator")
+        raise AccessError(description = "User is not the original DM creator")
     else:
-        raise AccessError("User is not in DM")
+        raise AccessError(description = "User is not in DM")
 
     store['dms'] = dms
     data_store.set(store)
@@ -174,7 +174,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError("Dm_id not valid")
+        raise InputError(description = "Dm_id not valid")
 
     dm_details = {}
     member_ids = [member['u_id'] for member in dm['members']]
@@ -183,7 +183,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
         dm_details['name'] = dm['name']
         dm_details['members'] = dm['members']
     else:
-        raise AccessError("Auth_user_id not a member")
+        raise AccessError(description = "Auth_user_id not a member")
 
     data_store.set(store)
     return dm_details
@@ -203,7 +203,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
         None
     """
     if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
+        raise AccessError(description = "Auth id not valid")
 
     store = data_store.get()
     dms = store['dms']
@@ -212,7 +212,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError("Dm_id not valid")
+        raise InputError(description = "Dm_id not valid")
 
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
@@ -224,7 +224,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     elif user in dm['members']:
         dm['members'].remove(user)
     else:
-        raise AccessError("User is not in DM")
+        raise AccessError(description = "User is not in DM")
 
     store['dms'] = dms
     data_store.set(store)

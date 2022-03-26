@@ -36,7 +36,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         None
     """
     if verify_user(u_id) is False:
-        raise InputError("u_id does not refer to a valid user")
+        raise InputError(description = "u_id does not refer to a valid user")
 
     store = data_store.get()
     channel = None
@@ -45,12 +45,12 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError("channel_id does not refer to a valid channel")
+        raise InputError(description = "channel_id does not refer to a valid channel")
 
     if check_user_in_channel(u_id, channel):
-        raise InputError("u_id refers to a user who is already a member of the channel")
+        raise InputError(description = "u_id refers to a user who is already a member of the channel")
     if not check_user_in_channel(auth_user_id, channel):
-        raise AccessError
+        raise AccessError(description = "User issuing invite is not part of channel")
 
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
@@ -84,13 +84,13 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError
+        raise InputError(description = "channel_id does not refer to a valid channel")
     ids = [user['u_id'] for user in channel['all_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
         return {k: v for k, v in channel.items() if k not in ['messages']}
     else:
-        raise AccessError("User is not a member of the channel")
+        raise AccessError(description = "User is not a member of the channel")
 
 
 def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
@@ -116,13 +116,13 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError('channel_id does not refer to a valid channel')
+        raise InputError(description = 'channel_id does not refer to a valid channel')
     if not check_user_in_channel(auth_user_id, channel):
-        raise AccessError("channel_id is valid and the authorised user is not a member of the channel")
+        raise AccessError(description = "User is not a member of the channel")
 
     # determine if start is greater than total number of messages, if so, return InputError
     if start > len(channel['messages']):
-        raise InputError("start is greater than the total number of messages in the channel")
+        raise InputError(description = "start is greater than the total number of messages in the channel")
 
     messages = []
     not_displayed = list(reversed(channel['messages']))[start:]

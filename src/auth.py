@@ -52,8 +52,8 @@ def auth_login_v1(email:str, password:str)->dict:
                 jwt = create_JWT(user_id)
                 return {'token': jwt, 'auth_user_id': user_id}
             else:
-                raise InputError("Incorrect Password")
-    raise InputError("Invalid Email")
+                raise InputError(description = "Incorrect Password")
+    raise InputError(description = "Invalid Email")
 
 
 def auth_register_v1(email: str, password: str, name_first: str, name_last:str)->dict:
@@ -76,15 +76,15 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
 
     """
     if not is_valid_email(email):
-        raise InputError("Email is not valid")
+        raise InputError(description = "Email is not valid")
     if len(password) < 6:
-        raise InputError("Password is too short")
+        raise InputError(description = "Password is too short")
     if is_email_taken(email):
-        raise InputError("Email is already taken")
+        raise InputError(description = "Email is already taken")
     if len(name_first) < 1 or len(name_first) > MAX_FIRST_NAME_LENGTH:
-        raise InputError("First name is too short or long")
+        raise InputError(description = "First name is too short or long")
     if len(name_last) < 1 or len(name_last) > MAX_LAST_NAME_LENGTH:
-        raise InputError("Last name is too short or long")
+        raise InputError(description = "Last name is too short or long")
 
     handle = generate_handle(name_first, name_last)
 

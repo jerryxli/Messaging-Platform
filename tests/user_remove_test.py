@@ -1,8 +1,4 @@
-from src.auth import GLOBAL_PERMISSION_USER
-from src.channel import GLOBAL_PERMISSION_OWNER
-from src.error import InputError, AccessError
-from src.config import port, url
-from src.user import user_remove_v1
+from src.config import url
 import pytest
 import requests
 

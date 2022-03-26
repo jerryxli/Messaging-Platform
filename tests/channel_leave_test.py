@@ -1,6 +1,4 @@
-from telnetlib import LOGOUT
-from src.error import AccessError
-from src.config import port, url
+from src.config import url
 import requests
 import pytest
 import jwt

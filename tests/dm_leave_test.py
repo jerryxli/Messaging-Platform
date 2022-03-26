@@ -1,5 +1,4 @@
 from src.config import url
-
 import requests
 import pytest
 
