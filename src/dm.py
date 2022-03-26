@@ -14,6 +14,8 @@ from src.channel import non_password_global_permission_field
 from src.error import InputError, AccessError
 from src.other import verify_user
 
+PAGE_THRESHOLD = 50
+
 def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     """
     Creates a dm between the auth_user_id and the user(s) in the u_ids dict
@@ -228,26 +230,6 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     data_store.set(store)
     return
 
-
-
-def dm_messages_v1(auth_user_id:int, dm_id:int, start: int)->dict:
-    """
-    Returns the messages of a dm from start index + 50
-
-    Exceptions:
-
-    Arguments:
-        auth_user_id (int)      - The id of the user
-        dm_id (int)             - The id of the dm
-        start (int)             - The start index
-
-    Return Value:
-        Returns { 'messages', 'start', 'end' } upon successful creation
-    """
-    return {'messages', 'start', 'end' }
-
-
-
 def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
     store = data_store.get()
     dms = store['dms']
@@ -266,3 +248,36 @@ def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
     store['dms'] = dms
     data_store.set(store)
     return {'message_id': message_id}
+
+
+def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
+    """
+    Returns the messages of a dm from start index + 50
+
+    Exceptions:
+
+    Arguments:
+        auth_user_id (int)      - The id of the user
+        dm_id (int)             - The id of the dm
+        start (int)             - The start index
+
+    Return Value:
+        Returns { 'messages', 'start', 'end' } upon successful creation
+    """
+    store = data_store.get()
+    dms = store['dms']
+    print(dms)
+    if dm_id in dms:
+        dm = dms[dm_id]
+    else:
+        raise InputError(description = 'dm_id does not refer to a valid channel')
+    u_ids = [user['u_id'] for user in dm['members']]
+    if auth_user_id not in u_ids:
+        raise AccessError(description = "dm_id is valid but user is not a member of the channel")
+    if start > len(dm['messages']):
+        raise InputError(description = "Start is greater than the total number of messages in channel")
+    messages = []
+    not_displayed = list(reversed(dm['messages']))[start:]
+    messages.extend(not_displayed[:min(PAGE_THRESHOLD, len(not_displayed))])
+    end = -1 if len(messages) == len(not_displayed) else start + PAGE_THRESHOLD
+    return {'messages': messages, 'start': start, 'end': end}
