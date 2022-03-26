@@ -51,10 +51,10 @@ def test_long_name(clear_store, create_user):
     response = requests.post(CREATE_URL, json = {'token': user1['token'], 'name': 'sadoiasjdoiasjdoaisdjaoisdjaoisdjaoisjdadsjgfoiasjfgoiasjdfoiajsdofiajsdoifjaosdifjaoisdjf', 'is_public': True})
     assert response.status_code == 400
 
-def test_long_name(clear_store, create_user):
+def test_invalid_JWT(clear_store, create_user):
     user1 = create_user
     requests.post(LOGOUT_URL, json = {'token': user1['token']})
-    response = requests.post(CREATE_URL, json = {'token': user1['token'], 'name': 'sadoiasjdoiasjdoaisdjaoisdjaoisdjaoisjdadsjgfoiasjfgoiasjdfoiajsdofiajsdoifjaosdifjaoisdjf', 'is_public': True})
+    response = requests.post(CREATE_URL, json = {'token': user1['token'], 'name': 'hello', 'is_public': True})
     assert response.status_code == 403
 
 
