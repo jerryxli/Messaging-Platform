@@ -219,19 +219,16 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
-def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
+def change_global_permission(auth_user_id:str, u_id:int, new_perm:int)->dict:
     '''
     Needs JWT check once implemented by login
     '''
     store = data_store.get()
     users = store['users']
-    global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
-    if not is_valid_JWT(token):
-        raise AccessError(description = "JWT is not valid")
-    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-    if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
+    global_owners = [key for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER]
+    if auth_user_id not in global_owners:
         raise AccessError(description = "User is not an owner")
-    if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
+    if len(global_owners) == 1 and u_id in global_owners and new_perm == GLOBAL_PERMISSION_USER:
         raise InputError(description = "This action would leave server without any owners")
     if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
         raise InputError(description = "This permission doesn't exist")

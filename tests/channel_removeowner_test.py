@@ -194,3 +194,11 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
     request_data_2 = requests.post(REMOVEOWNER_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'u_id': u_id_2})
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
+
+
+def test_valid_u_id_not_in_channel(clear_store, create_user, create_user2):
+    user_token = create_user['token']
+    user2 = create_user2
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    response = requests.post(REMOVEOWNER_URL, json = {'token': user_token, 'channel_id': channel_id, 'u_id': user2['auth_user_id']})
+    assert response.status_code == 400

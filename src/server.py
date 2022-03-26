@@ -316,10 +316,9 @@ def handle_dm_leave():
 @APP.route("/admin/userpermission/change/v1", methods = ["POST"])
 def handle_userperm_change():
     request_data = request.get_json()
-    user_token = request_data['token']
-    u_id = request_data['u_id']
-    permission_id = request_data['permission_id']
-    change_global_permission(user_token, u_id, permission_id)
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError(description = "JWT no longer valid")
+    change_global_permission(user_id_from_JWT(request_data['token']), request_data['u_id'], request_data['permission_id'])
     return {}
 
 @APP.route("/admin/user/remove/v1", methods = ["DELETE"])

@@ -1,9 +1,4 @@
-from src.channels import channels_create_v1 
-from src.auth import auth_register_v1
-from src.error import InputError, AccessError
-from src.other import clear_v1
 from tests.channels_list_test import LIST_URL
-from .helper_functions import is_valid_dictionary_output
 from src.config import url
 import pytest
 import requests
