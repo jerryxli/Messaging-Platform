@@ -40,13 +40,11 @@ def test_normal_functionality(clear_store, create_user):
 
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo sucks"}).json()['message_id']
     # check that channel_id has messages within it
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
     assert response.json()['messages'][0]['message'] == "Leo sucks"
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id, 'message': 'Leo is cool'})
     assert response.status_code == 200
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
     assert response.status_code == 200
     # check that message has changed
     assert response.json()['messages'][0]['message'] == "Leo is cool"
@@ -59,8 +57,7 @@ def test_message_over_1000_characters(clear_store, create_user):
 
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo sucks"}).json()['message_id']
     # check that channel_id has messages within it
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
     assert response.json()['messages'][0]['message'] == "Leo sucks"
     long_message = ''
     for i in range(1000):
@@ -111,13 +108,11 @@ def test_message_is_nothing(clear_store, create_user):
 
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo sucks"}).json()['message_id']
     # check that channel_id has messages within it
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
     assert response.json()['messages'][0]['message'] == "Leo sucks"
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id, 'message': ''})
     assert response.status_code == 200
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
     assert response.json() == {'messages': [], 'start': 0, 'end': -1} 
     assert response.status_code == 200
 

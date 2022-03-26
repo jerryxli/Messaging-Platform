@@ -17,7 +17,7 @@ def test_logout_success(clear_store):
     logout_request = requests.post(LOGOUT_URL, json={"token": response.json()['token']})
     assert logout_request.status_code == 200
     assert logout_request.json() == {}
-    profile_repsonse = requests.get(PROFILE_URL, params={"token": response.json()['token'], "u_id": response.json()['auth_user_id']})
+    profile_repsonse = requests.get(PROFILE_URL, json={"token": response.json()['token']}, params = {"u_id": response.json()['auth_user_id']})
     assert profile_repsonse.status_code == 403
 
 
@@ -34,7 +34,7 @@ def test_logout_multiple_sessions(clear_store):
     login_response = requests.post(LOGIN_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong"})
     token_1 = login_response.json()['token']
     requests.post(LOGOUT_URL, json={"token": token_0})
-    profile_repsonse = requests.get(PROFILE_URL, params={"token": token_1, "u_id": u_id})
+    profile_repsonse = requests.get(PROFILE_URL, params={"u_id": u_id}, json={"token": token_1})
     assert profile_repsonse.status_code == 200
-    profile_repsonse_1 = requests.get(PROFILE_URL, params={"token": token_0, "u_id": u_id})
+    profile_repsonse_1 = requests.get(PROFILE_URL, params={"u_id": u_id}, json = {"token": token_0})
     assert profile_repsonse_1.status_code == 403

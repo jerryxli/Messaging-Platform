@@ -18,7 +18,7 @@ def test_forged_token(clear_store):
     forged_encoding = {"auth_user_id": auth_id + 1, "session_id": 1000}
     print(forged_encoding)
     forgedJWT = jwt.encode(forged_encoding, "faketoken", algorithm='HS256')
-    profile_repsonse_0 = requests.get(PROFILE_URL, params={"token": forgedJWT, "u_id": auth_id})
+    profile_repsonse_0 = requests.get(PROFILE_URL, params={"u_id": auth_id}, json = {"token": forgedJWT})
     assert profile_repsonse_0.status_code == 403
 
 def test_token_exceeding_users(clear_store):
@@ -26,5 +26,5 @@ def test_token_exceeding_users(clear_store):
     auth_id = int(response.json()['auth_user_id'])
     forged_encoding = {"auth_user_id": auth_id + 1, "session_id": 1000}
     forgedJWT = jwt.encode(forged_encoding, JWT_SECRET, algorithm='HS256')
-    profile_repsonse_0 = requests.get(PROFILE_URL, params={"token": forgedJWT, "u_id": auth_id})
+    profile_repsonse_0 = requests.get(PROFILE_URL, params={"u_id": auth_id}, json = {"token": forgedJWT})
     assert profile_repsonse_0.status_code == 403

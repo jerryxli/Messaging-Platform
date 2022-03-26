@@ -41,7 +41,7 @@ def create_user3():
 def test_list_not_in_any_dms(clear_store, create_user):
     user_token = create_user['token']
 
-    response = requests.get(DM_LIST_URL, params = {'token': user_token})
+    response = requests.get(DM_LIST_URL, json = {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
     assert response_data == {'dms': [] }
@@ -53,7 +53,7 @@ def test_list_in_one_dm(clear_store, create_user, create_user2):
     response0 = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2]})
     dm_id = response0.json()['dm_id']
 
-    response = requests.get(DM_LIST_URL, params = {'token': user_token})
+    response = requests.get(DM_LIST_URL, json = {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
     assert response_data == {'dms': [{'dm_id': dm_id, 'name': "name1lastname1, name2lastname2"}] }
@@ -68,7 +68,7 @@ def test_list_in_multiple_dm(clear_store, create_user, create_user2, create_user
     response_data_2 = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2, user_id_3]}).json()
     dm_id_2 = response_data_2['dm_id']
 
-    response = requests.get(DM_LIST_URL, params = {'token': user_token})
+    response = requests.get(DM_LIST_URL, json = {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
     assert response_data == {'dms': [{'dm_id': dm_id_1, 'name': "name1lastname1, name2lastname2"}, {'dm_id': dm_id_2, 'name': "name1lastname1, name2lastname2, name3lastname3"}]}
@@ -76,7 +76,7 @@ def test_list_in_multiple_dm(clear_store, create_user, create_user2, create_user
 def test_invalid_token(clear_store, create_user):
     user_token = create_user['token']
     requests.post(LOGOUT_URL, json = {'token': user_token})
-    response = requests.get(DM_LIST_URL, params = {'token': user_token})
+    response = requests.get(DM_LIST_URL, json = {'token': user_token})
     assert response.status_code == 403
     
 

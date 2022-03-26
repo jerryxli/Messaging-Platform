@@ -45,8 +45,8 @@ def test_creator_of_dm(clear_store, create_user, create_user2):
     user_token_2 = create_user2['token']
     dm_id_1 = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': []}).json()['dm_id']
     dm_id_2 = requests.post(DM_CREATE_URL, json = {'token': user_token_2, 'u_ids': [create_user2['auth_user_id']]}).json()['dm_id']
-    dm_details_1 = requests.get(DM_DETAILS_URL, params = {'token': user_token_1, 'dm_id': dm_id_1})
-    dm_details_2 = requests.get(DM_DETAILS_URL, params = {'token': user_token_2, 'dm_id': dm_id_2})
+    dm_details_1 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id_1}, json = {'token': user_token_1})
+    dm_details_2 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id_2}, json = {'token': user_token_2})
     expected_output =   {   
                             'name': 'twixchocolate', 
                             'members': 
@@ -71,7 +71,7 @@ def test_member_of_dm(clear_store, create_user, create_user2):
     user_token_2 = create_user2['token']
     user_id_2 = create_user2['auth_user_id']
     dm_id = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': [user_id_2]}).json()['dm_id']
-    dm_details_1 = requests.get(DM_DETAILS_URL, params = {'token': user_token_2, 'dm_id': dm_id})
+    dm_details_1 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id} , json = {'token': user_token_2})
     expected_output =  {    
                             'name': 'snickerslickers, twixchocolate', 
                             'members': [
@@ -100,7 +100,7 @@ def test_invalid_user(clear_store, create_user):
     user_token = create_user['token']
     dm_id = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': []}).json()['dm_id']
     requests.post(LOGOUT_URL, json = {'token': user_token})
-    request_data = requests.get(DM_DETAILS_URL, params = {'token': user_token, 'dm_id': dm_id})
+    request_data = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id}, json = {'token': user_token})
     assert request_data.status_code == 403
 
 
@@ -111,8 +111,8 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     user_token_3 = create_user3['token']
     dm_id_1 = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': []}).json()['dm_id']
     dm_id_2 = requests.post(DM_CREATE_URL, json = {'token': user_token_2, 'u_ids': [create_user['auth_user_id']]}).json()['dm_id']
-    request_data_1 = requests.get(DM_DETAILS_URL, params = {'token': user_token_2, 'dm_id': dm_id_1})
-    request_data_2 = requests.get(DM_DETAILS_URL, params = {'token': user_token_3, 'dm_id': dm_id_2})
+    request_data_1 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id_1}, json = {'token': user_token_2})
+    request_data_2 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id_2}, json = {'token': user_token_3})
     # Access Error
     assert request_data_1.status_code == 403
     assert request_data_2.status_code == 403
@@ -122,8 +122,8 @@ def test_invalid_dm_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     dm_id = 0
-    request_data_1 = requests.get(DM_DETAILS_URL, params = {'token': user_token_1, 'dm_id': dm_id})
-    request_data_2 = requests.get(DM_DETAILS_URL, params = {'token': user_token_2, 'dm_id': dm_id})
+    request_data_1 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id} , json = {'token': user_token_1})
+    request_data_2 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id}, json = {'token': user_token_2})
     # Input Error
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
@@ -133,7 +133,7 @@ def test_from_stub_code(clear_store, create_stub_user):
     stub_token = create_stub_user['token']
     stub_uid = create_stub_user['auth_user_id']
     dm_id = requests.post(DM_CREATE_URL, json = {'token': stub_token, 'u_ids': []}).json()['dm_id']
-    dm_details = requests.get(DM_DETAILS_URL, params = {'token': stub_token, 'dm_id': dm_id})
+    dm_details = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id}, json = {'token': stub_token})
     
     assert dm_details.json() ==  {
         'name': 'haydenjacobs',
