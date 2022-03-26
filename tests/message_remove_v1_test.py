@@ -100,7 +100,7 @@ def test_user_without_permissions(clear_store, create_user, create_user2):
     assert response.status_code == 200
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Leo loves coding!"}).json()['message_id']
     response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_2, 'message_id': message_id})
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 def test_user_leaves_channel(clear_store, create_user):
     user_token_1 = create_user['token']

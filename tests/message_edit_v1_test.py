@@ -2,6 +2,8 @@ from src.config import url
 import pytest
 import requests
 
+from src.dm import dm_messages_v1
+
 CHANNEL_JOIN_URL = f"{url}/channel/join/v2"
 CREATE_URL = f"{url}/channels/create/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
@@ -9,6 +11,10 @@ MESSAGE_SEND_URL = f"{url}/message/send/v1"
 MESSAGE_EDIT_URL = f"{url}/message/edit/v1"
 CHANNEL_MESSAGES_URL = f"{url}/channel/messages/v2"
 LEAVE_URL = f"{url}/channel/leave/v1"
+DM_CREATE_URL = f"{url}/dm/create/v1"
+DM_SEND_URL = f"{url}/message/senddm/v1"
+DM_MESSAGES_URL = f"{url}/dm/messages/v1"
+DETAILS_URL = f"{url}/channel/details/v2"
 
 @pytest.fixture
 def clear_store():
@@ -99,7 +105,7 @@ def test_user_without_permissions(clear_store, create_user, create_user2):
     assert response.status_code == 200
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Leo loves coding!"}).json()['message_id']
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_2, 'message_id': message_id, 'message': 'no permissions'})
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 def test_message_is_nothing(clear_store, create_user):
     user_token_1 = create_user['token']
@@ -117,11 +123,24 @@ def test_message_is_nothing(clear_store, create_user):
     assert response.status_code == 200
 
 
-def test_user_leaves_channel(clear_store, create_user):
+def test_user_leaves_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    requests.post(CHANNEL_JOIN_URL, json = {'token': create_user2['token'], 'channel_id': channel_id})
     response = requests.post(LEAVE_URL, json = {'token': user_token_1, 'channel_id': channel_id})
+    print(requests.get(DETAILS_URL, json = {'token': create_user2['token']}, params = {'channel_id': channel_id}).json())
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id, 'message': 'im not in channel'})
     assert response.status_code == 400
+
+
+def test_normal_dm(clear_store, create_user):
+    user_1 = create_user
+    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_1['token'], 'message_id': message_id, 'message': 'i have edited this'})
+    assert response.status_code == 200
+    response = requests.get(DM_MESSAGES_URL, json = {'dm_id': dm_id, 'token': user_1['token'], 'start': 0})
+    assert response.json()['messages'][0]['message_id'] == message_id
+    assert response.json()['messages'][0]['message'] == 'i have edited this'

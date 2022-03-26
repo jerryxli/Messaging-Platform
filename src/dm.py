@@ -89,21 +89,13 @@ def dm_list_v1(auth_user_id:int)->dict:
         Returns { 'dms' } upon successful creation 
         in format {'dms': [{'dm_id': int, 'name': str}] } 
     """
-    if not verify_user(auth_user_id):
-        raise AccessError(description = "Auth id not valid")
-
     store = data_store.get()
     dms = store['dms']
-
     dm_list = []
-
-    for key, dm_info in dms.items():
-        ids = [user['u_id'] for user in dm_info['members']]
+    for key, value in dms.items():
+        ids = [user['u_id'] for user in value['members']]
         if auth_user_id in ids:
-            dm = {'dm_id': key, 'name': dm_info['name']}
-            dm_list.append(dm)
-    
-    data_store.set(store)
+            dm_list.append({'name': value['name'], 'dm_id': key})
 
     return { 'dms': dm_list }
 
@@ -127,17 +119,13 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     Return Value:
         None
     """
-    if not verify_user(auth_user_id):
-        raise AccessError(description = "Auth id not valid")
 
     store = data_store.get()
     dms = store['dms']
     users = store['users']
-    if dm_id in dms.keys():
-        dm = dms[dm_id]
-    else:
+    if dm_id not in dms:
         raise InputError(description = "dm_id is not valid")
-    
+    dm = dms[dm_id]
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
@@ -202,9 +190,6 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     Return Value:
         None
     """
-    if not verify_user(auth_user_id):
-        raise AccessError(description = "Auth id not valid")
-
     store = data_store.get()
     dms = store['dms']
     users = store['users']

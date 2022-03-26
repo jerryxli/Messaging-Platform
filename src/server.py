@@ -258,7 +258,7 @@ def handle_message_edit():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    message_edit_v1(user_id, message_id, message)
+    message_edit_v1(user_id, int(message_id), message)
     return {} 
 
 # DM Server Instructions
