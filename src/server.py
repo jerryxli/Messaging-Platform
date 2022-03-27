@@ -10,7 +10,7 @@ from src.other import clear_v1, user_id_from_JWT
 from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
 from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT, change_global_permission
-from src.user import user_profile_v1, user_setemail_v1, user_setname_v1,users_all_v1
+from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1,users_all_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
 from src.message import message_send_v1, message_remove_v1, message_edit_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
@@ -106,6 +106,15 @@ def handle_setemail_v1():
     email = request_data['email']
 
     return user_setemail_v1(token, email)
+
+@APP.route("/user/profile/sethandle/v1", methods=['PUT'])
+def handle_sethandle_v1():
+    request_data = request.get_json()
+    token = request_data['token']
+    handle_str = request_data['handle_str']
+
+    return user_set_handle_v1(token, handle_str)
+
 
 @APP.route("/users/all/v1", methods = ['GET'])
 def handle_users_all_v1():
