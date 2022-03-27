@@ -75,7 +75,10 @@ def test_message_already_removed(clear_store, create_user):
 
 def test_message_id_invalid(clear_store, create_user):
     user_token_1 = create_user['token']
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': 100})
+    channel_id = requests.post(CREATE_URL, json={
+                               'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id + 1})
     assert response.status_code == 400
 
 

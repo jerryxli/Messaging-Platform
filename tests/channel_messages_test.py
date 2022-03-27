@@ -39,14 +39,17 @@ def test_normal_functionality(clear_store, create_user):
     # no messages
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}         
     # send a message
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo loves tests!"})      
+    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo loves tests!"}).json()['message_id']      
     response = requests.get(CHANNEL_MESSAGES_URL, params= {'channel_id': channel_id, 'start':0, 'token': user_token_1})
     # check if message is there
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
-    assert response.json()['messages'][0]['message'] == "Leo loves tests!"
-    assert response.json()['messages'][0]['message_id'] == 0
-    assert response.json()['messages'][0]['u_id'] == 0
+    list_msg_id = [message['message_id'] for message in response.json()['messages']]
+    assert message_id in list_msg_id
+    message_index = list_msg_id.index(message_id)
+    assert response.json()['messages'][message_index]['message'] == "Leo loves tests!"
+    assert response.json()['messages'][message_index]['message_id'] == 0
+    assert response.json()['messages'][message_index]['u_id'] == 0
 
 def test_invalid_channel_id(clear_store, create_user):
     user_token_1 = create_user['token']

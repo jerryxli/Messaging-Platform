@@ -25,7 +25,7 @@ def create_user2():
 def clear_store():
     requests.delete(f"{url}/clear/v1", json={})
 
-def test_add_public_channel(clear_store, create_user, create_user2):
+def test_add_public_channel(clear_store, create_user):
     user1 = create_user
     channel_id = requests.post(CREATE_URL, json = {'token': user1['token'], 'name': 'my house', 'is_public': True}).json()['channel_id']
     response = requests.get(LIST_URL, params = {'token': user1['token']})

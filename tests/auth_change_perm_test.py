@@ -1,5 +1,4 @@
-from src.auth import GLOBAL_PERMISSION_USER
-from src.channel import GLOBAL_PERMISSION_OWNER
+from src.auth import GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER, GLOBAL_PERMISSION_REMOVED
 from src.config import url
 import pytest
 import requests
@@ -45,7 +44,7 @@ def test_invalid_u_id(clear_store, register_user_1, register_user_2):
 def test_invalid_permission_id(clear_store, register_user_1, register_user_2):
     admin = register_user_1
     user = register_user_2
-    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": -1})
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_REMOVED})
     assert response.status_code == 400
 
 

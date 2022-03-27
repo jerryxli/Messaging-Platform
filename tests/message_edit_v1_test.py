@@ -48,13 +48,18 @@ def test_normal_functionality(clear_store, create_user):
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo sucks"}).json()['message_id']
     # check that channel_id has messages within it
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
-    assert response.json()['messages'][0]['message'] == "Leo sucks"
+    list_msg_ids = [message['message_id'] for message in response.json()['messages']]
+    assert message_id in list_msg_ids 
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id, 'message': 'Leo is cool'})
     assert response.status_code == 200
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
-    # check that message has changed
-    assert response.json()['messages'][0]['message'] == "Leo is cool"
+    list_msg_ids = [message['message_id'] for message in response.json()['messages']]
+    assert message_id in list_msg_ids
+    msg_index = list_msg_ids.index(message_id)
+    assert response.json()['messages'][msg_index]['u_id'] == create_user['auth_user_id']
+    assert response.json()['messages'][msg_index]['message'] == "Leo is cool"
+
 
 
 def test_message_over_1000_characters(clear_store, create_user):

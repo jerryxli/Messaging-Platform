@@ -120,9 +120,9 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
 def test_invalid_dm_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    dm_id = 0
-    request_data_1 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id, 'token': user_token_1})
-    request_data_2 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id, 'token': user_token_2})
+    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_token_1, 'u_ids': []}).json()['dm_id']
+    request_data_1 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id + 1, 'token': user_token_1})
+    request_data_2 = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id + 2, 'token': user_token_2})
     # Input Error
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
