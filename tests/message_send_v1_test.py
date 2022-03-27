@@ -41,8 +41,7 @@ def test_normal_functionality(clear_store, create_user):
     response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})                                                        
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})                                                        
     assert response.status_code == 200
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
@@ -64,8 +63,7 @@ def test_normal_functionality2(clear_store, create_user, create_user2):
     response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World2"})
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
@@ -87,8 +85,7 @@ def test_check_accessibility_of_messages_across_channels(clear_store, create_use
     response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200 
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_2,
-                                                              'channel_id': channel_id2, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id2, 'start': 0, 'token': user_token_2})
     assert response.status_code == 200
     # check that channel_id2 has no messages within it
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}

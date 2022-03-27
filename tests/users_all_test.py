@@ -37,7 +37,7 @@ def test_one_user(clear_store, create_user):
     user_token = create_user['token']
     user_id = create_user['auth_user_id']
     response = requests.get(USERS_ALL_URL, params = {'token': user_token})
-    profile_response = requests.get(PROFILE_URL, params = {"token": user_token, "u_id": user_id})
+    profile_response = requests.get(PROFILE_URL, params = {"u_id": user_id, "token": user_token})
     assert profile_response.json() == {"u_id": user_id, 'email': "z432324@unsw.edu.au", 'name_first': "Ji", 'name_last': "Sun", 'handle_str': "jisun"}
     assert response.json()['users'] == [profile_response.json()]
     assert response.status_code == 200
@@ -49,8 +49,8 @@ def test_multiple_users(clear_store, create_user, create_user2):
     user_id = create_user['auth_user_id']
     user_id2 = create_user2['auth_user_id']
     response = requests.get(USERS_ALL_URL, params = {'token': user_token})
-    profile_response1 = requests.get(PROFILE_URL, params = {"token": user_token, "u_id": user_id})
-    profile_response2 = requests.get(PROFILE_URL, params = {"token": user_token2, "u_id": user_id2})
+    profile_response1 = requests.get(PROFILE_URL, params = {"u_id": user_id, "token": user_token})
+    profile_response2 = requests.get(PROFILE_URL, params = {"u_id": user_id2, "token": user_token2})
     assert [profile_response1.json(), profile_response2.json()] == [   {"u_id": user_id, 'email': "z432324@unsw.edu.au", 'name_first': "Ji", 'name_last': "Sun", 'handle_str': "jisun"},
                                                                        {"u_id": user_id2, 'email': "z54626@unsw.edu.au", 'name_first': "Jane", 'name_last': "Gyuri", 'handle_str': "janegyuri"}
                                                                    ]

@@ -52,8 +52,8 @@ def auth_login_v1(email:str, password:str)->dict:
                 jwt = create_JWT(user_id)
                 return {'token': jwt, 'auth_user_id': user_id}
             else:
-                raise InputError("Incorrect Password")
-    raise InputError("Invalid Email")
+                raise InputError(description = "Incorrect Password")
+    raise InputError(description = "Invalid Email")
 
 
 def auth_register_v1(email: str, password: str, name_first: str, name_last:str)->dict:
@@ -76,15 +76,15 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
 
     """
     if not is_valid_email(email):
-        raise InputError("Email is not valid")
+        raise InputError(description = "Email is not valid")
     if len(password) < 6:
-        raise InputError("Password is too short")
+        raise InputError(description = "Password is too short")
     if is_email_taken(email):
-        raise InputError("Email is already taken")
+        raise InputError(description = "Email is already taken")
     if len(name_first) < 1 or len(name_first) > MAX_FIRST_NAME_LENGTH:
-        raise InputError("First name is too short or long")
+        raise InputError(description = "First name is too short or long")
     if len(name_last) < 1 or len(name_last) > MAX_LAST_NAME_LENGTH:
-        raise InputError("Last name is too short or long")
+        raise InputError(description = "Last name is too short or long")
 
     handle = generate_handle(name_first, name_last)
 
@@ -219,19 +219,16 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
-def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
+def change_global_permission(auth_user_id:str, u_id:int, new_perm:int)->dict:
     '''
     Needs JWT check once implemented by login
     '''
     store = data_store.get()
     users = store['users']
-    global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
-    if not is_valid_JWT(token):
-        raise AccessError(description = "JWT is not valid")
-    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-    if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
+    global_owners = [key for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER]
+    if auth_user_id not in global_owners:
         raise AccessError(description = "User is not an owner")
-    if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
+    if len(global_owners) == 1 and u_id in global_owners and new_perm == GLOBAL_PERMISSION_USER:
         raise InputError(description = "This action would leave server without any owners")
     if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
         raise InputError(description = "This permission doesn't exist")

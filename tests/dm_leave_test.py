@@ -1,5 +1,4 @@
 from src.config import url
-
 import requests
 import pytest
 
@@ -37,7 +36,7 @@ def create_user3():
     return user_info
 
 def check_user_left(user_token, user_id, dm_id):
-    dm_details = requests.get(DM_DETAILS_URL, params = {'token': user_token, 'dm_id': dm_id}).json()
+    dm_details = requests.get(DM_DETAILS_URL, params = {'dm_id': dm_id, 'token': user_token}).json()
     user_has_left = True
 
     list_members = dm_details['members']
