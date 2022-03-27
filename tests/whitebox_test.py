@@ -32,3 +32,4 @@ def test_token_exceeding_users(clear_store):
 def test_manually_forged_with_correct_u_id(clear_store):
     response = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
     profile_res = requests.get(PROFILE_URL, params={'u_id': response.json()['auth_user_id'], "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoX3VzZXJfaWQiOjEzLCJ1c2VyX3Nlc3Npb25faWQiOjB9.VQ0yytHPCXtCAlDdvb1QVzpi95TMmI6hmlFWTe2tq88"})
+    assert profile_res.status_code == 403
