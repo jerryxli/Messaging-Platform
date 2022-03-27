@@ -38,7 +38,7 @@ def test_listall_v2_one_public(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
     
-    response = requests.get(LISTALL_URL, params = {'token': user_token})
+    response = requests.get(LISTALL_URL, params =  {'token': user_token})
     response_data = response.json()
     assert response.status_code == 200
     assert response_data == {'channels': [{'channel_id': channel_id, 'name': 'Channel1'}]}

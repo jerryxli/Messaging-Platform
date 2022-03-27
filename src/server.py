@@ -4,7 +4,7 @@ import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
-from src.error import AccessError, InputError
+from src.error import AccessError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
 from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1, channel_addowner_v1, channel_removeowner_v1
@@ -114,7 +114,7 @@ def handle_setemail_v1():
 def handle_users_all_v1():
     user_token= request.args.get('token')
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return users_all_v1(user_id)
 # Channels Server Instructions
@@ -127,7 +127,7 @@ def handle_channels_create_v2():
     channel_name = request_data['name']
     is_public = request_data['is_public']
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channels_create_v1(user_id, channel_name, is_public)
 
@@ -136,7 +136,7 @@ def handle_channels_create_v2():
 def handle_channels_list_v2():
     user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channels_list_v1(user_id)
 
@@ -145,7 +145,7 @@ def handle_channels_list_v2():
 def handle_channels_listall_v2():
     user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channels_listall_v1(user_id)
 
@@ -157,7 +157,7 @@ def handle_channel_details():
     user_token = request.args.get('token')
     channel_id = int(request.args.get('channel_id'))
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channel_details_v1(user_id, channel_id)
 
@@ -168,7 +168,7 @@ def handle_channel_join():
     user_token = request_data['token']
     channel_id = request_data['channel_id']
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     channel_join_v1(user_id, channel_id)
     return {}
@@ -181,7 +181,7 @@ def handle_channel_invite():
     channel_id = request_data['channel_id']
     u_id = int(request_data['u_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     channel_invite_v1(user_id, channel_id, u_id)
     return {}
@@ -193,7 +193,7 @@ def handle_channel_leave():
     user_token = request_data['token']
     channel_id = int(request_data['channel_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError(description="JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     channel_leave_v1(user_id, channel_id)
     return {}
@@ -206,7 +206,7 @@ def handle_channel_addowner():
     channel_id = int(request_data['channel_id'])
     u_id = int(request_data['u_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     channel_addowner_v1(user_id, channel_id, u_id)
     return {}
@@ -218,7 +218,7 @@ def handle_channel_messages():
     channel_id = int(request.args.get('channel_id'))
     start = int(request.args.get('start'))
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channel_messages_v1(user_id, channel_id, start)
 
@@ -230,7 +230,7 @@ def handle_channel_removeowner():
     channel_id = int(request_data['channel_id'])
     u_id = int(request_data['u_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     channel_removeowner_v1(user_id, channel_id, u_id)
     return {}
@@ -245,7 +245,7 @@ def handle_message_send():
     channel_id = int(request_data['channel_id'])
     message = request_data['message']
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return message_send_v1(user_id, channel_id, message)
 
@@ -256,7 +256,7 @@ def handle_message_remove():
     user_token = request_data['token']
     message_id = int(request_data['message_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     message_remove_v1(user_id, message_id)
     return {} 
@@ -269,9 +269,9 @@ def handle_message_edit():
     message_id = request_data['message_id']
     message = request_data['message']
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    message_edit_v1(user_id, message_id, message)
+    message_edit_v1(user_id, int(message_id), message)
     return {} 
 
 # DM Server Instructions
@@ -283,7 +283,7 @@ def handle_dm_create():
     user_token = request_data['token']
     u_ids = request_data['u_ids']
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return dm_create_v1(user_id, u_ids)
 
@@ -292,7 +292,7 @@ def handle_dm_create():
 def handle_dm_list():
     user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return dm_list_v1(user_id)
 
@@ -303,7 +303,7 @@ def handle_dm_remove():
     user_token = request_data['token']
     dm_id = int(request_data['dm_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     dm_remove_v1(user_id, dm_id)
     return {}
@@ -314,7 +314,7 @@ def handle_dm_details():
     user_token = request.args.get('token')
     dm_id = int(request.args.get('dm_id'))
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return dm_details_v1(user_id, dm_id)
 
@@ -325,7 +325,7 @@ def handle_dm_leave():
     user_token = request_data['token']
     dm_id = int(request_data['dm_id'])
     if not is_valid_JWT(user_token):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     dm_leave_v1(user_id, dm_id)
     return {}
@@ -336,10 +336,9 @@ def handle_dm_leave():
 @APP.route("/admin/userpermission/change/v1", methods=["POST"])
 def handle_userperm_change():
     request_data = request.get_json()
-    user_token = request_data['token']
-    u_id = request_data['u_id']
-    permission_id = request_data['permission_id']
-    change_global_permission(user_token, u_id, permission_id)
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError(description = "JWT no longer valid")
+    change_global_permission(user_id_from_JWT(request_data['token']), request_data['u_id'], request_data['permission_id'])
     return {}
 
 
@@ -347,7 +346,7 @@ def handle_userperm_change():
 def handle_user_remove():
     request_data = request.get_json()
     if not is_valid_JWT(request_data['token']):
-        raise AccessError
+        raise AccessError(description = "JWT no longer valid")
     return user_remove_v1(request_data['token'], request_data['u_id'])
 
 
@@ -355,16 +354,15 @@ def handle_user_remove():
 def handle_dm_send():
     request_data = request.get_json()
     if not is_valid_JWT(request_data['token']):
-        raise AccessError("JWT no longer valid")
+        raise AccessError(description = "JWT no longer valid")
     return dm_send_v1(user_id_from_JWT(request_data['token']), request_data['message'], request_data['dm_id'])
 
 
 @APP.route("/dm/messages/v1", methods=["GET"])
 def handle_dm_messages():
-    request_data = request.get_json()
-    if not is_valid_JWT(request_data['token']):
+    if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description = "JWT no longer valid")
-    return dm_messages_v1(user_id_from_JWT(request_data['token']), request_data['dm_id'], request_data['start'])
+    return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
 # NO NEED TO MODIFY BELOW THIS POINT
 

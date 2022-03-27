@@ -1,9 +1,4 @@
-from src.channels import channels_create_v1
-from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1
-from src.auth import auth_register_v1 
-from src.error import InputError, AccessError
 from src.config import url
-
 import requests
 import pytest
 
@@ -41,7 +36,7 @@ def create_user3():
 
 
 def check_user(user_token, u_id, channel_id):
-    details = requests.get(DETAILS_URL, params = {'token': user_token, 'channel_id': channel_id}).json()
+    details = requests.get(DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token}).json()
     user_was_added = False
     members = details['all_members']
     for member in members:

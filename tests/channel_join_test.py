@@ -61,7 +61,7 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})
     assert response.status_code == 200
-    channel_details = requests.get(CHANNEL_DETAILS_URL, params = {'token': user_token_2, 'channel_id': channel_id}).json()
+    channel_details = requests.get(CHANNEL_DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token_2}).json()
     expected_outcome = {
         'name': 'test',
         'is_public': True,
@@ -106,7 +106,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
     response_2 = requests.post(CHANNEL_JOIN_URL, json={
                                'token': user_token_3, 'channel_id': channel_id})
     assert response_2.status_code == 200
-    channel_details = requests.get(CHANNEL_DETAILS_URL, params = {'token': user_token_3, 'channel_id': channel_id}).json()
+    channel_details = requests.get(CHANNEL_DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token_3}).json()
     expected_outcome = {
         'name': 'test2',
         'is_public': True,

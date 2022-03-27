@@ -86,11 +86,9 @@ def channels_create_v1(auth_user_id: int, name: str, is_public: bool)->dict:
     store = data_store.get()
     channels = store['channels']
     users = store['users']
-    if not verify_user(auth_user_id):
-        raise AccessError("User not verified")
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
-        raise InputError("Channel name too long or short")
-    altered_users = {k: non_password_global_permission_field(v) for k, v in users.items()}
+        raise InputError(description = "Channel name too long or short")
+    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')

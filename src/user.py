@@ -147,11 +147,10 @@ def user_remove_v1(token: str, u_id: int)->dict:
             if message['u_id'] == u_id:
                 message['message'] = "Removed user"
         channel['messages'] = messages
-    dms = dm_list_v1(u_id)['dms']
-    dm_ids = [dm['dm_id'] for dm in dms]
-    for dm in store['dms']:
-        if dm['dm_id'] in dm_ids:
-            dm['users'].remove(u_id)
+    for dm in store['dms'].values():
+        member_u_ids = [user['u_id'] for user in dm['members']]
+        if u_id in member_u_ids:
+            dm['members'].pop(member_u_ids.index(u_id))
         for message in dm['messages']:
             if message['u_id'] == u_id:
                 message['message'] = 'Removed user'
