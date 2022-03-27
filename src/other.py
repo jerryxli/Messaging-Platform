@@ -36,9 +36,28 @@ def verify_user(auth_user_id: int)->bool:
     return bool(auth_user_id in users.keys())
 
 def is_global_user(auth_user_id: int)->bool:
+    """
+    This function checks whether a user has global permissions
+
+    Arguments:
+        auth_user_id (int)  - id to check
+    
+    Return value:
+        Returns True (Bool) is the user has global user permissions False if not
+    
+    """
     users = data_store.get()['users']
     return bool(users[auth_user_id]['global_permission'] == 2)
 
-def user_id_from_JWT(token:str)->int:
+def user_id_from_JWT(token: str)->int:
+    """
+    This function extracts the user from a given token, assumes the token is valid
+
+    Arguments:
+        token (str) - the valid token from the user
+    
+    Return Value:
+        The user id of the token
+    """
     jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
     return int(jwt_payload['auth_user_id'])

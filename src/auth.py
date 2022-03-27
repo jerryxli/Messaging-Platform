@@ -26,7 +26,7 @@ GLOBAL_PERMISSION_REMOVED = 0
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 
-def auth_login_v1(email:str, password:str)->dict:
+def auth_login_v1(email: str, password: str)->dict:
     """
     Logs an existing user into the application
 
@@ -56,7 +56,7 @@ def auth_login_v1(email:str, password:str)->dict:
     raise InputError("Invalid Email")
 
 
-def auth_register_v1(email: str, password: str, name_first: str, name_last:str)->dict:
+def auth_register_v1(email: str, password: str, name_first: str, name_last: str)->dict:
     """
     Registers a user into the database, generates a handle upon registration
 
@@ -98,14 +98,28 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-    'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions':[]}
+                           'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions': []}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
     jwt = create_JWT(new_user_id)
     return {'token': jwt, 'auth_user_id': new_user_id}
 
+
 def auth_logout_v1(token):
+    """
+    Logs the user out of the session in the token
+
+    Arguments:
+        token (str) - The token from the session which the user wants to be logged out of
+
+    Errors:
+        AccessError if the token is not valid or does not refer to a valid session
+
+    Return value:
+        {}
     
+    """
+
     if not is_valid_JWT(token):
         raise AccessError(description="The token provided is not valid.")
 
@@ -116,8 +130,6 @@ def auth_logout_v1(token):
     user['sessions'].remove(jwt_payload['user_session_id'])
 
     return {}
-
-
 
 
 def generate_handle(name_first:str, name_last:str)->str:
@@ -151,7 +163,7 @@ def generate_handle(name_first:str, name_last:str)->str:
     return stripped_concatenated_name
 
 
-def is_email_taken(email:str)->bool:
+def is_email_taken(email: str)->bool:
 
     """
     Checks whether an email is used in the data store
@@ -172,7 +184,7 @@ def is_email_taken(email:str)->bool:
     return False
 
 
-def is_handle_taken(handle:str)->bool:
+def is_handle_taken(handle: str)->bool:
     """
     This function checks whether a handle is used before in the data store
 
@@ -192,7 +204,7 @@ def is_handle_taken(handle:str)->bool:
     return False
 
 
-def is_valid_email(email:str)->bool:
+def is_valid_email(email: str)->bool:
     """
     Verifies whether an email is valid or not
 
@@ -205,7 +217,7 @@ def is_valid_email(email:str)->bool:
     return bool(re.search(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$', email))
 
 
-def remove_non_alphanumeric(string:str)->str:
+def remove_non_alphanumeric(string: str)->str:
     """
     Strips all alpha numeric characters from the input string
 
@@ -219,7 +231,7 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
-def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
+def change_global_permission(token: str, u_id: int, new_perm: int)->dict:
     '''
     Needs JWT check once implemented by login
     '''
@@ -246,7 +258,16 @@ def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
         raise InputError(description = "There is no user with this id")
     
 
-def create_JWT(auth_user_id):
+def create_JWT(auth_user_id: int)->str:
+    """
+    Creates a valid JWT from the auth user id, adds new session to user sessions
+
+    Arguments:
+        auth_user_id (int) - the user to get the JWT
+
+    Return Value:
+        The string of the new JWT, with the auth_user_id and session_id encoded
+    """
     store = data_store.get()
     new_session = len(store['users'][auth_user_id]['sessions'])
     store['users'][auth_user_id]['sessions'].append(new_session)
@@ -256,7 +277,18 @@ def create_JWT(auth_user_id):
     return new_jwt
 
 
-def is_valid_JWT(jwt_string):
+def is_valid_JWT(jwt_string: str)->bool:
+    """
+    Verifies whether a JWT is valid
+
+    Arguments:
+        jwt_string (str) - The string which needs to be verified
+
+    Return Value:
+        False if the JWT has been forged with a different secret, false if there is no session with the JWT,
+        false if the user id does not exist. True if none of those conditions are met (a valid JWT).
+
+    """
     try:
         jwt_payload = jwt.decode(jwt_string, JWT_SECRET, algorithms=['HS256'])
     except:
