@@ -16,7 +16,7 @@ from src.other import verify_user
 MAX_CHANNEL_NAME_LENGTH = 20
 
 
-def channels_list_v1(auth_user_id: int)->dict:
+def channels_list_v2(auth_user_id: int)->dict:
     """
     Prints out the list of channels that the user is a member of
     In the format: { channels: [{}, {}, {}] }
@@ -46,7 +46,7 @@ def channels_list_v1(auth_user_id: int)->dict:
     return {'channels': user_channels}
 
 
-def channels_listall_v1(auth_user_id: int)->dict:
+def channels_listall_v2(auth_user_id: int)->dict:
     """
     Allows a registered user to list all public and private channels
 
@@ -64,7 +64,7 @@ def channels_listall_v1(auth_user_id: int)->dict:
             for key, channel in channels.items()]}
 
 
-def channels_create_v1(auth_user_id: int, name: str, is_public: bool)->dict:
+def channels_create_v2(auth_user_id: int, name: str, is_public: bool)->dict:
     """
     Creates a new channel
 
@@ -87,7 +87,7 @@ def channels_create_v1(auth_user_id: int, name: str, is_public: bool)->dict:
     channels = store['channels']
     users = store['users']
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
-        raise InputError(description = "Channel name too long or short")
+        raise InputError(description="Channel name too long or short")
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id

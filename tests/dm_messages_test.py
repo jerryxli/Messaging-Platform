@@ -31,8 +31,8 @@ def register_user_2():
 
 def test_basic_success(clear_store, register_user_1):
     user_1 = register_user_1
-    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
-    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': "HEY ME"}).json()['message_id']
+    dm_id = requests.post(DM_CREATE_URL, json={'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json={'token': user_1['token'], 'dm_id': dm_id, 'message': "HEY ME"}).json()['message_id']
     response = requests.get(DM_MESSAGES_URL, params = {"token": user_1['token'], 'dm_id': dm_id, 'start': 0})
     assert response.status_code == 200
     list_msg_ids = [message['message_id'] for message in response.json()['messages']]
@@ -80,20 +80,20 @@ def test_pagination_success(clear_store, register_user_1, register_user_2):
 
 def test_invalid_dm_id(clear_store, register_user_1):
     user_1 = register_user_1
-    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
+    dm_id = requests.post(DM_CREATE_URL, json={'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
     response = requests.get(DM_MESSAGES_URL, params = {"token": user_1['token'], 'dm_id': dm_id + 1, 'start': 0})
     assert response.status_code == 400
 
 def test_invalid_u_id(clear_store, register_user_1, register_user_2):
     user_1 = register_user_1
     user_2 = register_user_2
-    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
+    dm_id = requests.post(DM_CREATE_URL, json={'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
     response = requests.get(DM_MESSAGES_URL, params = {"token": user_2['token'], 'dm_id': dm_id, 'start': 0})
     assert response.status_code == 403
 
 
 def test_invalid_start(clear_store, register_user_1):
     user_1 = register_user_1
-    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
+    dm_id = requests.post(DM_CREATE_URL, json={'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
     response = requests.get(DM_MESSAGES_URL, params = {"token": user_1['token'], 'dm_id': dm_id, 'start': 43})
     assert response.status_code == 400

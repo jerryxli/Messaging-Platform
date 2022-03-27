@@ -16,7 +16,7 @@ from src.other import verify_user, is_global_user
 GLOBAL_PERMISSION_OWNER = 2
 PAGE_THRESHOLD = 50
 
-def channel_invite_v1(auth_user_id, channel_id, u_id):
+def channel_invite_v2(auth_user_id, channel_id, u_id):
     """
     Invites a user to join a channel.
 
@@ -36,7 +36,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
         None
     """
     if verify_user(u_id) is False:
-        raise InputError(description = "u_id does not refer to a valid user")
+        raise InputError(description="u_id does not refer to a valid user")
 
     store = data_store.get()
     channel = None
@@ -45,12 +45,12 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError(description = "channel_id does not refer to a valid channel")
+        raise InputError(description="channel_id does not refer to a valid channel")
 
     if check_user_in_channel(u_id, channel):
-        raise InputError(description = "u_id refers to a user who is already a member of the channel")
+        raise InputError(description="u_id refers to a user who is already a member of the channel")
     if not check_user_in_channel(auth_user_id, channel):
-        raise AccessError(description = "User issuing invite is not part of channel")
+        raise AccessError(description="User issuing invite is not part of channel")
 
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
@@ -60,7 +60,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     data_store.set(store)
 
 
-def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
+def channel_details_v2(auth_user_id:int, channel_id:int)->dict:
     """
     Returns assosciated details of a channel.
 
@@ -84,16 +84,16 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError(description = "channel_id does not refer to a valid channel")
+        raise InputError(description="channel_id does not refer to a valid channel")
     ids = [user['u_id'] for user in channel['all_members']]
     # Checks for Access error: when the user is not a member of the channel
     if auth_user_id in ids:
         return {k: v for k, v in channel.items() if k not in ['messages']}
     else:
-        raise AccessError(description = "User is not a member of the channel")
+        raise AccessError(description="User is not a member of the channel")
 
 
-def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
+def channel_messages_v2(auth_user_id:int, channel_id:int, start:int)->dict:
     """
     Returns up to 50 messages between the start index and start + 50.
 
@@ -116,13 +116,13 @@ def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError(description = 'channel_id does not refer to a valid channel')
+        raise InputError(description='channel_id does not refer to a valid channel')
     if not check_user_in_channel(auth_user_id, channel):
-        raise AccessError(description = "User is not a member of the channel")
+        raise AccessError(description="User is not a member of the channel")
 
     # determine if start is greater than total number of messages, if so, return InputError
     if start > len(channel['messages']):
-        raise InputError(description = "start is greater than the total number of messages in the channel")
+        raise InputError(description="start is greater than the total number of messages in the channel")
 
     messages = []
     not_displayed = list(reversed(channel['messages']))[start:]
@@ -147,7 +147,7 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     return bool(auth_user_id in ids)
 
 
-def channel_join_v1(auth_user_id:int, channel_id:int)->None:
+def channel_join_v2(auth_user_id:int, channel_id:int)->None:
     """
     Adds a new user to a channel provided it is public and they aren't already in it
 
@@ -313,12 +313,12 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         raise InputError("channel_id not valid")
     owner_members = [user['u_id'] for user in channel['owner_members']]
     if u_id not in owner_members:
-        raise InputError(description = "u_id is not an owner of channel")
+        raise InputError(description="u_id is not an owner of channel")
     
     if not users[auth_user_id]['global_permission'] == GLOBAL_PERMISSION_OWNER and not auth_user_id in owner_members:
-        raise AccessError(description = 'auth_user_id does not have owner permissions')
+        raise AccessError(description='auth_user_id does not have owner permissions')
     if len(owner_members) == 1:
-        raise InputError(description = "u_id is the only owner")
+        raise InputError(description="u_id is the only owner")
     user_index = owner_members.index(u_id)
     channel['owner_members'].pop(user_index)
     channels[channel_id] = channel

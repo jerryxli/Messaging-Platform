@@ -9,7 +9,7 @@ LOGIN_URL = f"{url}/auth/login/v2"
 
 @pytest.fixture
 def clear_store():
-    requests.delete(f"{url}/clear/v1", json = {})
+    requests.delete(f"{url}/clear/v1", json={})
     
 @pytest.fixture
 def register_user_1():
@@ -18,7 +18,7 @@ def register_user_1():
 
 @pytest.fixture
 def register_user_2():
-    response = requests.post(REGISTER_URL, json = {"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).json()
+    response = requests.post(REGISTER_URL, json={"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).json()
     return response
 
 def test_basic_success(clear_store, register_user_1, register_user_2):
