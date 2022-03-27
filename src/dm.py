@@ -38,12 +38,12 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     # U_id is not valid
     if len(u_ids) != 0:
         if any(verify_user(u_id) for u_id in u_ids) == False:
-            raise InputError("U_id not valid")
+            raise InputError(description = "U_id not valid")
 
     # Check for duplicate u_id
     user_set = set(u_ids)
     if len(user_set) < len(u_ids):
-        raise InputError("Duplicate u_ids entered")
+        raise InputError(description = "Duplicate u_ids entered")
     if auth_user_id not in u_ids:
         u_ids.append(auth_user_id)
 
@@ -89,21 +89,13 @@ def dm_list_v1(auth_user_id:int)->dict:
         Returns { 'dms' } upon successful creation 
         in format {'dms': [{'dm_id': int, 'name': str}] } 
     """
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
-
     store = data_store.get()
     dms = store['dms']
-
     dm_list = []
-
-    for key, dm_info in dms.items():
-        ids = [user['u_id'] for user in dm_info['members']]
+    for key, value in dms.items():
+        ids = [user['u_id'] for user in value['members']]
         if auth_user_id in ids:
-            dm = {'dm_id': key, 'name': dm_info['name']}
-            dm_list.append(dm)
-    
-    data_store.set(store)
+            dm_list.append({'name': value['name'], 'dm_id': key})
 
     return { 'dms': dm_list }
 
@@ -127,17 +119,13 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     Return Value:
         None
     """
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
 
     store = data_store.get()
     dms = store['dms']
     users = store['users']
-    if dm_id in dms.keys():
-        dm = dms[dm_id]
-    else:
-        raise InputError("dm_id is not valid")
-    
+    if dm_id not in dms:
+        raise InputError(description = "dm_id is not valid")
+    dm = dms[dm_id]
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
@@ -145,9 +133,9 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
         # remove DM
         del dms[dm_id]
     elif user in dm['members']:
-        raise AccessError("User is not the original DM creator")
+        raise AccessError(description = "User is not the original DM creator")
     else:
-        raise AccessError("User is not in DM")
+        raise AccessError(description = "User is not in DM")
 
     store['dms'] = dms
     data_store.set(store)
@@ -174,7 +162,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError("Dm_id not valid")
+        raise InputError(description = "Dm_id not valid")
 
     dm_details = {}
     member_ids = [member['u_id'] for member in dm['members']]
@@ -183,7 +171,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
         dm_details['name'] = dm['name']
         dm_details['members'] = dm['members']
     else:
-        raise AccessError("Auth_user_id not a member")
+        raise AccessError(description = "Auth_user_id not a member")
 
     data_store.set(store)
     return dm_details
@@ -202,9 +190,6 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     Return Value:
         None
     """
-    if not verify_user(auth_user_id):
-        raise AccessError("Auth id not valid")
-
     store = data_store.get()
     dms = store['dms']
     users = store['users']
@@ -212,7 +197,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError("Dm_id not valid")
+        raise InputError(description = "Dm_id not valid")
 
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
@@ -224,7 +209,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     elif user in dm['members']:
         dm['members'].remove(user)
     else:
-        raise AccessError("User is not in DM")
+        raise AccessError(description = "User is not in DM")
 
     store['dms'] = dms
     data_store.set(store)
@@ -266,7 +251,10 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
     """
     store = data_store.get()
     dms = store['dms']
-    print(dms)
+    print('dm', dm_id)
+    print(dms, 'DMSSSSSS\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+    print(dm_id in dms.keys())
+    print(dms.keys())
     if dm_id in dms:
         dm = dms[dm_id]
     else:

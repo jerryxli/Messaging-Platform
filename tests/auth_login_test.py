@@ -1,6 +1,5 @@
-from src.error import InputError, AccessError
 from .helper_functions import is_valid_dictionary_output
-from src.config import port, url
+from src.config import url
 import pytest
 import requests
 
