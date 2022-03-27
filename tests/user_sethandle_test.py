@@ -29,7 +29,6 @@ def test_nomal_success(clear_store, register_user_1):
     assert change_request.status_code == 200
     assert change_request.json() == {}
     profile_repsonse = requests.get(PROFILE_URL, params={"token": user_token, "u_id": user_id})
-    print(profile_repsonse.json())
     assert profile_repsonse.json()['handle_str'] == 'iamthebest'
 
 def test_invalid_token(clear_store, register_user_1):
@@ -61,3 +60,10 @@ def test_handle_in_use(clear_store, register_user_1, register_user_2):
     user2_handle = profile_repsonse.json()['handle_str']
     change_request = requests.put(SETHANDLE_URL, json={"token": user_token, "handle_str": user2_handle})
     assert change_request.status_code == 400
+
+def test_own_handle(clear_store, register_user_1):
+    user_token = register_user_1['token']
+    user_id = register_user_1['auth_user_id']
+    user_handle = requests.get(PROFILE_URL, params = {'token': user_token, 'u_id': user_id}).json()['handle_str']
+    change_request = requests.put(SETHANDLE_URL, json={"token": user_token, "handle_str": user_handle})
+    assert change_request.status_code == 200

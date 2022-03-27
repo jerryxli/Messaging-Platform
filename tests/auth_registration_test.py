@@ -62,6 +62,6 @@ def test_auth_register_v2_error_last_name_short(clear_store):
     assert response.status_code == 400
 
 
-def test_auth_register_v1_error_last_name_long(clear_store):
+def test_auth_register_v2_error_last_name_long(clear_store):
     response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"goodpass", "name_first":"Simon", "name_last":"THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY"})
     assert response.status_code == 400

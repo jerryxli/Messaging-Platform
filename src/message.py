@@ -129,7 +129,6 @@ def message_remove_v1(user_id, message_id):
 
     if message_info is None:
         raise InputError(description = "message_id does not refer to a valid message within a channel/DM that the authorised user has joined")
-    print(user_id)
     if message_info['type'] == 'channel':
         u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['owner_members']]
         all_u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['all_members']]

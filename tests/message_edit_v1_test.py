@@ -136,7 +136,6 @@ def test_user_leaves_channel(clear_store, create_user, create_user2):
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     requests.post(CHANNEL_JOIN_URL, json = {'token': create_user2['token'], 'channel_id': channel_id})
     response = requests.post(LEAVE_URL, json = {'token': user_token_1, 'channel_id': channel_id})
-    print(requests.get(DETAILS_URL, params = {'token': create_user2['token'], 'channel_id': channel_id}).json())
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id, 'message': 'im not in channel'})
     assert response.status_code == 400
 

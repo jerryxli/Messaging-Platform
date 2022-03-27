@@ -16,7 +16,6 @@ def test_forged_token(clear_store):
     response = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
     auth_id = int(response.json()['auth_user_id'])
     forged_encoding = {"auth_user_id": auth_id + 1, "session_id": 1000}
-    print(forged_encoding)
     forgedJWT = jwt.encode(forged_encoding, "faketoken", algorithm='HS256')
     profile_repsonse_0 = requests.get(PROFILE_URL, params={"u_id": auth_id, "token": forgedJWT})
     assert profile_repsonse_0.status_code == 403

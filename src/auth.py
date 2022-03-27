@@ -26,7 +26,7 @@ GLOBAL_PERMISSION_REMOVED = 0
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 
-def auth_login_v1(email: str, password: str)->dict:
+def auth_login_v2(email: str, password: str)->dict:
     """
     Logs an existing user into the application
 
@@ -56,7 +56,7 @@ def auth_login_v1(email: str, password: str)->dict:
     raise InputError(description = "Invalid Email")
 
 
-def auth_register_v1(email: str, password: str, name_first: str, name_last: str)->dict:
+def auth_register_v2(email: str, password: str, name_first: str, name_last: str)->dict:
     """
     Registers a user into the database, generates a handle upon registration
 

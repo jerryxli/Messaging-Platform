@@ -266,10 +266,6 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
     """
     store = data_store.get()
     dms = store['dms']
-    print('dm', dm_id)
-    print(dms, 'DMSSSSSS\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-    print(dm_id in dms.keys())
-    print(dms.keys())
     if dm_id in dms:
         dm = dms[dm_id]
     else:

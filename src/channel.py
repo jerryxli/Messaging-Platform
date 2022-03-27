@@ -16,7 +16,7 @@ from src.other import verify_user, is_global_user
 GLOBAL_PERMISSION_OWNER = 2
 PAGE_THRESHOLD = 50
 
-def channel_invite_v1(auth_user_id, channel_id, u_id):
+def channel_invite_v2(auth_user_id, channel_id, u_id):
     """
     Invites a user to join a channel.
 
@@ -60,7 +60,7 @@ def channel_invite_v1(auth_user_id, channel_id, u_id):
     data_store.set(store)
 
 
-def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
+def channel_details_v2(auth_user_id:int, channel_id:int)->dict:
     """
     Returns assosciated details of a channel.
 
@@ -93,7 +93,7 @@ def channel_details_v1(auth_user_id:int, channel_id:int)->dict:
         raise AccessError(description = "User is not a member of the channel")
 
 
-def channel_messages_v1(auth_user_id:int, channel_id:int, start:int)->dict:
+def channel_messages_v2(auth_user_id:int, channel_id:int, start:int)->dict:
     """
     Returns up to 50 messages between the start index and start + 50.
 
@@ -147,7 +147,7 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     return bool(auth_user_id in ids)
 
 
-def channel_join_v1(auth_user_id:int, channel_id:int)->None:
+def channel_join_v2(auth_user_id:int, channel_id:int)->None:
     """
     Adds a new user to a channel provided it is public and they aren't already in it
 

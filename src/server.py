@@ -7,9 +7,9 @@ from flask_cors import CORS
 from src.error import AccessError
 from src import config
 from src.other import clear_v1, user_id_from_JWT
-from src.channel import channel_invite_v1, channel_details_v1, channel_join_v1, channel_leave_v1, channel_messages_v1, channel_addowner_v1, channel_removeowner_v1
-from src.channels import channels_create_v1, channels_list_v1, channels_listall_v1
-from src.auth import auth_login_v1, auth_logout_v1, auth_register_v1, is_valid_JWT, change_global_permission
+from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1
+from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
+from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, is_valid_JWT, change_global_permission
 from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1,users_all_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
 from src.message import message_send_v1, message_remove_v1, message_edit_v1
@@ -59,7 +59,7 @@ def handle_register_v2():
     name_first = request_data['name_first']
     name_last = request_data['name_last']
 
-    return auth_register_v1(email, password, name_first, name_last)
+    return auth_register_v2(email, password, name_first, name_last)
 
 
 @APP.route("/auth/login/v2", methods=['POST'])
@@ -69,7 +69,7 @@ def handle_login_v2():
     email = request_data['email']
     password = request_data['password']
 
-    return auth_login_v1(email, password)
+    return auth_login_v2(email, password)
 
 
 @APP.route("/auth/logout/v1", methods=['POST'])
@@ -138,7 +138,7 @@ def handle_channels_create_v2():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return channels_create_v1(user_id, channel_name, is_public)
+    return channels_create_v2(user_id, channel_name, is_public)
 
 
 @APP.route("/channels/list/v2", methods=["GET"])
@@ -147,7 +147,7 @@ def handle_channels_list_v2():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return channels_list_v1(user_id)
+    return channels_list_v2(user_id)
 
 
 @APP.route("/channels/listall/v2", methods=['GET'])
@@ -156,7 +156,7 @@ def handle_channels_listall_v2():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return channels_listall_v1(user_id)
+    return channels_listall_v2(user_id)
 
 # Channel Server Instructions
 
@@ -168,7 +168,7 @@ def handle_channel_details():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return channel_details_v1(user_id, channel_id)
+    return channel_details_v2(user_id, channel_id)
 
 
 @APP.route("/channel/join/v2", methods=["POST"])
@@ -179,7 +179,7 @@ def handle_channel_join():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    channel_join_v1(user_id, channel_id)
+    channel_join_v2(user_id, channel_id)
     return {}
 
 
@@ -192,7 +192,7 @@ def handle_channel_invite():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    channel_invite_v1(user_id, channel_id, u_id)
+    channel_invite_v2(user_id, channel_id, u_id)
     return {}
 
 
@@ -229,7 +229,7 @@ def handle_channel_messages():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return channel_messages_v1(user_id, channel_id, start)
+    return channel_messages_v2(user_id, channel_id, start)
 
 
 @APP.route("/channel/removeowner/v1", methods = ["POST"])
