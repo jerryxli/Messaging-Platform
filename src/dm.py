@@ -38,12 +38,12 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     # U_id is not valid
     if len(u_ids) != 0:
         if any(verify_user(u_id) for u_id in u_ids) == False:
-            raise InputError(description = "U_id not valid")
+            raise InputError(description="U_id not valid")
 
     # Check for duplicate u_id
     user_set = set(u_ids)
     if len(user_set) < len(u_ids):
-        raise InputError(description = "Duplicate u_ids entered")
+        raise InputError(description="Duplicate u_ids entered")
     if auth_user_id not in u_ids:
         u_ids.append(auth_user_id)
 
@@ -124,7 +124,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     dms = store['dms']
     users = store['users']
     if dm_id not in dms:
-        raise InputError(description = "dm_id is not valid")
+        raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
@@ -133,9 +133,9 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
         # remove DM
         del dms[dm_id]
     elif user in dm['members']:
-        raise AccessError(description = "User is not the original DM creator")
+        raise AccessError(description="User is not the original DM creator")
     else:
-        raise AccessError(description = "User is not in DM")
+        raise AccessError(description="User is not in DM")
 
     store['dms'] = dms
     data_store.set(store)
@@ -162,7 +162,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError(description = "Dm_id not valid")
+        raise InputError(description="Dm_id not valid")
 
     dm_details = {}
     member_ids = [member['u_id'] for member in dm['members']]
@@ -171,7 +171,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
         dm_details['name'] = dm['name']
         dm_details['members'] = dm['members']
     else:
-        raise AccessError(description = "Auth_user_id not a member")
+        raise AccessError(description="Auth_user_id not a member")
 
     data_store.set(store)
     return dm_details
@@ -197,7 +197,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     if dm_id in dms.keys():
         dm = dms[dm_id]
     else:
-        raise InputError(description = "Dm_id not valid")
+        raise InputError(description="Dm_id not valid")
 
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
@@ -209,7 +209,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     elif user in dm['members']:
         dm['members'].remove(user)
     else:
-        raise AccessError(description = "User is not in DM")
+        raise AccessError(description="User is not in DM")
 
     store['dms'] = dms
     data_store.set(store)
@@ -269,12 +269,12 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
     if dm_id in dms:
         dm = dms[dm_id]
     else:
-        raise InputError(description = 'dm_id does not refer to a valid channel')
+        raise InputError(description='dm_id does not refer to a valid channel')
     u_ids = [user['u_id'] for user in dm['members']]
     if auth_user_id not in u_ids:
-        raise AccessError(description = "dm_id is valid but user is not a member of the channel")
+        raise AccessError(description="dm_id is valid but user is not a member of the channel")
     if start > len(dm['messages']):
-        raise InputError(description = "Start is greater than the total number of messages in channel")
+        raise InputError(description="Start is greater than the total number of messages in channel")
     messages = []
     not_displayed = list(reversed(dm['messages']))[start:]
     messages.extend(not_displayed[:min(PAGE_THRESHOLD, len(not_displayed))])

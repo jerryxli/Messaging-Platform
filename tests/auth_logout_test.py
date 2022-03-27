@@ -17,7 +17,7 @@ def test_logout_success(clear_store):
     logout_request = requests.post(LOGOUT_URL, json={"token": response.json()['token']})
     assert logout_request.status_code == 200
     assert logout_request.json() == {}
-    profile_response = requests.get(PROFILE_URL, params = {"token": response.json()['token'], "u_id": response.json()['auth_user_id']})
+    profile_response = requests.get(PROFILE_URL, params={"token": response.json()['token'], "u_id": response.json()['auth_user_id']})
     assert profile_response.status_code == 403
 
 

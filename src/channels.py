@@ -87,7 +87,7 @@ def channels_create_v2(auth_user_id: int, name: str, is_public: bool)->dict:
     channels = store['channels']
     users = store['users']
     if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
-        raise InputError(description = "Channel name too long or short")
+        raise InputError(description="Channel name too long or short")
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id

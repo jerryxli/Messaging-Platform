@@ -41,11 +41,11 @@ def test_normal_functionality(clear_store, create_user):
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     # check that channel_id has messages within it
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.json() != {'messages': [], 'start': 0, 'end': -1}
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
@@ -58,18 +58,18 @@ def test_message_already_removed(clear_store, create_user):
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     # check that channel_id has messages within it
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.json() != {'messages': [], 'start': 0, 'end': -1}
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_1, 'message_id': message_id})
     # check that channel_id has NO messages within it
     assert response.status_code == 200
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}
     # attempt to remove the message again
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 400
 
 
@@ -77,8 +77,8 @@ def test_message_id_invalid(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id + 1})
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_1, 'message_id': message_id + 1})
     assert response.status_code == 400
 
 
@@ -91,8 +91,8 @@ def test_user_id_didnt_send_message(clear_store, create_user, create_user2):
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})  
     assert response.status_code == 200
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_2, 'message_id': message_id})
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_2, 'message_id': message_id})
     assert response.status_code == 403
 
 def test_user_without_permissions(clear_store, create_user, create_user2):
@@ -104,29 +104,29 @@ def test_user_without_permissions(clear_store, create_user, create_user2):
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})  
     assert response.status_code == 200
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Leo loves coding!"}).json()['message_id']
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_2, 'message_id': message_id})
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_2, 'channel_id': channel_id, 'message': "Leo loves coding!"}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_2, 'message_id': message_id})
     assert response.status_code == 200
 
 def test_user_leaves_channel(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
-    response = requests.post(LEAVE_URL, json = {'token': user_token_1, 'channel_id': channel_id})
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
+    response = requests.post(LEAVE_URL, json={'token': user_token_1, 'channel_id': channel_id})
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 400
     
 def test_normal_dm(clear_store, create_user):
     user_1 = create_user
-    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': []}).json()['dm_id']
-    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_1['token'], 'message_id': message_id})
+    dm_id = requests.post(DM_CREATE_URL, json={'token': user_1['token'], 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json={'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': user_1['token'], 'message_id': message_id})
     assert response.status_code == 200
 
 def test_user_not_in_dm(clear_store, create_user, create_user2):
     user_1 = create_user
-    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': []}).json()['dm_id']
-    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
-    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': create_user2['token'], 'message_id': message_id, 'message': 'i have edited this'})
+    dm_id = requests.post(DM_CREATE_URL, json={'token': user_1['token'], 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json={'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json={'token': create_user2['token'], 'message_id': message_id, 'message': 'i have edited this'})
     assert response.status_code == 400

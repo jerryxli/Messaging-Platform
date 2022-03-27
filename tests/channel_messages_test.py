@@ -39,8 +39,8 @@ def test_normal_functionality(clear_store, create_user):
     # no messages
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}         
     # send a message
-    message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Leo loves tests!"}).json()['message_id']      
-    response = requests.get(CHANNEL_MESSAGES_URL, params= {'channel_id': channel_id, 'start':0, 'token': user_token_1})
+    message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Leo loves tests!"}).json()['message_id']      
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start':0, 'token': user_token_1})
     # check if message is there
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
@@ -59,7 +59,7 @@ def test_pagination_functionality(clear_store, create_user):
     for i in range(0, 124):
         requests.post(MESSAGE_SEND_URL, json={"token": user_1_token, "channel_id": channel_id, "message": str(i)})
 
-    request_messages = requests.get(CHANNEL_MESSAGES_URL, params = {'token': user_1_token, 'channel_id': channel_id, 'start': 0})
+    request_messages = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_1_token, 'channel_id': channel_id, 'start': 0})
     counter = 123
     current_start = 0
     # Keep requesting messages
@@ -73,7 +73,7 @@ def test_pagination_functionality(clear_store, create_user):
             assert message['message'] == str(counter)
             counter -= 1
         current_start += 50
-        request_messages = requests.get(CHANNEL_MESSAGES_URL, params = {'token': user_1_token, 'channel_id': channel_id, 'start': current_start})
+        request_messages = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_1_token, 'channel_id': channel_id, 'start': current_start})
     # Check the final batch of messages
     for message in request_messages.json()['messages']:
         assert message['message'] == str(counter)
