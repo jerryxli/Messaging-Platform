@@ -1,6 +1,6 @@
 from src.data_store import data_store
 from src.error import AccessError, InputError
-from src.auth import GLOBAL_PERMISSION_REMOVED, MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, is_email_taken, is_valid_JWT, is_valid_email
+from src.auth import GLOBAL_PERMISSION_REMOVED, MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, is_email_taken, is_handle_taken, is_valid_JWT, is_valid_email
 from src.other import user_id_from_JWT, verify_user
 from src.channel import GLOBAL_PERMISSION_OWNER, non_password_global_permission_field
 from src.dm import dm_list_v1
@@ -157,5 +157,38 @@ def user_remove_v1(token: str, u_id: int)->dict:
     users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': GLOBAL_PERMISSION_REMOVED, 'sessions': []}
     store['channels'] = channels
     store['users'] = users
+    data_store.set(store)
+    return {}
+    
+def user_set_handle_v1(token: str, handle_str: str)->dict:
+    """
+    Allows a user to update thier handle
+
+    Arguments:
+        token (str) - The token of the user whose handle needs to be updated
+        handle_str  - The new proposed handle
+
+    Errors:
+        AccessError - Where the token provided is not valid
+        InputError  - Where the handle is not between 3 and 20 characters, is not alphanumeric
+                      or the handle is in use by another user
+    """
+    if not is_valid_JWT(token):
+        raise AccessError(description="Token provided is not valid.")
+    if len(handle_str) < 3 or len(handle_str) > 20:
+        raise InputError(description="The handle is not between 3 and 20 characters(inclusive).")
+    if not handle_str.isalnum():
+        raise InputError(description="The handle is not alphanumeric.")
+    
+    store = data_store.get()
+    user = store['users'][user_id_from_JWT(token)]
+    if user['handle'] == handle_str:
+        return {}
+    
+    if is_handle_taken(handle_str):
+        raise InputError(description="This handle is in use by another user.")
+    
+    user['handle'] = handle_str
+
     data_store.set(store)
     return {}
