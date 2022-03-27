@@ -20,7 +20,7 @@ def test_set_name_success(clear_store):
     assert setname_request.status_code == 200
     assert setname_request.json() == {}
     new_profile = requests.get(PROFILE_URL, params={"u_id": user_id, "token": token})
-    assert new_profile.json() == {"u_id": user_id, "email": "z55555@unsw.edu.au", "name_first": "John", "name_last": "Smith", "handle_str": "jakerenzella"}
+    assert new_profile.json()['user'] == {"u_id": user_id, "email": "z55555@unsw.edu.au", "name_first": "John", "name_last": "Smith", "handle_str": "jakerenzella"}
 
 
 def test_invalid_token(clear_store):
