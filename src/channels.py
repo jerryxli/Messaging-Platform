@@ -15,7 +15,8 @@ from src.other import verify_user
 
 MAX_CHANNEL_NAME_LENGTH = 20
 
-def channels_list_v1(auth_user_id:int)->dict:
+
+def channels_list_v1(auth_user_id: int)->dict:
     """
     Prints out the list of channels that the user is a member of
     In the format: { channels: [{}, {}, {}] }
@@ -34,7 +35,7 @@ def channels_list_v1(auth_user_id:int)->dict:
     # List to store channel info
     user_channels = []
 
-    # Loops through each channel in the list Channels to check if 
+    # Loops through each channel in the list Channels to check if
     # user is in the channel
     for channel_id, channel_details in channels.items():
         ids = [user['u_id'] for user in channel_details['all_members']]
@@ -42,10 +43,10 @@ def channels_list_v1(auth_user_id:int)->dict:
             user_channel = {'channel_id': channel_id, 'name': channel_details['name']}
             user_channels.append(user_channel)
     # Returns a dictionary with the key 'channels' which has user_channels as its values
-    return { 'channels': user_channels }
+    return {'channels': user_channels}
 
 
-def channels_listall_v1(auth_user_id:int)->dict:
+def channels_listall_v1(auth_user_id: int)->dict:
     """
     Allows a registered user to list all public and private channels
 
@@ -59,11 +60,11 @@ def channels_listall_v1(auth_user_id:int)->dict:
 
     store = data_store.get()
     channels = store['channels']
-    return { 'channels': [{'channel_id': key, 'name': channel['name']}
-    for key, channel in channels.items()] }
+    return {'channels': [{'channel_id': key, 'name': channel['name']}
+            for key, channel in channels.items()]}
 
 
-def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
+def channels_create_v1(auth_user_id: int, name: str, is_public: bool)->dict:
     """
     Creates a new channel
 
@@ -81,7 +82,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
 
     Adds in format {'channel_id': int, 'name': str, 'public': bool, 'users': list(IDs)}
     """
-    
+
     store = data_store.get()
     channels = store['channels']
     users = store['users']
@@ -93,8 +94,8 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
         user['handle_str'] = user.pop('handle')
     new_channel_id = len(channels)
     channels[new_channel_id] = {'name': name, 'is_public': is_public,
-    'owner_members': [altered_users[auth_user_id]],
-    'all_members': [altered_users[auth_user_id]], 'messages': []}
+                                'owner_members': [altered_users[auth_user_id]],
+                                'all_members': [altered_users[auth_user_id]], 'messages': []}
     store['channels'] = channels
     data_store.set(store)
     return(
@@ -102,7 +103,7 @@ def channels_create_v1(auth_user_id:int, name:str, is_public:bool)->dict:
     )
 
 
-def non_password_global_permission_field(user:dict)->dict:
+def non_password_global_permission_field(user: dict)->dict:
     """
     Removes all non-password fields from a user to print them
 
@@ -113,5 +114,5 @@ def non_password_global_permission_field(user:dict)->dict:
         Dictionary with password field removed
 
     """
-    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission', 'sessions']}
+    user = {k: v for k, v in user.items() if k not in ['password', 'global_permission', 'sessions']}
     return user
