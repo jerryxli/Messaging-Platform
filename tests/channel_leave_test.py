@@ -45,8 +45,8 @@ def test_owner_leaves(clear_store, create_user, create_user2):
     channel_id_2 = requests.post(CREATE_URL, json = {'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     request_data_1 = requests.post(LEAVE_URL, json = {'token': user_token_1, 'channel_id': channel_id_1})
     request_data_2 = requests.post(LEAVE_URL, json = {'token': user_token_2, 'channel_id': channel_id_2})
-    channel_details_1 = requests.get(DETAILS_URL, params = {'channel_id': channel_id_2}, json = {'token': user_token_2})
-    channel_details_2 = requests.get(DETAILS_URL, params = {'channel_id': channel_id_1}, json = {'token': user_token_1})
+    channel_details_1 = requests.get(DETAILS_URL, params = {'channel_id': channel_id_2, 'token': user_token_2})
+    channel_details_2 = requests.get(DETAILS_URL, params = {'channel_id': channel_id_1, 'token': user_token_1})
 
     assert request_data_1.json() == {}
     assert request_data_1.status_code == 200
@@ -64,8 +64,8 @@ def test_member_leaves(clear_store, create_user, create_user2):
     channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     requests.post(JOIN_URL, json = {'token': user_token_2, 'channel_id': channel_id})
     request_data_1 = requests.post(LEAVE_URL, json = {'token': user_token_2, 'channel_id': channel_id})
-    channel_details_1 = requests.get(DETAILS_URL, params = {'channel_id': channel_id}, json = {'token': user_token_1})
-    channel_details_2 = requests.get(DETAILS_URL, params = {'channel_id': channel_id}, json = {'token': user_token_2})
+    channel_details_1 = requests.get(DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token_1})
+    channel_details_2 = requests.get(DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token_2})
     expected_output_1 = {   'name': 'My Channel!', 
                             'is_public': True,
                             'owner_members': [

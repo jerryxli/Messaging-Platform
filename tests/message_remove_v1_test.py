@@ -43,11 +43,11 @@ def test_normal_functionality(clear_store, create_user):
 
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     # check that channel_id has messages within it
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.json() != {'messages': [], 'start': 0, 'end': -1}
     response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
     # check that channel_id has no messages within it
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}
@@ -60,12 +60,12 @@ def test_message_already_removed(clear_store, create_user):
 
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     # check that channel_id has messages within it
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.json() != {'messages': [], 'start': 0, 'end': -1}
     response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
     # check that channel_id has NO messages within it
     assert response.status_code == 200
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}
     # attempt to remove the message again

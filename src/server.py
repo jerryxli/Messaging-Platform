@@ -83,10 +83,10 @@ def handle_logout_v1():
 
 @APP.route("/user/profile/v1", methods=['GET'])
 def handle_profile_v1():
-    request_data = request.get_json()
+    token = request.args.get('token')
     u_id = int(request.args.get('u_id'))
 
-    return user_profile_v1(request_data['token'], u_id)
+    return user_profile_v1(token, u_id)
 
 
 @APP.route("/user/profile/setname/v1", methods=['PUT'])
@@ -109,7 +109,7 @@ def handle_setemail_v1():
 
 @APP.route("/users/all/v1", methods = ['GET'])
 def handle_users_all_v1():
-    user_token= request.get_json()['token']
+    user_token= request.args.get('token')
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
@@ -130,7 +130,7 @@ def handle_channels_create_v2():
 
 @APP.route("/channels/list/v2", methods=["GET"])
 def handle_channels_list_v2():
-    user_token = request.get_json()['token']
+    user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
@@ -138,7 +138,7 @@ def handle_channels_list_v2():
 
 @APP.route("/channels/listall/v2", methods=['GET'])
 def handle_channels_listall_v2():
-    user_token = request.get_json()['token']
+    user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
@@ -149,7 +149,7 @@ def handle_channels_listall_v2():
 
 @APP.route("/channel/details/v2", methods=["GET"])
 def handle_channel_details():
-    user_token = request.get_json()['token']
+    user_token = request.args.get('token')
     channel_id = int(request.args.get('channel_id'))
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
@@ -205,7 +205,7 @@ def handle_channel_addowner():
 
 @APP.route("/channel/messages/v2", methods=['GET'])
 def handle_channel_messages():
-    user_token = request.get_json()['token']
+    user_token = request.args.get('token')
     channel_id = int(request.args.get('channel_id'))
     start = int(request.args.get('start'))
     if not is_valid_JWT(user_token):
@@ -274,7 +274,7 @@ def handle_dm_create():
 
 @APP.route("/dm/list/v1", methods = ["GET"])
 def handle_dm_list():
-    user_token = request.get_json()['token']
+    user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
@@ -294,7 +294,7 @@ def handle_dm_remove():
 
 @APP.route("/dm/details/v1", methods = ["GET"])
 def handle_dm_details():
-    user_token = request.get_json()['token']
+    user_token = request.args.get('token')
     dm_id = int(request.args.get('dm_id'))
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
@@ -337,11 +337,9 @@ def handle_dm_send():
 
 @APP.route("/dm/messages/v1", methods=["GET"])
 def handle_dm_messages():
-    request_data = request.get_json()
-    print(request_data)
-    if not is_valid_JWT(request_data['token']):
+    if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description = "JWT no longer valid")
-    return dm_messages_v1(user_id_from_JWT(request_data['token']), request_data['dm_id'], request_data['start'])
+    return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
 # NO NEED TO MODIFY BELOW THIS POINT
 
