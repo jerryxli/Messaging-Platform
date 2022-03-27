@@ -9,6 +9,9 @@ MESSAGE_SEND_URL = f"{url}/message/send/v1"
 MESSAGE_REMOVE_URL = f"{url}/message/remove/v1"
 CHANNEL_MESSAGES_URL = f"{url}/channel/messages/v2"
 LEAVE_URL = f"{url}/channel/leave/v1"
+DM_CREATE_URL = f"{url}/dm/create/v1"
+DM_SEND_URL = f"{url}/message/senddm/v1"
+DM_MESSAGES_URL = f"{url}/dm/messages/v1"
 
 @pytest.fixture
 def clear_store():
@@ -109,4 +112,18 @@ def test_user_leaves_channel(clear_store, create_user):
     message_id = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     response = requests.post(LEAVE_URL, json = {'token': user_token_1, 'channel_id': channel_id})
     response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_token_1, 'message_id': message_id})
+    assert response.status_code == 400
+    
+def test_normal_dm(clear_store, create_user):
+    user_1 = create_user
+    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': user_1['token'], 'message_id': message_id})
+    assert response.status_code == 200
+
+def test_user_not_in_dm(clear_store, create_user, create_user2):
+    user_1 = create_user
+    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.delete(MESSAGE_REMOVE_URL, json = {'token': create_user2['token'], 'message_id': message_id, 'message': 'i have edited this'})
     assert response.status_code == 400

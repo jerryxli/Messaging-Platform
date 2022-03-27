@@ -338,6 +338,7 @@ def handle_dm_send():
 @APP.route("/dm/messages/v1", methods=["GET"])
 def handle_dm_messages():
     request_data = request.get_json()
+    print(request_data)
     if not is_valid_JWT(request_data['token']):
         raise AccessError(description = "JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request_data['token']), request_data['dm_id'], request_data['start'])

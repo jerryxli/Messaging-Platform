@@ -83,7 +83,6 @@ def message_edit_v1(user_id, message_id, message):
     if message_info['type'] == 'channel':
         u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['owner_members']]
         all_u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['all_members']]
-        print('\n\n\n\\n\n\n\n\n\n\n', user_id in u_ids)
         if user_id not in u_ids and user_id not in all_u_ids:
             raise InputError(description = "message_id is valid but user is not in channel")
         if message_info['message']['u_id'] != user_id and user_id not in u_ids:
@@ -91,8 +90,8 @@ def message_edit_v1(user_id, message_id, message):
 
     else:
         u_ids = [user['u_id'] for user in dms[message_info['dm_id']]['members']]
-        if user_id not in u_ids or message_info['message']['u_id'] != user_id:
-            raise AccessError(description = "message_id is valid but user does not have permissions to edit")
+        if user_id not in u_ids:
+            raise InputError(description = "message_id is valid but user is not in dm")
     if len(message) > 1000:
         raise InputError(description = "message over 1000 characters")
     if message == '':
@@ -134,28 +133,19 @@ def message_remove_v1(user_id, message_id):
     if message_info['type'] == 'channel':
         u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['owner_members']]
         all_u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['all_members']]
-        print('\n\n\n\\n\n\n\n\n\n\n', user_id in u_ids)
         if user_id not in u_ids and user_id not in all_u_ids:
             raise InputError(description = "message_id is valid but user is not in channel")
         if message_info['message']['u_id'] != user_id and user_id not in u_ids:
             raise AccessError(description = "message_id is valid but user does not have permissions to edit")
     else:
         u_ids = [user['u_id'] for user in dms[message_info['dm_id']]['members']]
-        if user_id not in u_ids or message_info['message']['u_id'] != user_id:
-            raise AccessError(description = "message_id is valid but user does not have permissions to edit")
+        if user_id not in u_ids:
+            raise InputError(description = "message_id is valid but user is not in dm")
     message_info['channel']['messages'].remove(message_info['message'])
     store['channels'] = channels
     store['dms'] = dms
     data_store.set(store)
     return {}
-    
-
-def is_owner(user_id, channel):
-    """ Check if a user is an owner of a channel """
-    for owner in channel['owner_members']:
-        if user_id == owner['u_id']:
-            return True
-    return False
     
 def get_message_and_channel(message_id):
     store = data_store.get()

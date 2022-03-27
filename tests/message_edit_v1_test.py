@@ -15,6 +15,7 @@ DM_CREATE_URL = f"{url}/dm/create/v1"
 DM_SEND_URL = f"{url}/message/senddm/v1"
 DM_MESSAGES_URL = f"{url}/dm/messages/v1"
 DETAILS_URL = f"{url}/channel/details/v2"
+DM_SEND_URL = f"{url}/message/senddm/v1"
 
 @pytest.fixture
 def clear_store():
@@ -66,7 +67,7 @@ def test_message_over_1000_characters(clear_store, create_user):
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0}, json = {'token': user_token_1})
     assert response.json()['messages'][0]['message'] == "Leo sucks"
     long_message = ''
-    for i in range(1000):
+    for i in range(2000):
         long_message += str(i)
     response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id, 'message': long_message})
     assert response.status_code == 400
@@ -144,3 +145,18 @@ def test_normal_dm(clear_store, create_user):
     response = requests.get(DM_MESSAGES_URL, json = {'dm_id': dm_id, 'token': user_1['token'], 'start': 0})
     assert response.json()['messages'][0]['message_id'] == message_id
     assert response.json()['messages'][0]['message'] == 'i have edited this'
+    
+def test_user_not_in_dm(clear_store, create_user, create_user2):
+    user_1 = create_user
+    dm_id = requests.post(DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.put(MESSAGE_EDIT_URL, json = {'token': create_user2['token'], 'message_id': message_id, 'message': 'i have edited this'})
+    assert response.status_code == 400
+    
+def test_message_id_invalid_dm(clear_store, create_user):
+    user_token_1 = create_user['token']
+    dm_id = requests.post(DM_CREATE_URL, json={
+                               'token': user_token_1, 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(DM_SEND_URL, json = {'token': user_token_1, 'dm_id': dm_id, 'message': "Leo sucks"}).json()['message_id']
+    response = requests.put(MESSAGE_EDIT_URL, json = {'token': user_token_1, 'message_id': message_id + 1, 'message': 'invalid message id'})
+    assert response.status_code == 400
