@@ -42,7 +42,7 @@ def test_basic_success(clear_store, register_user_1, register_user_2):
     assert channel_messages[0]['message'] == 'Removed user'
     assert response.status_code == 200
     response = requests.get(PROFILE_URL, params= {'u_id': user_2['auth_user_id'], 'token': user_1['token']})
-    assert response.json() == {"u_id": user_2['auth_user_id'], "email":"", "name_first": "Removed", "name_last": "user", "handle_str": ""}
+    assert response.json()['user'] == {"u_id": user_2['auth_user_id'], "email":"", "name_first": "Removed", "name_last": "user", "handle_str": ""}
     assert 200 == requests.post(REGISTER_URL, json={"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).status_code
     
 def test_basic_success_v2(clear_store, register_user_1, register_user_2):

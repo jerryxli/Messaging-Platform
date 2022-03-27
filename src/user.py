@@ -31,7 +31,7 @@ def user_profile_v1(token: str, u_id: int)->dict:
 
     return_dictionary = {'u_id': u_id, 'email': user['email'], 'name_first': user['name_first'], 'name_last': user['name_last'], 'handle_str': user['handle']}
 
-    return return_dictionary
+    return {"user": return_dictionary}
 
 
 def user_setname_v1(token: str, name_first: str, name_last: str)->dict:
