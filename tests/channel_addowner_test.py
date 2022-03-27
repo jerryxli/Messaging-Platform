@@ -173,7 +173,7 @@ def test_invalid_user_token(clear_store, create_user, create_user2):
 def test_invalid_u_id(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(ADDOWNER_URL, json = {'token': user_token, 'channel_id': channel_id, 'u_id': 24})
+    response = requests.post(ADDOWNER_URL, json = {'token': user_token, 'channel_id': channel_id, 'u_id': create_user['auth_user_id'] + 1})
     assert response.status_code == 400
 
 # Tests for when the user_id entered is not a member of the channel -> INPUT ERROR

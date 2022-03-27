@@ -158,7 +158,7 @@ def test_invalid_user_token(clear_store, create_user, create_user2):
 def test_invalid_u_id(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json = {'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(REMOVEOWNER_URL, json = {'token': user_token, 'channel_id': channel_id, 'u_id': 24})
+    response = requests.post(REMOVEOWNER_URL, json = {'token': user_token, 'channel_id': channel_id, 'u_id': create_user['auth_user_id'] + 1})
     assert response.status_code == 400
 
 # Tests for when the user_id entered is not an owner of the channel -> INPUT ERROR
@@ -189,9 +189,9 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_token_2 = create_user2['token']
     u_id_1 = create_user['auth_user_id']
     u_id_2 = create_user2['auth_user_id']
-    channel_id = 15
-    request_data_1 = requests.post(REMOVEOWNER_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'u_id': u_id_1})
-    request_data_2 = requests.post(REMOVEOWNER_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'u_id': u_id_2})
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    request_data_1 = requests.post(REMOVEOWNER_URL, json = {'token': user_token_1, 'channel_id': channel_id + 1, 'u_id': u_id_1})
+    request_data_2 = requests.post(REMOVEOWNER_URL, json = {'token': user_token_2, 'channel_id': channel_id + 2, 'u_id': u_id_2})
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
 

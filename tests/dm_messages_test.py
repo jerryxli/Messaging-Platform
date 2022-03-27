@@ -35,9 +35,12 @@ def test_basic_success(clear_store, register_user_1):
     message_id = requests.post(DM_SEND_URL, json = {'token': user_1['token'], 'dm_id': dm_id, 'message': "HEY ME"}).json()['message_id']
     response = requests.get(DM_MESSAGES_URL, params = {"token": user_1['token'], 'dm_id': dm_id, 'start': 0})
     assert response.status_code == 200
-    assert response.json()['messages'][0]['message_id'] == message_id
-    assert response.json()['messages'][0]['u_id'] == user_1['auth_user_id']
-    assert response.json()['messages'][0]['message'] == "HEY ME"
+    list_msg_ids = [message['message_id'] for message in response.json()['messages']]
+    assert message_id in list_msg_ids
+    msg_index = list_msg_ids.index(message_id)
+    assert response.json()['messages'][msg_index]['message_id'] == message_id
+    assert response.json()['messages'][msg_index]['u_id'] == user_1['auth_user_id']
+    assert response.json()['messages'][msg_index]['message'] == "HEY ME"
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
 

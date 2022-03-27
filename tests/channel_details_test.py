@@ -134,9 +134,9 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
 def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = 0
-    request_data_1 = requests.get(DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token_1})
-    request_data_2 = requests.get(DETAILS_URL, params = {'channel_id': channel_id, 'token': user_token_2})
+    channel_id = requests.post(CREATE_URL, json = {'token': user_token_1, 'name': 'My Channel', 'is_public': True}).json()['channel_id']
+    request_data_1 = requests.get(DETAILS_URL, params = {'channel_id': channel_id + 1, 'token': user_token_1})
+    request_data_2 = requests.get(DETAILS_URL, params = {'channel_id': channel_id + 2, 'token': user_token_2})
     # Input Error
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400

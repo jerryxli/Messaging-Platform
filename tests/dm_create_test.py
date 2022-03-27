@@ -60,7 +60,7 @@ def test_invalid_token(clear_store, create_user):
 # Test invalid u_id -> INPUT ERROR
 def test_invalid_u_id(clear_store, create_user):
     user_token = create_user['token']
-    response = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [12]})
+    response = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [create_user['auth_user_id'] + 1]})
     assert response.status_code == 400
 
 # Test duplicate u_id -> INPUT ERROR

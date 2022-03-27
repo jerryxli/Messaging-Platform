@@ -70,11 +70,9 @@ def test_list_in_multiple_dm(clear_store, create_user, create_user2, create_user
 
 def test_not_in_dm(clear_store, create_user, create_user2):
     user_token = create_user['token']
-    user_id_2 = create_user2['auth_user_id']
-    response_data_1 = requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': [user_id_2]}).json()
-    dm_id_1 = response_data_1['dm_id']
+    requests.post(DM_CREATE_URL, json = {'token': user_token, 'u_ids': []}).json()
     response = requests.get(DM_LIST_URL, params = {'token': create_user2['token']}).json()
-    assert response == {'dms': [{'dm_id': dm_id_1, 'name': "name1lastname1, name2lastname2"}]}
+    assert response == {'dms': []}
     
 def test_invalid_token(clear_store, create_user):
     user_token = create_user['token']
