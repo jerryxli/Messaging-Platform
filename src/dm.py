@@ -216,16 +216,31 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     return
 
 def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
+    """
+    Allows a user to send a message in the specified DM
+
+    Arguments:
+        auth_user_id (int) - The user id of the sender
+        message (str)      - The message to be sent
+        dm_id (int)        - The id of the DM where the message will be sent to
+
+    Errors
+        AccessError        - Where the user does not belong to the specified DM
+        InputError         - Where the DM id is invalid or the message is not between 1 and 1000 characters
+    
+    Return Value:
+        Dictionary containing message_id, on success
+    """
     store = data_store.get()
     dms = store['dms']
     if dm_id not in dms:
-        raise InputError(description = "dm_id is invalid")
+        raise InputError(description="dm_id is invalid")
     if len(message) > 1000 or len(message) < 1:
-        raise InputError(description = "Invalid message length")
+        raise InputError(description="Invalid message length")
     dm = dms[dm_id]
     u_ids = [user['u_id'] for user in dm['members']]
     if auth_user_id not in u_ids:
-        raise AccessError(description = "User is not part of DM")
+        raise AccessError(description="User is not part of DM")
     message_id = store['messages']
     dm['messages'].append({'message_id': message_id, 'u_id': auth_user_id, 'message': message, 'time_sent': time()})
     store['messages'] += 1

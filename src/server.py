@@ -16,7 +16,6 @@ from src.message import message_send_v1, message_remove_v1, message_edit_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
 
 
-
 def quit_gracefully(*args):
     '''For coverage'''
     exit(0)
@@ -42,12 +41,14 @@ APP.register_error_handler(Exception, defaultHandler)
 
 # NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
 
+
 @APP.route("/clear/v1", methods=['DELETE'])
 def handle_clear():
     clear_v1()
     return {}
 
 # Auth Server Instructions
+
 
 @APP.route("/auth/register/v2", methods=['POST'])
 def handle_register_v2():
@@ -81,6 +82,7 @@ def handle_logout_v1():
 
 # User Server Instructions
 
+
 @APP.route("/user/profile/v1", methods=['GET'])
 def handle_profile_v1():
     token = request.args.get('token')
@@ -107,6 +109,7 @@ def handle_setemail_v1():
 
     return user_setemail_v1(token, email)
 
+
 @APP.route("/user/profile/sethandle/v1", methods=['PUT'])
 def handle_sethandle_v1():
     request_data = request.get_json()
@@ -124,6 +127,7 @@ def handle_users_all_v1():
     user_id = user_id_from_JWT(user_token)
     return users_all_v1(user_id)
 # Channels Server Instructions
+
 
 @APP.route("/channels/create/v2", methods=["POST"])
 def handle_channels_create_v2():
@@ -144,6 +148,7 @@ def handle_channels_list_v2():
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return channels_list_v1(user_id)
+
 
 @APP.route("/channels/listall/v2", methods=['GET'])
 def handle_channels_listall_v2():
@@ -177,6 +182,7 @@ def handle_channel_join():
     channel_join_v1(user_id, channel_id)
     return {}
 
+
 @APP.route("/channel/invite/v2", methods=['POST'])
 def handle_channel_invite():
     request_data = request.get_json()
@@ -189,6 +195,7 @@ def handle_channel_invite():
     channel_invite_v1(user_id, channel_id, u_id)
     return {}
 
+
 @APP.route("/channel/leave/v1", methods=['POST'])
 def handle_channel_leave():
     request_data = request.get_json()
@@ -200,7 +207,8 @@ def handle_channel_leave():
     channel_leave_v1(user_id, channel_id)
     return {}
 
-@APP.route("/channel/addowner/v1", methods = ["POST"])
+
+@APP.route("/channel/addowner/v1", methods=["POST"])
 def handle_channel_addowner():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -212,6 +220,7 @@ def handle_channel_addowner():
     channel_addowner_v1(user_id, channel_id, u_id)
     return {}
 
+
 @APP.route("/channel/messages/v2", methods=['GET'])
 def handle_channel_messages():
     user_token = request.args.get('token')
@@ -222,7 +231,7 @@ def handle_channel_messages():
     user_id = user_id_from_JWT(user_token)
     return channel_messages_v1(user_id, channel_id, start)
 
-    
+
 @APP.route("/channel/removeowner/v1", methods = ["POST"])
 def handle_channel_removeowner():
     request_data = request.get_json()
@@ -236,7 +245,9 @@ def handle_channel_removeowner():
     return {}
 
 # Message Server Instructions
-@APP.route("/message/send/v1", methods = ['POST'])
+
+
+@APP.route("/message/send/v1", methods=['POST'])
 def handle_message_send():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -245,9 +256,10 @@ def handle_message_send():
     if not is_valid_JWT(user_token):
         raise AccessError(description = "JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
-    return message_send_v1(user_id, channel_id, message) 
+    return message_send_v1(user_id, channel_id, message)
 
-@APP.route("/message/remove/v1", methods = ['DELETE'])
+
+@APP.route("/message/remove/v1", methods=['DELETE'])
 def handle_message_remove():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -258,7 +270,8 @@ def handle_message_remove():
     message_remove_v1(user_id, message_id)
     return {} 
 
-@APP.route("/message/edit/v1", methods = ['PUT'])
+
+@APP.route("/message/edit/v1", methods=['PUT'])
 def handle_message_edit():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -271,7 +284,9 @@ def handle_message_edit():
     return {} 
 
 # DM Server Instructions
-@APP.route("/dm/create/v1", methods = ["POST"])
+
+
+@APP.route("/dm/create/v1", methods=["POST"])
 def handle_dm_create():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -281,7 +296,8 @@ def handle_dm_create():
     user_id = user_id_from_JWT(user_token)
     return dm_create_v1(user_id, u_ids)
 
-@APP.route("/dm/list/v1", methods = ["GET"])
+
+@APP.route("/dm/list/v1", methods=["GET"])
 def handle_dm_list():
     user_token = request.args.get('token')
     if not is_valid_JWT(user_token):
@@ -290,7 +306,7 @@ def handle_dm_list():
     return dm_list_v1(user_id)
 
 
-@APP.route("/dm/remove/v1", methods = ["DELETE"])
+@APP.route("/dm/remove/v1", methods=["DELETE"])
 def handle_dm_remove():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -301,7 +317,8 @@ def handle_dm_remove():
     dm_remove_v1(user_id, dm_id)
     return {}
 
-@APP.route("/dm/details/v1", methods = ["GET"])
+
+@APP.route("/dm/details/v1", methods=["GET"])
 def handle_dm_details():
     user_token = request.args.get('token')
     dm_id = int(request.args.get('dm_id'))
@@ -310,7 +327,8 @@ def handle_dm_details():
     user_id = user_id_from_JWT(user_token)
     return dm_details_v1(user_id, dm_id)
 
-@APP.route("/dm/leave/v1", methods = ["POST"])
+
+@APP.route("/dm/leave/v1", methods=["POST"])
 def handle_dm_leave():
     request_data = request.get_json()
     user_token = request_data['token']
@@ -322,7 +340,9 @@ def handle_dm_leave():
     return {}
 
 # Change User permissions
-@APP.route("/admin/userpermission/change/v1", methods = ["POST"])
+
+
+@APP.route("/admin/userpermission/change/v1", methods=["POST"])
 def handle_userperm_change():
     request_data = request.get_json()
     if not is_valid_JWT(request_data['token']):
@@ -330,19 +350,22 @@ def handle_userperm_change():
     change_global_permission(user_id_from_JWT(request_data['token']), request_data['u_id'], request_data['permission_id'])
     return {}
 
-@APP.route("/admin/user/remove/v1", methods = ["DELETE"])
+
+@APP.route("/admin/user/remove/v1", methods=["DELETE"])
 def handle_user_remove():
     request_data = request.get_json()
     if not is_valid_JWT(request_data['token']):
         raise AccessError(description = "JWT no longer valid")
     return user_remove_v1(request_data['token'], request_data['u_id'])
 
-@APP.route("/message/senddm/v1", methods = ["POST"])
+
+@APP.route("/message/senddm/v1", methods=["POST"])
 def handle_dm_send():
     request_data = request.get_json()
     if not is_valid_JWT(request_data['token']):
         raise AccessError(description = "JWT no longer valid")
     return dm_send_v1(user_id_from_JWT(request_data['token']), request_data['message'], request_data['dm_id'])
+
 
 @APP.route("/dm/messages/v1", methods=["GET"])
 def handle_dm_messages():
