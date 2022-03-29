@@ -258,9 +258,9 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     else:
         raise InputError("Channel id not valid")
 
-    # Check the auth_user and u_id are members of the channel first
-    if not check_user_in_channel(u_id, channel):
-        raise InputError("U_id not a member")
+    # Check if auth_user is a member of the channel
+    if not check_user_in_channel(auth_user_id, channel):
+        raise AccessError("Auth_user_id does not have owner permissions")
 
     # Check if auth_user has owner permissions
     owner_members = channel['owner_members']
@@ -271,6 +271,11 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         altered_auth['handle_str'] = altered_auth.pop('handle')
         if altered_auth not in owner_members:
             raise AccessError("Auth_user_id does not have owner permissions")
+    
+    # Check if u_id is a member of the channel
+    if not check_user_in_channel(u_id, channel):
+        raise InputError("U_id not a member")
+    
     altered_user = non_password_global_permission_field(users[u_id])
     altered_user['u_id'] = u_id
     altered_user['handle_str'] = altered_user.pop('handle')
@@ -279,7 +284,7 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     if altered_user not in owner_members:
         owner_members.append(altered_user)
     else:
-        raise InputError("User_id is already a member")
+        raise InputError("User_id is already an owner")
 
     data_store.set(store)
 
