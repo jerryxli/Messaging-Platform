@@ -37,8 +37,9 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
 
     # U_id is not valid
     if len(u_ids) != 0:
-        if any(verify_user(u_id) for u_id in u_ids) == False:
-            raise InputError(description="U_id not valid")
+        for u_id in u_ids:
+            if not verify_user(u_id):
+                raise InputError(description="U_id not valid")
 
     # Check for duplicate u_id
     user_set = set(u_ids)

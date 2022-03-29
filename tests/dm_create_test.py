@@ -58,9 +58,10 @@ def test_invalid_token(clear_store, create_user):
     assert response.status_code == 403
 
 # Test invalid u_id -> INPUT ERROR
-def test_invalid_u_id(clear_store, create_user):
+def test_invalid_u_id(clear_store, create_user, create_user2):
     user_token = create_user['token']
-    response = requests.post(DM_CREATE_URL, json={'token': user_token, 'u_ids': [create_user['auth_user_id'] + 1]})
+    user_id_2 = create_user2['auth_user_id']
+    response = requests.post(DM_CREATE_URL, json={'token': user_token, 'u_ids': [user_id_2, -1]})
     assert response.status_code == 400
 
 # Test duplicate u_id -> INPUT ERROR
