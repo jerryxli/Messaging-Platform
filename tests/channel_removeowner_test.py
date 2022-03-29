@@ -41,7 +41,7 @@ def create_user4():
 # The Channel leave function takes in user token and channel id as input
 # The function removes the member or owner from the channel
 
-# Tests for when a channel owner removes an owner
+# Tests for when a channel owner removes an owner -> SUCCESS
 def test_owner_removeowner(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -82,8 +82,8 @@ def test_owner_removeowner(clear_store, create_user, create_user2):
                                                     }   
                                                  ]
 
-# Tests for when a global owner removes an owner
-def test_global_owner_remove_themselves(clear_store, create_user, create_user2):
+# Tests for when a global owner who is a member removes an owner -> SUCCESS
+def test_global_owner_remove_owner(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_id = create_user['auth_user_id']
@@ -108,8 +108,8 @@ def test_global_owner_remove_themselves(clear_store, create_user, create_user2):
                                                     }  
                                                 ]
 
-# Test for when a global_owner removes an owner
-def test_global_owner_remove_owner(clear_store, create_user, create_user2, create_user3):
+# Test for when a global_owner non member removes owner -> ACCESS ERROR
+def test_global_owner_non_member(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
@@ -117,18 +117,8 @@ def test_global_owner_remove_owner(clear_store, create_user, create_user2, creat
     requests.post(JOIN_URL, json={'token': user_token_3, 'channel_id': channel_id_2})
     requests.post(ADDOWNER_URL, json={'token': user_token_2, 'channel_id': channel_id_2, 'u_id': create_user3['auth_user_id']})
     response = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_2, 'u_id': create_user3['auth_user_id']})
-    channel_details = requests.get(DETAILS_URL, params={'channel_id': channel_id_2, 'token': user_token_2}).json()
-    assert response.status_code == 200
-    assert response.json() == {}
-    assert channel_details['owner_members'] == [
-                                                    {
-                                                        'u_id': create_user2['auth_user_id'],
-                                                        'email': "z54626@unsw.edu.au",
-                                                        'name_first': "Snickers",
-                                                        'name_last': "Lickers",
-                                                        'handle_str': "snickerslickers",
-                                                    }  
-                                                ]
+    assert response.status_code == 403
+
 
 # Test for when a member tries to remove an owner (no owner permissions) -> ACCESS ERROR
 def test_member_removeowner(clear_store, create_user, create_user2, create_user3, create_user4):
@@ -195,7 +185,7 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
 
-
+# Test for when u_id is not a member -> INPUT ERROR
 def test_valid_u_id_not_in_channel(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user2 = create_user2

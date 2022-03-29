@@ -317,6 +317,10 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     else:
         raise InputError("channel_id not valid")
     owner_members = [user['u_id'] for user in channel['owner_members']]
+    
+    if not check_user_in_channel(auth_user_id, channel):
+        raise AccessError("Auth_user_id does not have owner permissions")
+
     if u_id not in owner_members:
         raise InputError(description="u_id is not an owner of channel")
     
