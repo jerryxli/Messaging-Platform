@@ -38,17 +38,20 @@ def test_normal_functionality(clear_store, create_user):
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
                                
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200
+    message_id = response.json()['message_id']
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})                                                        
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})                                                        
     assert response.status_code == 200
+    list_msg_ids = [message['message_id'] for message in response.json()['messages']]
+    assert message_id in list_msg_ids
+    msg_index = list_msg_ids.index(message_id)
+    assert response.json()['messages'][msg_index]['message_id'] == message_id
+    assert response.json()['messages'][msg_index]['u_id'] == create_user['auth_user_id']
+    assert response.json()['messages'][msg_index]['message'] == "Hello World"
     assert response.json()['start'] == 0
-    assert response.json()['end'] == -1
-    assert response.json()['messages'][0]['message'] == "Hello World"
-    assert response.json()['messages'][0]['message_id'] == 0
-    assert response.json()['messages'][0]['u_id'] == 0
+    assert response.json()['end'] == -1    
     
 
 def test_normal_functionality2(clear_store, create_user, create_user2):
@@ -58,24 +61,25 @@ def test_normal_functionality2(clear_store, create_user, create_user2):
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})  
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
+    message_id1 = response.json()['message_id']
     assert response.status_code == 200 
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World2"})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World2"})
+    message_id2 = response.json()['message_id']
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_1,
-                                                              'channel_id': channel_id, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     assert response.status_code == 200
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
-    assert response.json()['messages'][0]['message'] == "Hello World2"
-    assert response.json()['messages'][0]['message_id'] == 1
-    assert response.json()['messages'][0]['u_id'] == 1
-
-    assert response.json()['messages'][1]['message'] == "Hello World"
-    assert response.json()['messages'][1]['message_id'] == 0
-    assert response.json()['messages'][1]['u_id'] == 0
+    for message in response.json()['messages']:
+        if message['message_id'] == message_id1:
+            assert message['message'] == "Hello World"
+            assert message['u_id'] == create_user['auth_user_id']
+        if message['message_id'] == message_id2:
+            assert message['message'] == "Hello World2"
+            assert message['u_id'] == create_user2['auth_user_id']    
 
 def test_check_accessibility_of_messages_across_channels(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
@@ -84,11 +88,10 @@ def test_check_accessibility_of_messages_across_channels(clear_store, create_use
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     channel_id2 = requests.post(CREATE_URL, json={
                                'token': user_token_2, 'name': 'My Channel2!', 'is_public': True}).json()['channel_id'] 
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200 
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
-    response = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_token_2,
-                                                              'channel_id': channel_id2, 'start': 0})
+    response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id2, 'start': 0, 'token': user_token_2})
     assert response.status_code == 200
     # check that channel_id2 has no messages within it
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}
@@ -98,7 +101,7 @@ def test_invalid_message(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': channel_id, 'message': ""})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': ""})
     assert response.status_code == 400
 
 def test_user_not_part_of_channel(clear_store, create_user, create_user2):
@@ -106,10 +109,10 @@ def test_user_not_part_of_channel(clear_store, create_user, create_user2):
     user_token_2 = create_user2['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 403
 
 def test_channel_not_valid(clear_store, create_user):
     user_token_1 = create_user['token']
-    response = requests.post(MESSAGE_SEND_URL, json = {'token': user_token_1, 'channel_id': "100", 'message': "Hello World"})
+    response = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': "100", 'message': "Hello World"})
     assert response.status_code == 400

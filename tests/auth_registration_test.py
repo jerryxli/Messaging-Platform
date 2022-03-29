@@ -25,12 +25,12 @@ def test_auth_register_handle_generate(clear_store):
     id_0 = response_0.json()['auth_user_id']
     id_1 = response_1.json()['auth_user_id']
     id_2 = response_2.json()['auth_user_id']
-    profile_repsonse_0 = requests.get(PROFILE_URL, params={"token": token, "u_id": id_0})
-    assert profile_repsonse_0.json() == {"u_id": id_0, "email":"z55555@unsw.edu.au", "name_first": "abcdefghi", "name_last": "jklmnopqrst", "handle_str": "abcdefghijklmnopqrst"}
-    profile_repsonse_1 = requests.get(PROFILE_URL, params={"token": token, "u_id": id_1})
-    assert profile_repsonse_1.json() == {"u_id": id_1, "email":"z55556@unsw.edu.au", "name_first": " **(&(abcdefghi__  ", "name_last": "jklmnopqrst&**uv", "handle_str": "abcdefghijklmnopqrst0"}
-    profile_repsonse_2 = requests.get(PROFILE_URL, params={"token": token, "u_id": id_2})
-    assert profile_repsonse_2.json() == {"u_id": id_2, "email":"z55557@unsw.edu.au", "name_first": "ABCDEFGHI", "name_last": "JKLMNOPQRSTUVWXYZ", "handle_str": "abcdefghijklmnopqrst1"}
+    profile_response_0 = requests.get(PROFILE_URL, params={"u_id": id_0, "token": token})
+    assert profile_response_0.json()['user'] == {"u_id": id_0, "email":"z55555@unsw.edu.au", "name_first": "abcdefghi", "name_last": "jklmnopqrst", "handle_str": "abcdefghijklmnopqrst"}
+    profile_response_1 = requests.get(PROFILE_URL, params={"u_id": id_1, "token": token})
+    assert profile_response_1.json()['user'] == {"u_id": id_1, "email":"z55556@unsw.edu.au", "name_first": " **(&(abcdefghi__  ", "name_last": "jklmnopqrst&**uv", "handle_str": "abcdefghijklmnopqrst0"}
+    profile_response_2 = requests.get(PROFILE_URL, params={"u_id": id_2, "token": token})
+    assert profile_response_2.json()['user'] == {"u_id": id_2, "email":"z55557@unsw.edu.au", "name_first": "ABCDEFGHI", "name_last": "JKLMNOPQRSTUVWXYZ", "handle_str": "abcdefghijklmnopqrst1"}
 
 def test_auth_register_v2_error_email_not_valid(clear_store):
     response = requests.post(REGISTER_URL, json={"email":"tsgyd", "password":"34rd^hds)", "name_first": "Johnny", "name_last":"Smith"})
@@ -62,6 +62,6 @@ def test_auth_register_v2_error_last_name_short(clear_store):
     assert response.status_code == 400
 
 
-def test_auth_register_v1_error_last_name_long(clear_store):
+def test_auth_register_v2_error_last_name_long(clear_store):
     response = requests.post(REGISTER_URL, json={"email":"z123456789@unsw.edu.au", "password":"goodpass", "name_first":"Simon", "name_last":"THISISIAREALLYALONGNAMEWHICHISOUTOFBOUNDSDEFINITIELY"})
     assert response.status_code == 400

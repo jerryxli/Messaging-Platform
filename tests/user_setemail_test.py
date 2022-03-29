@@ -16,12 +16,12 @@ def test_normal_change(clear_store):
     user_id = registration_request.json()['auth_user_id']
     token = registration_request.json()['token']
     
-    original_profile = requests.get(PROFILE_URL, params={"token": token, "u_id": user_id})
-    assert original_profile.json() == {"email": "z55555@unsw.edu.au", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
+    original_profile = requests.get(PROFILE_URL, params={"u_id": user_id, "token": token})
+    assert original_profile.json()['user'] == {"email": "z55555@unsw.edu.au", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
     set_email_request = requests.put(SETEMAIL_URL, json={"token": token, "email": "mynewemail@gmail.com"})
     assert set_email_request.json() == {}
-    new_profile = requests.get(PROFILE_URL, params={"token": token, "u_id": user_id})
-    assert new_profile.json() == {"email": "mynewemail@gmail.com", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
+    new_profile = requests.get(PROFILE_URL, params={"u_id": user_id, "token": token})
+    assert new_profile.json()['user'] == {"email": "mynewemail@gmail.com", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
 
 def test_invalid_token(clear_store):
     registration_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
@@ -50,5 +50,5 @@ def test_change_same_email(clear_store):
     token = registration_request.json()['token']
     setemail_request = requests.put(SETEMAIL_URL, json={"token": token, "email": "z55555@unsw.edu.au"})
     assert setemail_request.status_code == 200
-    profile = requests.get(PROFILE_URL, params={"token": token, "u_id": user_id})
-    assert profile.json() == {"email": "z55555@unsw.edu.au", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
+    profile = requests.get(PROFILE_URL, params={"u_id": user_id, "token": token})
+    assert profile.json()['user'] == {"email": "z55555@unsw.edu.au", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}

@@ -1,5 +1,4 @@
-from src.auth import GLOBAL_PERMISSION_USER
-from src.channel import GLOBAL_PERMISSION_OWNER
+from src.auth import GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER, GLOBAL_PERMISSION_REMOVED
 from src.config import url
 import pytest
 import requests
@@ -10,7 +9,7 @@ LOGIN_URL = f"{url}/auth/login/v2"
 
 @pytest.fixture
 def clear_store():
-    requests.delete(f"{url}/clear/v1", json = {})
+    requests.delete(f"{url}/clear/v1", json={})
     
 @pytest.fixture
 def register_user_1():
@@ -19,7 +18,7 @@ def register_user_1():
 
 @pytest.fixture
 def register_user_2():
-    response = requests.post(REGISTER_URL, json = {"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).json()
+    response = requests.post(REGISTER_URL, json={"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).json()
     return response
 
 def test_basic_success(clear_store, register_user_1, register_user_2):
@@ -45,7 +44,7 @@ def test_invalid_u_id(clear_store, register_user_1, register_user_2):
 def test_invalid_permission_id(clear_store, register_user_1, register_user_2):
     admin = register_user_1
     user = register_user_2
-    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": -1})
+    response = requests.post(CHANGE_PERM_URL, json={"token": admin['token'], "u_id": user['auth_user_id'], "permission_id": GLOBAL_PERMISSION_REMOVED})
     assert response.status_code == 400
 
 

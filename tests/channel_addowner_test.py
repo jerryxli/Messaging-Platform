@@ -2,7 +2,6 @@ from src.error import AccessError
 from src.config import port, url
 import requests
 import pytest
-import jwt
 
 DETAILS_URL = f"{url}/channel/details/v2"
 JOIN_URL = f"{url}/channel/join/v2"

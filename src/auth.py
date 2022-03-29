@@ -26,7 +26,7 @@ GLOBAL_PERMISSION_REMOVED = 0
 JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 
-def auth_login_v1(email:str, password:str)->dict:
+def auth_login_v2(email: str, password: str)->dict:
     """
     Logs an existing user into the application
 
@@ -52,11 +52,11 @@ def auth_login_v1(email:str, password:str)->dict:
                 jwt = create_JWT(user_id)
                 return {'token': jwt, 'auth_user_id': user_id}
             else:
-                raise InputError("Incorrect Password")
-    raise InputError("Invalid Email")
+                raise InputError(description="Incorrect Password")
+    raise InputError(description="Invalid Email")
 
 
-def auth_register_v1(email: str, password: str, name_first: str, name_last:str)->dict:
+def auth_register_v2(email: str, password: str, name_first: str, name_last: str)->dict:
     """
     Registers a user into the database, generates a handle upon registration
 
@@ -76,15 +76,15 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
 
     """
     if not is_valid_email(email):
-        raise InputError("Email is not valid")
+        raise InputError(description="Email is not valid")
     if len(password) < 6:
-        raise InputError("Password is too short")
+        raise InputError(description="Password is too short")
     if is_email_taken(email):
-        raise InputError("Email is already taken")
+        raise InputError(description="Email is already taken")
     if len(name_first) < 1 or len(name_first) > MAX_FIRST_NAME_LENGTH:
-        raise InputError("First name is too short or long")
+        raise InputError(description="First name is too short or long")
     if len(name_last) < 1 or len(name_last) > MAX_LAST_NAME_LENGTH:
-        raise InputError("Last name is too short or long")
+        raise InputError(description="Last name is too short or long")
 
     handle = generate_handle(name_first, name_last)
 
@@ -98,14 +98,28 @@ def auth_register_v1(email: str, password: str, name_first: str, name_last:str)-
     if new_user_id == 0:
         global_permission = GLOBAL_PERMISSION_OWNER
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-    'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions':[]}
+                           'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions': []}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
     jwt = create_JWT(new_user_id)
     return {'token': jwt, 'auth_user_id': new_user_id}
 
+
 def auth_logout_v1(token):
+    """
+    Logs the user out of the session in the token
+
+    Arguments:
+        token (str) - The token from the session which the user wants to be logged out of
+
+    Errors:
+        AccessError if the token is not valid or does not refer to a valid session
+
+    Return value:
+        {}
     
+    """
+
     if not is_valid_JWT(token):
         raise AccessError(description="The token provided is not valid.")
 
@@ -116,8 +130,6 @@ def auth_logout_v1(token):
     user['sessions'].remove(jwt_payload['user_session_id'])
 
     return {}
-
-
 
 
 def generate_handle(name_first:str, name_last:str)->str:
@@ -151,7 +163,7 @@ def generate_handle(name_first:str, name_last:str)->str:
     return stripped_concatenated_name
 
 
-def is_email_taken(email:str)->bool:
+def is_email_taken(email: str)->bool:
 
     """
     Checks whether an email is used in the data store
@@ -172,7 +184,7 @@ def is_email_taken(email:str)->bool:
     return False
 
 
-def is_handle_taken(handle:str)->bool:
+def is_handle_taken(handle: str)->bool:
     """
     This function checks whether a handle is used before in the data store
 
@@ -192,7 +204,7 @@ def is_handle_taken(handle:str)->bool:
     return False
 
 
-def is_valid_email(email:str)->bool:
+def is_valid_email(email: str)->bool:
     """
     Verifies whether an email is valid or not
 
@@ -205,7 +217,7 @@ def is_valid_email(email:str)->bool:
     return bool(re.search(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$', email))
 
 
-def remove_non_alphanumeric(string:str)->str:
+def remove_non_alphanumeric(string: str)->str:
     """
     Strips all alpha numeric characters from the input string
 
@@ -219,34 +231,53 @@ def remove_non_alphanumeric(string:str)->str:
     return "".join(alnum_list)
 
 
-def change_global_permission(token:str, u_id:int, new_perm:int)->dict:
-    '''
-    Needs JWT check once implemented by login
-    '''
+def change_global_permission(auth_user_id:str, u_id:int, new_perm:int)->dict:
+    """
+    Allows for global permissions to be changed
+
+    Arguments:
+        auth_user_id (int) - User exacting the change
+        u_id (int)         - User to have permissions changed
+        new_perm (int)     - New permission
+
+    Errors:
+        AccessError when the user changing permissions is not authorised
+        InputError where permission would leave no global owner, where permission doesn't exist or 
+                         where permission is the same
+
+    Return Values:
+
+    """
     store = data_store.get()
     users = store['users']
-    global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
-    if not is_valid_JWT(token):
-        raise AccessError(description = "JWT is not valid")
-    jwt_payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-    if users[jwt_payload['auth_user_id']]['global_permission'] != GLOBAL_PERMISSION_OWNER:
-        raise AccessError(description = "User is not an owner")
-    if len(global_owners) == 1 and u_id in global_owners.keys() and new_perm == GLOBAL_PERMISSION_USER:
-        raise InputError(description = "This action would leave server without any owners")
+    global_owners = [key for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER]
+    if auth_user_id not in global_owners:
+        raise AccessError(description="User is not an owner")
+    if len(global_owners) == 1 and u_id in global_owners and new_perm == GLOBAL_PERMISSION_USER:
+        raise InputError(description="This action would leave server without any owners")
     if new_perm not in [GLOBAL_PERMISSION_USER, GLOBAL_PERMISSION_OWNER]:
-        raise InputError(description = "This permission doesn't exist")
+        raise InputError(description="This permission doesn't exist")
     
     if u_id in users.keys():
         user = users[u_id]
         if user['global_permission'] == new_perm:
-            raise InputError(description = "This user already has this permission")
+            raise InputError(description="This user already has this permission")
         user['global_permission'] = new_perm
         data_store.set(store)
     else:
-        raise InputError(description = "There is no user with this id")
+        raise InputError(description="There is no user with this id")
     
 
-def create_JWT(auth_user_id):
+def create_JWT(auth_user_id: int)->str:
+    """
+    Creates a valid JWT from the auth user id, adds new session to user sessions
+
+    Arguments:
+        auth_user_id (int) - the user to get the JWT
+
+    Return Value:
+        The string of the new JWT, with the auth_user_id and session_id encoded
+    """
     store = data_store.get()
     new_session = len(store['users'][auth_user_id]['sessions'])
     store['users'][auth_user_id]['sessions'].append(new_session)
@@ -256,7 +287,18 @@ def create_JWT(auth_user_id):
     return new_jwt
 
 
-def is_valid_JWT(jwt_string):
+def is_valid_JWT(jwt_string: str)->bool:
+    """
+    Verifies whether a JWT is valid
+
+    Arguments:
+        jwt_string (str) - The string which needs to be verified
+
+    Return Value:
+        False if the JWT has been forged with a different secret, false if there is no session with the JWT,
+        false if the user id does not exist. True if none of those conditions are met (a valid JWT).
+
+    """
     try:
         jwt_payload = jwt.decode(jwt_string, JWT_SECRET, algorithms=['HS256'])
     except:
