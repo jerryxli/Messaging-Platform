@@ -38,10 +38,6 @@ def create_user4():
     user_info = requests.post(REGISTER_URL, json=user_input).json()
     return user_info
 
-# The Channel leave function takes in user token and channel id as input
-# The function removes the member or owner from the channel
-
-# Tests for when a channel owner removes an owner -> SUCCESS
 def test_owner_removeowner(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -82,7 +78,6 @@ def test_owner_removeowner(clear_store, create_user, create_user2):
                                                     }   
                                                  ]
 
-# Tests for when a global owner who is a member removes an owner -> SUCCESS
 def test_global_owner_remove_owner(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -108,7 +103,6 @@ def test_global_owner_remove_owner(clear_store, create_user, create_user2):
                                                     }  
                                                 ]
 
-# Test for when a global_owner non member removes owner -> ACCESS ERROR
 def test_global_owner_non_member(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -119,8 +113,6 @@ def test_global_owner_non_member(clear_store, create_user, create_user2, create_
     response = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_2, 'u_id': create_user3['auth_user_id']})
     assert response.status_code == 403
 
-
-# Test for when a member tries to remove an owner (no owner permissions) -> ACCESS ERROR
 def test_member_removeowner(clear_store, create_user, create_user2, create_user3, create_user4):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -136,7 +128,6 @@ def test_member_removeowner(clear_store, create_user, create_user2, create_user3
     assert response_1.status_code == 403
     assert response_2.status_code == 403
 
-# Test for when a user_token is invalid -> ACCESS ERROR
 def test_invalid_user_token(clear_store, create_user, create_user2):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
@@ -144,14 +135,12 @@ def test_invalid_user_token(clear_store, create_user, create_user2):
     request_data = requests.post(REMOVEOWNER_URL, json={'token': user_token, 'channel_id': channel_id, 'u_id': create_user2['auth_user_id']})
     assert request_data.status_code == 403
 
-# Test for when a user_id is invalid -> INPUT ERROR
 def test_invalid_u_id(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(REMOVEOWNER_URL, json={'token': user_token, 'channel_id': channel_id, 'u_id': create_user['auth_user_id'] + 1})
     assert response.status_code == 400
 
-# Tests for when the user_id entered is not an owner of the channel -> INPUT ERROR
 def test_u_id_not_owner(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -165,7 +154,6 @@ def test_u_id_not_owner(clear_store, create_user, create_user2, create_user3):
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
 
-# Test for when the user_id is already a channel owner -> INPUT ERROR
 def test_only_owner(clear_store, create_user):
     user_token = create_user['token']
     u_id = create_user['auth_user_id']
@@ -173,7 +161,6 @@ def test_only_owner(clear_store, create_user):
     request_data = requests.post(REMOVEOWNER_URL, json={'token': user_token, 'channel_id': channel_id, 'u_id': u_id})
     assert request_data.status_code == 400
 
-# Tests for when an invalid channel_id is entered -> INPUT ERROR
 def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -185,7 +172,6 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
 
-# Test for when u_id is not a member -> INPUT ERROR
 def test_valid_u_id_not_in_channel(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user2 = create_user2
