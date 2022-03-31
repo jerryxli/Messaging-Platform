@@ -120,7 +120,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if auth_user_id == dm['owner_members']: 
-        dms.pop('dm_id')
+        dms.pop(dm_id)
     elif user in dm['members']:
         raise AccessError(description="User is not the original DM creator")
     else:
@@ -191,9 +191,9 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
-    if dm['creator'] == auth_user_id:
+    if dm['owner_members'] == auth_user_id:
         # user is owner of channel
-        dm['creator'] = None
+        dm['owner_members'] = None
         dm['members'].remove(user)
     elif user in dm['members']:
         dm['members'].remove(user)
