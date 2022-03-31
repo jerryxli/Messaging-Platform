@@ -32,10 +32,6 @@ def create_user3():
     user_info = request_data.json()
     return user_info
 
-# When channels_list_v2 is called, it should return the channel name and channel id.
-# In the format: {'channels': {'channel_id': ' ', 'name': ' '}}
-
-# Test for when the user has no channels
 def test_no_channels(clear_store, create_user):
     user_token = create_user['token']
     response = requests.get(LIST_URL, params={'token': user_token})
@@ -43,8 +39,6 @@ def test_no_channels(clear_store, create_user):
     assert response.json() == expected_outcome
     assert response.status_code == 200
 
-
-# Test for when the user has created one channel
 def test_one_channel(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
@@ -53,8 +47,6 @@ def test_one_channel(clear_store, create_user):
     assert response.json() == expected_outcome
     assert response.status_code == 200
 
-
-# Test for when the user has multiple channels
 def test_multiple_channels(clear_store, create_user,):
     user_token = create_user['token']
     channel_id_1 = requests.post(CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
@@ -65,8 +57,6 @@ def test_multiple_channels(clear_store, create_user,):
     assert response.json() == expected_outcome
     assert response.status_code == 200
 
-
-# Test for when multiple users have created channels
 def test_multiple_users(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -87,10 +77,7 @@ def test_multiple_users(clear_store, create_user, create_user2, create_user3):
     assert response_3.json() == { 'channels': [{'channel_id': channel_id_3, 'name': 'LOUNGE'}] }
     assert response_3.status_code == 200
 
-
-# Test for when the token is invalid
 def test_invalid_user_token(clear_store, create_user):
-    # Since we are only creating one user and each id is unique, then user + 1 must be fake
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(LOGOUT_URL, json={'token': user_token})
