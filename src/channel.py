@@ -80,13 +80,12 @@ def channel_details_v2(auth_user_id:int, channel_id:int)->dict:
     store = data_store.get()
     channels = store['channels']
 
-    # Checks for Input error: when the channel_id does not exist
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
         raise InputError(description="channel_id does not refer to a valid channel")
     ids = [user['u_id'] for user in channel['all_members']]
-    # Checks for Access error: when the user is not a member of the channel
+    
     if auth_user_id in ids:
         return {k: v for k, v in channel.items() if k not in ['messages']}
     else:
@@ -120,7 +119,6 @@ def channel_messages_v2(auth_user_id:int, channel_id:int, start:int)->dict:
     if not check_user_in_channel(auth_user_id, channel):
         raise AccessError(description="User is not a member of the channel")
 
-    # determine if start is greater than total number of messages, if so, return InputError
     if start > len(channel['messages']):
         raise InputError(description="start is greater than the total number of messages in the channel")
 
@@ -172,16 +170,14 @@ def channel_join_v2(auth_user_id:int, channel_id:int)->None:
         channel = channels[channel_id]
     else:
         raise InputError("channel_id does not refer to a valid channel")
-    # check if the channel is public
+
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')
     if channel['is_public'] or (not channel['is_public'] and is_global_user(auth_user_id)):
-        # check if the user is already in the channel
         if check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
-        # channel is public and user isn't in the channel yet. Add to channel
         channel['all_members'].append(altered_users[auth_user_id])
     else:
         raise AccessError
@@ -209,13 +205,11 @@ def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
     channels = store['channels']
     users = store['users']
 
-    # Check channel_id is valid
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
         raise InputError("Channel id not valid")
         
-    # Check auth_user_id is in channel
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
@@ -258,11 +252,9 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     else:
         raise InputError("Channel id not valid")
 
-    # Check the auth_user and u_id are members of the channel first
-    if not check_user_in_channel(u_id, channel):
-        raise InputError("U_id not a member")
+    if not check_user_in_channel(auth_user_id, channel):
+        raise AccessError("Auth_user_id does not have owner permissions")
 
-    # Check if auth_user has owner permissions
     owner_members = channel['owner_members']
     auth_user = users[auth_user_id]
     if not auth_user['global_permission'] == GLOBAL_PERMISSION_OWNER:
@@ -271,15 +263,18 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         altered_auth['handle_str'] = altered_auth.pop('handle')
         if altered_auth not in owner_members:
             raise AccessError("Auth_user_id does not have owner permissions")
+    
+    if not check_user_in_channel(u_id, channel):
+        raise InputError("U_id not a member")
+    
     altered_user = non_password_global_permission_field(users[u_id])
     altered_user['u_id'] = u_id
     altered_user['handle_str'] = altered_user.pop('handle')
 
-    # Check if user is already an owner, otherwise add to list of owners
     if altered_user not in owner_members:
         owner_members.append(altered_user)
     else:
-        raise InputError("User_id is already a member")
+        raise InputError("User_id is already an owner")
 
     data_store.set(store)
 
@@ -312,6 +307,10 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     else:
         raise InputError("channel_id not valid")
     owner_members = [user['u_id'] for user in channel['owner_members']]
+    
+    if not check_user_in_channel(auth_user_id, channel):
+        raise AccessError("Auth_user_id does not have owner permissions")
+
     if u_id not in owner_members:
         raise InputError(description="u_id is not an owner of channel")
     

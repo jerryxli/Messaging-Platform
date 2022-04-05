@@ -36,12 +36,9 @@ def test_normal_functionality(clear_store, create_user):
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.get(CHANNEL_MESSAGES_URL, params= {'channel_id': channel_id, 'start':0, 'token': user_token_1})
-    # no messages
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}         
-    # send a message
     message_id = requests.post(MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Leo loves tests!"}).json()['message_id']      
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start':0, 'token': user_token_1})
-    # check if message is there
     assert response.json()['start'] == 0
     assert response.json()['end'] == -1
     list_msg_id = [message['message_id'] for message in response.json()['messages']]
@@ -62,23 +59,18 @@ def test_pagination_functionality(clear_store, create_user):
     request_messages = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_1_token, 'channel_id': channel_id, 'start': 0})
     counter = 123
     current_start = 0
-    # Keep requesting messages
     while request_messages.json()['end'] != -1:
-        # Check start and end line up
         assert request_messages.json()['start'] == current_start
         assert request_messages.json()['end'] == current_start + 50
         assert len(request_messages.json()['messages']) == 50
-        # Check messages are being displayed in correct order
         for message in request_messages.json()['messages']:
             assert message['message'] == str(counter)
             counter -= 1
         current_start += 50
         request_messages = requests.get(CHANNEL_MESSAGES_URL, params={'token': user_1_token, 'channel_id': channel_id, 'start': current_start})
-    # Check the final batch of messages
     for message in request_messages.json()['messages']:
         assert message['message'] == str(counter)
         counter -= 1
-    # Check we have exhausted all messages
     assert counter == -1
 
 

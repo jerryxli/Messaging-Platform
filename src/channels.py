@@ -28,21 +28,16 @@ def channels_list_v2(auth_user_id: int)->dict:
     Return Value:
         Returns { channels } on successful creation
     """
-    # Gets list of channels from data_store
     store = data_store.get()
     channels = store['channels']
 
-    # List to store channel info
     user_channels = []
 
-    # Loops through each channel in the list Channels to check if
-    # user is in the channel
     for channel_id, channel_details in channels.items():
         ids = [user['u_id'] for user in channel_details['all_members']]
         if auth_user_id in ids:
             user_channel = {'channel_id': channel_id, 'name': channel_details['name']}
             user_channels.append(user_channel)
-    # Returns a dictionary with the key 'channels' which has user_channels as its values
     return {'channels': user_channels}
 
 

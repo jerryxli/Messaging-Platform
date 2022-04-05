@@ -184,11 +184,9 @@ def test_global_owner_join_private(clear_store, create_user, create_user2, creat
     user_token_3 = create_user3['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_2, 'name': 'secret', 'is_public': False}).json()['channel_id']
-    #  Test normal member cant get in
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_3, 'channel_id': channel_id})
     assert response.status_code == 403
-    # Verify owner is not in the channel
     assert requests.get(LIST_URL, params={'token': user_token_1}).json() == {'channels': []}
     response = requests.post(CHANNEL_JOIN_URL, json={
                              'token': user_token_1, 'channel_id': channel_id})

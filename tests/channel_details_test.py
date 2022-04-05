@@ -37,9 +37,6 @@ def create_stub_user():
     user_info = requests.post(REGISTER_URL, json=user_input).json()
     return user_info
 
-# The channels_details_v1 function takes in user_id and channel_id as input.
-# The function then outputs { name: , is_public: , owner_members: , all_members: } for the channel.
-# Tests for the creator trying to access the details of a channel with only one member (themselves).
 def test_creator_of_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -62,8 +59,6 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
     for user in channel_details_2['all_members']:
         assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
 
-
-# Tests for a member and creator getting details of a private channel
 def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -105,9 +100,7 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
 
     assert channel_details_1 == expected_output
     assert channel_details_2 == expected_output
-    
 
-# Test for when a user_token is invalid
 def test_invalid_user(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
@@ -115,8 +108,6 @@ def test_invalid_user(clear_store, create_user):
     request_data = requests.get(DETAILS_URL, params={'channel_id': channel_id}, json={'token': user_token})
     assert request_data.status_code == 403
 
-
-# Tests for when the user_id entered is not a member of the channel_id.
 def test_unauthorised_user_id(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -125,24 +116,18 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     channel_id_2 = requests.post(CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     request_data_1 = requests.get(DETAILS_URL, params={'channel_id': channel_id_1, 'token': user_token_2})
     request_data_2 = requests.get(DETAILS_URL, params={'channel_id': channel_id_2, 'token': user_token_3})
-    # Access Error
     assert request_data_1.status_code == 403
     assert request_data_2.status_code == 403
 
-
-# Tests for when an invalid channel_id is entered.
 def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token_1, 'name': 'My Channel', 'is_public': True}).json()['channel_id']
     request_data_1 = requests.get(DETAILS_URL, params={'channel_id': channel_id + 1, 'token': user_token_1})
     request_data_2 = requests.get(DETAILS_URL, params={'channel_id': channel_id + 2, 'token': user_token_2})
-    # Input Error
     assert request_data_1.status_code == 400
     assert request_data_2.status_code == 400
 
-
-# Test against the stub code output
 def test_from_stub_code(clear_store, create_stub_user):
     stub_token = create_stub_user['token']
     stub_uid = create_stub_user['auth_user_id']

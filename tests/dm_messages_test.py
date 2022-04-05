@@ -57,23 +57,18 @@ def test_pagination_success(clear_store, register_user_1, register_user_2):
     request_messages = requests.get(DM_MESSAGES_URL, params={"token": user_1_token, 'dm_id': dm_id, 'start': 0})
     counter = 123
     current_start = 0
-    # Keep requesting messages
     while request_messages.json()['end'] != -1:
-        # Check start and end line up
         assert request_messages.json()['start'] == current_start
         assert request_messages.json()['end'] == current_start + 50
         assert len(request_messages.json()['messages']) == 50
-        # Check messages are being displayed in correct order
         for message in request_messages.json()['messages']:
             assert message['message'] == str(counter)
             counter -= 1
         current_start += 50
         request_messages = requests.get(DM_MESSAGES_URL, params={"token": user_1_token, 'dm_id': dm_id, 'start': current_start})
-    # Check the final batch of messages
     for message in request_messages.json()['messages']:
         assert message['message'] == str(counter)
         counter -= 1
-    # Check we have exhausted all messages
     assert counter == -1
 
 

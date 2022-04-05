@@ -11,8 +11,6 @@ LOGIN_URL = f"{url}/auth/login/v2"
 def clear_store():
     requests.delete(f"{url}/clear/v1", json={})
 
-
-#Basic Tests
 def test_basic_success(clear_store):
     register_request = requests.post(REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
     assert register_request.status_code == 200

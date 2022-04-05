@@ -35,19 +35,16 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     dms = store['dms']
     users = store['users']
 
-    # U_id is not valid
-    if len(u_ids) != 0:
-        if any(verify_user(u_id) for u_id in u_ids) == False:
+    for u_id in u_ids:
+        if not verify_user(u_id):
             raise InputError(description="U_id not valid")
 
-    # Check for duplicate u_id
     user_set = set(u_ids)
     if len(user_set) < len(u_ids):
         raise InputError(description="Duplicate u_ids entered")
     if auth_user_id not in u_ids:
         u_ids.append(auth_user_id)
 
-    # Create users list with user info
     members = []
     for id in u_ids:
         user = non_password_global_permission_field(users[id])
@@ -55,7 +52,6 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
         user['handle_str'] = user.pop('handle')
         members.append(user) 
 
-    # Create name
     name = ''
     user_handles = []
     for id in u_ids:
@@ -63,10 +59,9 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     user_handles.sort()
     name = ', '.join(user_handles)
 
-    # Information for the dm
     dm_info = {}
     dm_id = len(dms)
-    dm_info['creator'] = auth_user_id
+    dm_info['owner_members'] = auth_user_id
     dm_info['name'] = name
     dm_info['members'] = members
     dm_info['messages'] = []
@@ -100,11 +95,6 @@ def dm_list_v1(auth_user_id:int)->dict:
     return { 'dms': dm_list }
 
 
-    # return { 'dms': [{'dm_id': key, 'name': dm['name']}] 
-    #         for key, dm in dms.items()}
-
-
-
 def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     """
     Remove an existing DM, so all members are no longer in the DM. 
@@ -129,9 +119,8 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
-    if auth_user_id == dm['creator']: # dm['owner_members']
-        # remove DM
-        del dms[dm_id]
+    if auth_user_id == dm['owner_members']: 
+        dms.pop(dm_id)
     elif user in dm['members']:
         raise AccessError(description="User is not the original DM creator")
     else:
@@ -202,9 +191,8 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     user = non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
-    if dm['creator'] == auth_user_id:
-        # user is owner of channel
-        dm['creator'] = None
+    if dm['owner_members'] == auth_user_id:
+        dm['owner_members'] = None
         dm['members'].remove(user)
     elif user in dm['members']:
         dm['members'].remove(user)

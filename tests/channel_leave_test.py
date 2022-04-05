@@ -34,10 +34,6 @@ def create_user3():
     user_info = requests.post(REGISTER_URL, json=user_input).json()
     return user_info
 
-# The Channel leave function takes in user token and channel id as input
-# The function removes the member or owner from the channel
-
-# Tests for when the owner leaves the channel
 def test_owner_leaves(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -52,12 +48,9 @@ def test_owner_leaves(clear_store, create_user, create_user2):
     assert request_data_1.status_code == 200
     assert request_data_2.json() == {}
     assert request_data_2.status_code == 200
-    # Access Error when trying to get details
     assert channel_details_1.status_code == 403
     assert channel_details_2.status_code == 403 
 
-
-# Tests for when a member leaves the channel
 def test_member_leaves(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -93,7 +86,6 @@ def test_member_leaves(clear_store, create_user, create_user2):
     assert channel_details_1.status_code == 200
     assert channel_details_2.status_code == 403
 
-# Test for when a user_token is invalid
 def test_invalid_member(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
@@ -101,8 +93,6 @@ def test_invalid_member(clear_store, create_user):
     response = requests.post(LEAVE_URL, json={'token': user_token, 'channel_id': channel_id})
     assert response.status_code == 403
 
-
-# Tests for when the user_id entered is not a member of the channel_id.
 def test_unauthorised_user_id(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -114,8 +104,6 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     assert request_data_1.status_code == 403
     assert request_data_2.status_code == 403
 
-
-# Tests for when an invalid channel_id is entered.
 def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
