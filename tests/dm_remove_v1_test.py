@@ -33,8 +33,6 @@ def create_user3():
     user_info = request_data.json()
     return user_info
 
-# check_dm_id_is_removed(token, dm_id):
-
 def test_remove_dm(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_id_2 = create_user2['auth_user_id']
@@ -44,7 +42,6 @@ def test_remove_dm(clear_store, create_user, create_user2):
     response = requests.delete(DM_REMOVE_URL, json={'token': user_token, 'dm_id': dm_id})
     assert response.status_code == 200
 
-# already removed or not existing in the first place
 def test_invalid_dm_id(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_id_2 = create_user2['auth_user_id']
@@ -56,7 +53,6 @@ def test_invalid_dm_id(clear_store, create_user, create_user2):
     response = requests.delete(DM_REMOVE_URL, json={'token': user_token, 'dm_id': dm_id})
     assert response.status_code == 400
 
-# member in dm that is not creator tries to remove dm
 def test_not_dm_creator(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_id_2 = create_user2['auth_user_id']

@@ -93,11 +93,9 @@ def test_check_accessibility_of_messages_across_channels(clear_store, create_use
     assert is_valid_dictionary_output(response.json(), {'message_id': int})
     response = requests.get(CHANNEL_MESSAGES_URL, params={'channel_id': channel_id2, 'start': 0, 'token': user_token_2})
     assert response.status_code == 200
-    # check that channel_id2 has no messages within it
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}
 
 def test_invalid_message(clear_store, create_user):
-    # message invalid when length of message is < 1 or > 1000 characters
     user_token_1 = create_user['token']
     channel_id = requests.post(CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
