@@ -192,7 +192,6 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if dm['owner_members'] == auth_user_id:
-        # user is owner of channel
         dm['owner_members'] = None
         dm['members'].remove(user)
     elif user in dm['members']:

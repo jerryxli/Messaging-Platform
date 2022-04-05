@@ -32,9 +32,6 @@ def create_user3():
     user_info = request_data.json()
     return user_info
 
-# Dm Create creates a dm and returns a dm_id
-
-# Test successful case -> RETURN DM_ID 
 def test_success_create(clear_store, create_user, create_user2, create_user3): 
     user_token_1 = create_user['token']
     user_id_2 = create_user2['auth_user_id']
@@ -43,28 +40,24 @@ def test_success_create(clear_store, create_user, create_user2, create_user3):
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'dm_id': int})    
 
-# Test empty list of u_ids -> RETURN DM_ID
 def test_empty_list(clear_store, create_user):
     user_token_1 = create_user['token']
     response = requests.post(DM_CREATE_URL, json={'token': user_token_1, 'u_ids': []})
     assert response.status_code == 200
     assert is_valid_dictionary_output(response.json(), {'dm_id': int})    
 
-# Test Invalid token -> ACCESS ERROR
 def test_invalid_token(clear_store, create_user):
     user_token = create_user['token']
     requests.post(LOGOUT_URL, json={'token': user_token})
     response = requests.post(DM_CREATE_URL, json={'token': user_token, 'u_ids': []})
     assert response.status_code == 403
 
-# Test invalid u_id -> INPUT ERROR
 def test_invalid_u_id(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_id_2 = create_user2['auth_user_id']
     response = requests.post(DM_CREATE_URL, json={'token': user_token, 'u_ids': [user_id_2, -1]})
     assert response.status_code == 400
 
-# Test duplicate u_id -> INPUT ERROR
 def test_duplicate_u_id(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_id_2 = create_user2['auth_user_id']

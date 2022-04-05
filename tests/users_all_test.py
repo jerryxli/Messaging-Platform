@@ -29,10 +29,6 @@ def create_user2():
     user_info = request_data.json()
     return user_info
 
-
-# Users All returns {'users': [{u_id, email, name_first, name_last, handle}]}
-
-# No users registered
 def test_one_user(clear_store, create_user):
     user_token = create_user['token']
     user_id = create_user['auth_user_id']
@@ -42,7 +38,6 @@ def test_one_user(clear_store, create_user):
     assert response.json()['users'] == [profile_response.json()['user']]
     assert response.status_code == 200
 
-# Test for multiple users
 def test_multiple_users(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_token2 = create_user2['token']
@@ -59,9 +54,7 @@ def test_multiple_users(clear_store, create_user, create_user2):
     requests.delete(REMOVE_URL, json={'token': user_token, 'u_id': user_id2})
     response = requests.get(USERS_ALL_URL, params={'token': user_token})
     assert response.json() == {'users': [{"u_id": user_id, 'email': "z432324@unsw.edu.au", 'name_first': "Ji", 'name_last': "Sun", 'handle_str': "jisun"}]}
-    
 
-# Test for invalid token
 def test_invalid_token(clear_store, create_user):
     user_token = create_user['token']
     requests.post(f"{url}/auth/logout/v1", json={"token": user_token})

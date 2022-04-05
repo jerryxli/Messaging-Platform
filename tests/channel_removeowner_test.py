@@ -32,12 +32,6 @@ def create_user3():
     user_info = requests.post(REGISTER_URL, json=user_input).json()
     return user_info
 
-@pytest.fixture
-def create_user4():
-    user_input = {'email': "z234019@unsw.edu.au", 'password': "slobknob", 'name_first': "Kit", 'name_last': "Kat"}
-    user_info = requests.post(REGISTER_URL, json=user_input).json()
-    return user_info
-
 def test_owner_removeowner(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
@@ -46,12 +40,9 @@ def test_owner_removeowner(clear_store, create_user, create_user2):
     requests.post(ADDOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_1, 'u_id': create_user2['auth_user_id']})
     channel_details_1 = requests.get(DETAILS_URL, params={'channel_id': channel_id_1, 'token': user_token_1}).json()
     request_data_1 = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_1, 'u_id': create_user2['auth_user_id']})
-    
     channel_details_2 = requests.get(DETAILS_URL, params={'channel_id': channel_id_1, 'token': user_token_2}).json()
-
     assert request_data_1.json() == {}
     assert request_data_1.status_code == 200
-
     assert channel_details_1['owner_members'] == [
                                                     {
                                                         'u_id': create_user['auth_user_id'],
@@ -83,16 +74,12 @@ def test_global_owner_remove_owner(clear_store, create_user, create_user2):
     user_token_2 = create_user2['token']
     user_id = create_user['auth_user_id']
     channel_id_2 = requests.post(CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': True}).json()['channel_id']
-    join_request = requests.post(JOIN_URL, json={'token': user_token_1, 'channel_id': channel_id_2})
-    add_request = requests.post(ADDOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_2, 'u_id': user_id})
+    requests.post(JOIN_URL, json={'token': user_token_1, 'channel_id': channel_id_2})
+    requests.post(ADDOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_2, 'u_id': user_id})
     response = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_2, 'u_id': user_id})
     channel_details = requests.get(DETAILS_URL, params={'channel_id': channel_id_2, 'token': user_token_2}).json()
-   
-    assert join_request.status_code == 200
-    assert add_request.status_code == 200
     assert response.json() == {}
     assert response.status_code == 200
-    
     assert channel_details['owner_members'] ==  [
                                                     {
                                                         'u_id': create_user2['auth_user_id'],
@@ -113,20 +100,16 @@ def test_global_owner_non_member(clear_store, create_user, create_user2, create_
     response = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_2, 'u_id': create_user3['auth_user_id']})
     assert response.status_code == 403
 
-def test_member_removeowner(clear_store, create_user, create_user2, create_user3, create_user4):
+def test_member_removeowner(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
-    user_token_4 = create_user4['token']
     channel_id_1 = requests.post(CREATE_URL, json={'token': user_token_1, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id_1})
     requests.post(JOIN_URL, json={'token': user_token_3, 'channel_id': channel_id_1})
-    requests.post(JOIN_URL, json={'token': user_token_4, 'channel_id': channel_id_1})
-    requests.post(ADDOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_1, 'u_id': create_user4['auth_user_id']})
-    response_1 = requests.post(REMOVEOWNER_URL, json={'token': user_token_2, 'channel_id': channel_id_1, 'u_id': create_user4['auth_user_id']})
-    response_2 = requests.post(REMOVEOWNER_URL, json={'token': user_token_3, 'channel_id': channel_id_1, 'u_id': create_user4['auth_user_id']})
+    requests.post(ADDOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_1, 'u_id': create_user3['auth_user_id']})
+    response_1 = requests.post(REMOVEOWNER_URL, json={'token': user_token_2, 'channel_id': channel_id_1, 'u_id': create_user3['auth_user_id']})
     assert response_1.status_code == 403
-    assert response_2.status_code == 403
 
 def test_invalid_user_token(clear_store, create_user, create_user2):
     user_token = create_user['token']
@@ -143,16 +126,11 @@ def test_invalid_u_id(clear_store, create_user):
 
 def test_u_id_not_owner(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
-    user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
     channel_id_1 = requests.post(CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    requests.post(JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id_1})
     requests.post(JOIN_URL, json={'token': user_token_3, 'channel_id': channel_id_1})
     request_data_1 = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_1, 'u_id': create_user3['auth_user_id']})
-    request_data_2 = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id_1, 'u_id': create_user2['auth_user_id']})
-
     assert request_data_1.status_code == 400
-    assert request_data_2.status_code == 400
 
 def test_only_owner(clear_store, create_user):
     user_token = create_user['token']
@@ -161,16 +139,12 @@ def test_only_owner(clear_store, create_user):
     request_data = requests.post(REMOVEOWNER_URL, json={'token': user_token, 'channel_id': channel_id, 'u_id': u_id})
     assert request_data.status_code == 400
 
-def test_invalid_channel_id(clear_store, create_user, create_user2):
+def test_invalid_channel_id(clear_store, create_user):
     user_token_1 = create_user['token']
-    user_token_2 = create_user2['token']
     u_id_1 = create_user['auth_user_id']
-    u_id_2 = create_user2['auth_user_id']
     channel_id = requests.post(CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     request_data_1 = requests.post(REMOVEOWNER_URL, json={'token': user_token_1, 'channel_id': channel_id + 1, 'u_id': u_id_1})
-    request_data_2 = requests.post(REMOVEOWNER_URL, json={'token': user_token_2, 'channel_id': channel_id + 2, 'u_id': u_id_2})
     assert request_data_1.status_code == 400
-    assert request_data_2.status_code == 400
 
 def test_valid_u_id_not_in_channel(clear_store, create_user, create_user2):
     user_token = create_user['token']

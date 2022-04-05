@@ -96,7 +96,6 @@ def message_edit_v1(user_id, message_id, message):
         raise InputError(description="message over 1000 characters")
     if message == '':
         message_remove_v1(user_id, message_id)
-    # edit the message
     else:
         message_info['message']['message'] = message
     store['channels'] = channels
