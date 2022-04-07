@@ -55,6 +55,7 @@ def channel_invite_v2(auth_user_id, channel_id, u_id):
     altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id
+        user['handle_str'] = user.pop('handle')
         channel['all_members'].append(altered_users[u_id])
 
     data_store.set(store)
