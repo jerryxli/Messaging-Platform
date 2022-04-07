@@ -6,6 +6,6 @@ source =
 omit =
     test_*.py
     *_test.py
-    src/server.py
     src/data_store.py
+    src/server.py
     */__init__.py
