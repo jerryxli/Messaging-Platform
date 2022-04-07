@@ -23,19 +23,15 @@ Example usage:
     print(store) # Prints { 'names': ['Emily', 'Hayden', 'Jake', 'Nick'] }
     data_store.set(store)
 '''
-
 import pickle
-
 FILE_LOCATION = "datastore.p"
 
-## YOU SHOULD MODIFY THIS OBJECT BELOW
 initial_object = {
     'users': {},
     'channels': {},
     'messages': 0,
     'dms': {},
 }
-## YOU SHOULD MODIFY THIS OBJECT ABOVE
 
 
 def pickle_and_store(object_to_persist: dict):
@@ -50,7 +46,6 @@ def unpickle_and_load() -> dict:
     return data_contents
 
 
-## YOU ARE ALLOWED TO CHANGE THE BELOW IF YOU WISH
 class Datastore:
     def __init__(self):
         print("Creating Data Store")

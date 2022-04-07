@@ -1,10 +1,6 @@
 from src.data_store import data_store
-from src.error import AccessError, InputError
-from src.auth import GLOBAL_PERMISSION_REMOVED, MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, is_email_taken, is_handle_taken, is_valid_JWT, is_valid_email
-from src.other import user_id_from_JWT, verify_user
-from src.channel import GLOBAL_PERMISSION_OWNER, non_password_global_permission_field
-from src.dm import dm_list_v1
-
+from src.error import InputError, AccessError
+import src.other as other
 
 def user_profile_v1(token: str, u_id: int)->dict:
     """
@@ -21,9 +17,9 @@ def user_profile_v1(token: str, u_id: int)->dict:
     Return Value:
         Dictionary containing u_id, email, name_first, name_last and handle_str
     """
-    if not is_valid_JWT(token):
+    if not other.is_valid_JWT(token):
         raise AccessError(description="The token provided is not valid.")
-    if not verify_user(u_id):
+    if not other.verify_user(u_id):
         raise InputError(description="u_id does not refer to a valid user.")
 
     store = data_store.get()
@@ -51,15 +47,15 @@ def user_setname_v1(token: str, name_first: str, name_last: str)->dict:
         Empty Dictionary on Success
     
     """
-    if not is_valid_JWT(token):
+    if not other.is_valid_JWT(token):
         raise AccessError(description="The token provided is not valid.")
-    if len(name_first) < 1 or len(name_first) > MAX_FIRST_NAME_LENGTH:
+    if len(name_first) < 1 or len(name_first) > other.MAX_FIRST_NAME_LENGTH:
         raise InputError(description="The first name provided is not between 1 and 50 characters.")
-    if len(name_last) < 1 or len(name_last) > MAX_LAST_NAME_LENGTH:
+    if len(name_last) < 1 or len(name_last) > other.MAX_LAST_NAME_LENGTH:
         raise InputError(description="The last name provided is not between 1 and 50 characters.")
 
     store = data_store.get()
-    user = store['users'][user_id_from_JWT(token)]
+    user = store['users'][other.user_id_from_JWT(token)]
     user['name_first'] = name_first
     user['name_last'] = name_last
 
@@ -82,17 +78,17 @@ def user_setemail_v1(token: str, email: str)->dict:
         Empty dictionary on success
     
     """
-    if not is_valid_JWT(token):
+    if not other.is_valid_JWT(token):
         raise AccessError(description="The token provided is not valid.")
-    if not is_valid_email(email):
+    if not other.is_valid_email(email):
         raise InputError(description="Email provided is not valid.")
 
     store = data_store.get()
-    user = store['users'][user_id_from_JWT(token)]
+    user = store['users'][other.user_id_from_JWT(token)]
 
     if user['email'] == email:
         return {}
-    if is_email_taken(email):
+    if other.is_email_taken(email):
         raise InputError(description="Email is already taken by another user.")
 
     user['email'] = email
@@ -115,8 +111,8 @@ def users_all_v1(auth_user_id: int)->dict:
     users = store['users']
     all_users = []
     for user_id, user in users.items():
-        if user['global_permission'] != GLOBAL_PERMISSION_REMOVED:
-            user = non_password_global_permission_field(user)
+        if user['global_permission'] != other.GLOBAL_PERMISSION_REMOVED:
+            user = other.non_password_global_permission_field(user)
             user['u_id'] = user_id
             user['handle_str'] = user.pop('handle')
             all_users.append(user)
@@ -126,12 +122,12 @@ def users_all_v1(auth_user_id: int)->dict:
 def user_remove_v1(token: str, u_id: int)->dict:
     store = data_store.get()
     users = store['users']
-    admin_user = users[user_id_from_JWT(token)]
-    if admin_user['global_permission'] != GLOBAL_PERMISSION_OWNER:
+    admin_user = users[other.user_id_from_JWT(token)]
+    if admin_user['global_permission'] != other.GLOBAL_PERMISSION_OWNER:
         raise AccessError(description="Insufficient permissions")
     if u_id not in users:
         raise InputError(description="Invalid user id")
-    global_owners = {key: user for key, user in users.items() if user['global_permission'] == GLOBAL_PERMISSION_OWNER}
+    global_owners = {key: user for key, user in users.items() if user['global_permission'] == other.GLOBAL_PERMISSION_OWNER}
     if len(global_owners) == 1 and u_id in global_owners.keys():
         raise InputError(description="Would cause 0 owners of Seams")
     channels = store['channels']
@@ -154,7 +150,7 @@ def user_remove_v1(token: str, u_id: int)->dict:
         for message in dm['messages']:
             if message['u_id'] == u_id:
                 message['message'] = 'Removed user'
-    users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': GLOBAL_PERMISSION_REMOVED, 'sessions': []}
+    users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': other.GLOBAL_PERMISSION_REMOVED, 'sessions': []}
     store['channels'] = channels
     store['users'] = users
     data_store.set(store)
@@ -173,7 +169,7 @@ def user_set_handle_v1(token: str, handle_str: str)->dict:
         InputError  - Where the handle is not between 3 and 20 characters, is not alphanumeric
                       or the handle is in use by another user
     """
-    if not is_valid_JWT(token):
+    if not other.is_valid_JWT(token):
         raise AccessError(description="Token provided is not valid.")
     if len(handle_str) < 3 or len(handle_str) > 20:
         raise InputError(description="The handle is not between 3 and 20 characters(inclusive).")
@@ -181,11 +177,11 @@ def user_set_handle_v1(token: str, handle_str: str)->dict:
         raise InputError(description="The handle is not alphanumeric.")
     
     store = data_store.get()
-    user = store['users'][user_id_from_JWT(token)]
+    user = store['users'][other.user_id_from_JWT(token)]
     if user['handle'] == handle_str:
         return {}
     
-    if is_handle_taken(handle_str):
+    if other.is_handle_taken(handle_str):
         raise InputError(description="This handle is in use by another user.")
     
     user['handle'] = handle_str
