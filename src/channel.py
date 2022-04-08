@@ -11,10 +11,8 @@ get information of the messages within a channel and join a channel.
 """
 from src.data_store import data_store
 from src.error import InputError, AccessError
-from src.other import verify_user, is_global_user
+import src.other as other
 
-GLOBAL_PERMISSION_OWNER = 2
-PAGE_THRESHOLD = 50
 
 def channel_invite_v2(auth_user_id, channel_id, u_id):
     """
@@ -35,7 +33,7 @@ def channel_invite_v2(auth_user_id, channel_id, u_id):
     Return Value:
         None
     """
-    if verify_user(u_id) is False:
+    if other.verify_user(u_id) is False:
         raise InputError(description="u_id does not refer to a valid user")
 
     store = data_store.get()
@@ -47,12 +45,12 @@ def channel_invite_v2(auth_user_id, channel_id, u_id):
     else:
         raise InputError(description="channel_id does not refer to a valid channel")
 
-    if check_user_in_channel(u_id, channel):
+    if other.check_user_in_channel(u_id, channel):
         raise InputError(description="u_id refers to a user who is already a member of the channel")
-    if not check_user_in_channel(auth_user_id, channel):
+    if not other.check_user_in_channel(auth_user_id, channel):
         raise AccessError(description="User issuing invite is not part of channel")
 
-    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
+    altered_users = {k: other.non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')
@@ -117,7 +115,7 @@ def channel_messages_v2(auth_user_id:int, channel_id:int, start:int)->dict:
         channel = channels[channel_id]
     else:
         raise InputError(description='channel_id does not refer to a valid channel')
-    if not check_user_in_channel(auth_user_id, channel):
+    if not other.check_user_in_channel(auth_user_id, channel):
         raise AccessError(description="User is not a member of the channel")
 
     if start > len(channel['messages']):
@@ -125,25 +123,10 @@ def channel_messages_v2(auth_user_id:int, channel_id:int, start:int)->dict:
 
     messages = []
     not_displayed = list(reversed(channel['messages']))[start:]
-    messages.extend(not_displayed[:min(PAGE_THRESHOLD, len(not_displayed))])
+    messages.extend(not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
     
-    end = -1 if len(messages) == len(not_displayed) else start + PAGE_THRESHOLD
+    end = -1 if len(messages) == len(not_displayed) else start + other.PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}
-
-
-def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
-    """
-    Checks whether a user is in a channel or not
-
-    Arguments:
-        user_id (int)   - the id of the user
-        channel (dict)  - the channel to check
-
-    Returns:
-        A boolean, true if the user is in the channel, false if not
-    """
-    ids = [user['u_id'] for user in channel['all_members']]
-    return bool(auth_user_id in ids)
 
 
 def channel_join_v2(auth_user_id:int, channel_id:int)->None:
@@ -172,12 +155,12 @@ def channel_join_v2(auth_user_id:int, channel_id:int)->None:
     else:
         raise InputError("channel_id does not refer to a valid channel")
 
-    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
+    altered_users = {k: other.non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')
-    if channel['is_public'] or (not channel['is_public'] and is_global_user(auth_user_id)):
-        if check_user_in_channel(auth_user_id, channel):
+    if channel['is_public'] or (not channel['is_public'] and other.is_global_user(auth_user_id)):
+        if other.check_user_in_channel(auth_user_id, channel):
             raise InputError("the authorised user is already a member of the channel")
         channel['all_members'].append(altered_users[auth_user_id])
     else:
@@ -211,7 +194,7 @@ def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
     else:
         raise InputError("Channel id not valid")
         
-    user = non_password_global_permission_field(users[auth_user_id])
+    user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if user in channel['owner_members']:
@@ -223,6 +206,7 @@ def channel_leave_v1(auth_user_id:int, channel_id:int)->None:
         raise AccessError("User not in channel")
     
     data_store.set(store)     
+
 
 def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     """
@@ -243,7 +227,7 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     Returns:
         None
     """
-    if not verify_user(u_id):
+    if not other.verify_user(u_id):
         raise InputError("U id not valid")
     store = data_store.get()
     channels = store['channels']
@@ -253,22 +237,22 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     else:
         raise InputError("Channel id not valid")
 
-    if not check_user_in_channel(auth_user_id, channel):
+    if not other.check_user_in_channel(auth_user_id, channel):
         raise AccessError("Auth_user_id does not have owner permissions")
 
     owner_members = channel['owner_members']
     auth_user = users[auth_user_id]
-    if not auth_user['global_permission'] == GLOBAL_PERMISSION_OWNER:
-        altered_auth = non_password_global_permission_field(users[auth_user_id])
+    if not auth_user['global_permission'] == other.GLOBAL_PERMISSION_OWNER:
+        altered_auth = other.non_password_global_permission_field(users[auth_user_id])
         altered_auth['u_id'] = auth_user_id
         altered_auth['handle_str'] = altered_auth.pop('handle')
         if altered_auth not in owner_members:
             raise AccessError("Auth_user_id does not have owner permissions")
     
-    if not check_user_in_channel(u_id, channel):
+    if not other.check_user_in_channel(u_id, channel):
         raise InputError("U_id not a member")
     
-    altered_user = non_password_global_permission_field(users[u_id])
+    altered_user = other.non_password_global_permission_field(users[u_id])
     altered_user['u_id'] = u_id
     altered_user['handle_str'] = altered_user.pop('handle')
 
@@ -278,6 +262,7 @@ def channel_addowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         raise InputError("User_id is already an owner")
 
     data_store.set(store)
+
 
 def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     """
@@ -298,7 +283,7 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     Returns:
         None
     """
-    if not verify_user(u_id):
+    if not other.verify_user(u_id):
         raise InputError("U id not valid")
     store = data_store.get()
     channels = store['channels']
@@ -309,13 +294,13 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
         raise InputError("channel_id not valid")
     owner_members = [user['u_id'] for user in channel['owner_members']]
     
-    if not check_user_in_channel(auth_user_id, channel):
+    if not other.check_user_in_channel(auth_user_id, channel):
         raise AccessError("Auth_user_id does not have owner permissions")
 
     if u_id not in owner_members:
         raise InputError(description="u_id is not an owner of channel")
     
-    if not users[auth_user_id]['global_permission'] == GLOBAL_PERMISSION_OWNER and not auth_user_id in owner_members:
+    if not users[auth_user_id]['global_permission'] == other.GLOBAL_PERMISSION_OWNER and not auth_user_id in owner_members:
         raise AccessError(description='auth_user_id does not have owner permissions')
     if len(owner_members) == 1:
         raise InputError(description="u_id is the only owner")
@@ -324,18 +309,3 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     channels[channel_id] = channel
     store['channels'] = channels
     data_store.set(store)
-
-
-def non_password_global_permission_field(user:dict)->dict:
-    """
-    Removes all non-password fields from a user to print them
-
-    Arguments:
-        user (dict) - dictionary of all user details
-
-    Returns:
-        Dictionary with password field removed
-
-    """
-    user = {k: v for k,v in user.items() if k not in ['password', 'global_permission', 'sessions']}
-    return user

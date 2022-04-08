@@ -9,10 +9,9 @@ Created: 19.03.2022
 Description: Allows the user to send, edit and remove messages.
 """
 from time import time
-
 from src.data_store import data_store
 from src.error import InputError, AccessError
-from src.channel import check_user_in_channel
+import src.other as other
 
 def message_send_v1(user_id, channel_id, message):
     """
@@ -42,7 +41,7 @@ def message_send_v1(user_id, channel_id, message):
     if len(message) > 1000 or len(message) < 1:
         raise InputError(description="Length of message is less than 1 or over 1000 characters")
 
-    if check_user_in_channel(user_id, message_channel):
+    if other.check_user_in_channel(user_id, message_channel):
         new_message_id = store['messages']
         message_channel['messages'].append({'message_id': new_message_id, 'u_id': user_id, 'message': message, 'time_sent': time()})
         store['channels'] = channels

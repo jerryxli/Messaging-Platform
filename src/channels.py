@@ -8,12 +8,9 @@ Created: 22.02.2022
 Description: Allows the user to list channel info that they are apart of,
 list channel info for all channels and create channels.
 """
-
 from src.data_store import data_store
-from src.error import AccessError, InputError
-from src.other import verify_user
-
-MAX_CHANNEL_NAME_LENGTH = 20
+from src.error import InputError
+import src.other as other
 
 
 def channels_list_v2(auth_user_id: int)->dict:
@@ -81,9 +78,9 @@ def channels_create_v2(auth_user_id: int, name: str, is_public: bool)->dict:
     store = data_store.get()
     channels = store['channels']
     users = store['users']
-    if len(name) > MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
+    if len(name) > other.MAX_CHANNEL_NAME_LENGTH or len(name) < 1:
         raise InputError(description="Channel name too long or short")
-    altered_users = {k: non_password_global_permission_field(v) for k,v in users.items()}
+    altered_users = {k: other.non_password_global_permission_field(v) for k,v in users.items()}
     for user_id, user in altered_users.items():
         user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')
@@ -96,18 +93,3 @@ def channels_create_v2(auth_user_id: int, name: str, is_public: bool)->dict:
     return(
         {'channel_id': new_channel_id}
     )
-
-
-def non_password_global_permission_field(user: dict)->dict:
-    """
-    Removes all non-password fields from a user to print them
-
-    Arguments:
-        user (dict) - dictionary of all user details
-
-    Returns:
-        Dictionary with password field removed
-
-    """
-    user = {k: v for k, v in user.items() if k not in ['password', 'global_permission', 'sessions']}
-    return user

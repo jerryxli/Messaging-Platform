@@ -10,11 +10,9 @@ message in a dm, get details of a dm, and remove a dm.
 """
 from time import time
 from src.data_store import data_store
-from src.channel import non_password_global_permission_field
 from src.error import InputError, AccessError
-from src.other import verify_user
+import src.other as other
 
-PAGE_THRESHOLD = 50
 
 def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     """
@@ -36,7 +34,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     users = store['users']
 
     for u_id in u_ids:
-        if not verify_user(u_id):
+        if not other.verify_user(u_id):
             raise InputError(description="U_id not valid")
 
     user_set = set(u_ids)
@@ -47,7 +45,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
 
     members = []
     for id in u_ids:
-        user = non_password_global_permission_field(users[id])
+        user = other.non_password_global_permission_field(users[id])
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
         members.append(user) 
@@ -116,7 +114,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
-    user = non_password_global_permission_field(users[auth_user_id])
+    user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if auth_user_id == dm['owner_members']: 
@@ -130,7 +128,6 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     data_store.set(store)
     return
     
-
 
 def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     """
@@ -188,7 +185,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     else:
         raise InputError(description="Dm_id not valid")
 
-    user = non_password_global_permission_field(users[auth_user_id])
+    user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if dm['owner_members'] == auth_user_id:
@@ -201,7 +198,8 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
 
     store['dms'] = dms
     data_store.set(store)
-    return
+    return None
+
 
 def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
     """
@@ -265,6 +263,6 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
         raise InputError(description="Start is greater than the total number of messages in channel")
     messages = []
     not_displayed = list(reversed(dm['messages']))[start:]
-    messages.extend(not_displayed[:min(PAGE_THRESHOLD, len(not_displayed))])
-    end = -1 if len(messages) == len(not_displayed) else start + PAGE_THRESHOLD
+    messages.extend(not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
+    end = -1 if len(messages) == len(not_displayed) else start + other.PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}

@@ -1,15 +1,13 @@
-import sys
-import jwt
 import signal
 from json import dumps
 from flask import Flask, request
 from flask_cors import CORS
 from src.error import AccessError
 from src import config
-from src.other import clear_v1, user_id_from_JWT
+from src.other import clear_v1, user_id_from_JWT, is_valid_JWT
 from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
-from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, is_valid_JWT, change_global_permission
+from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
 from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1,users_all_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
 from src.message import message_send_v1, message_remove_v1, message_edit_v1
@@ -39,8 +37,6 @@ CORS(APP)
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
 
-# NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
-
 
 @APP.route("/clear/v1", methods=['DELETE'])
 def handle_clear():
@@ -51,31 +47,25 @@ def handle_clear():
 @APP.route("/auth/register/v2", methods=['POST'])
 def handle_register_v2():
     request_data = request.get_json()
-
     email = request_data['email']
     password = request_data['password']
     name_first = request_data['name_first']
     name_last = request_data['name_last']
-
     return auth_register_v2(email, password, name_first, name_last)
 
 
 @APP.route("/auth/login/v2", methods=['POST'])
 def handle_login_v2():
     request_data = request.get_json()
-
     email = request_data['email']
     password = request_data['password']
-
     return auth_login_v2(email, password)
 
 
 @APP.route("/auth/logout/v1", methods=['POST'])
 def handle_logout_v1():
     request_data = request.get_json()
-
     token = request_data['token']
-
     return auth_logout_v1(token)
 
 
@@ -83,7 +73,6 @@ def handle_logout_v1():
 def handle_profile_v1():
     token = request.args.get('token')
     u_id = int(request.args.get('u_id'))
-
     return user_profile_v1(token, u_id)
 
 
@@ -93,7 +82,6 @@ def handle_setname_v1():
     token = request_data['token']
     name_first = request_data['name_first']
     name_last = request_data['name_last']
-
     return user_setname_v1(token, name_first, name_last)
 
 
@@ -102,7 +90,6 @@ def handle_setemail_v1():
     request_data = request.get_json()
     token = request_data['token']
     email = request_data['email']
-
     return user_setemail_v1(token, email)
 
 
@@ -111,7 +98,6 @@ def handle_sethandle_v1():
     request_data = request.get_json()
     token = request_data['token']
     handle_str = request_data['handle_str']
-
     return user_set_handle_v1(token, handle_str)
 
 
