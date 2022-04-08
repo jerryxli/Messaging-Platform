@@ -29,7 +29,7 @@ FILE_LOCATION = "datastore.p"
 initial_object = {
     'users': {},
     'channels': {},
-    'messages': 0,
+    'messages': {},
     'dms': {},
 }
 

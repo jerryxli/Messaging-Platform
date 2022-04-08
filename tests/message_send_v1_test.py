@@ -30,7 +30,7 @@ def create_user2():
 
 def test_basic_message_send(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
                                
     response = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
@@ -52,7 +52,7 @@ def test_basic_message_send(clear_store, create_user):
 def test_basic_message_send_v2(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(other.CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})  
@@ -79,9 +79,9 @@ def test_basic_message_send_v2(clear_store, create_user, create_user2):
 def test_check_accessibility_of_messages_across_channels(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    channel_id2 = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id2 = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_2, 'name': 'My Channel2!', 'is_public': True}).json()['channel_id'] 
     response = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 200 
@@ -92,7 +92,7 @@ def test_check_accessibility_of_messages_across_channels(clear_store, create_use
 
 def test_invalid_message(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': ""})
     assert response.status_code == 400
@@ -100,7 +100,7 @@ def test_invalid_message(clear_store, create_user):
 def test_user_not_part_of_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_2, 'channel_id': channel_id, 'message': "Hello World"})
     assert response.status_code == 403

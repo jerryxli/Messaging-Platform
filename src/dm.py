@@ -227,13 +227,11 @@ def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
     u_ids = [user['u_id'] for user in dm['members']]
     if auth_user_id not in u_ids:
         raise AccessError(description="User is not part of DM")
-    message_id = store['messages']
-    dm['messages'].append({'message_id': message_id, 'u_id': auth_user_id, 'message': message, 'time_sent': time()})
-    store['messages'] += 1
-    dms[dm_id] = dm
-    store['dms'] = dms
+    messages = store['messages']
+    new_message_id = len(messages)
+    messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': message, 'time_sent': time(), 'is_channel': False, 'id': dm_id}
     data_store.set(store)
-    return {'message_id': message_id}
+    return {'message_id': new_message_id}
 
 
 def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
@@ -252,6 +250,7 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
     """
     store = data_store.get()
     dms = store['dms']
+    stored_messages = store['messages']
     if dm_id in dms:
         dm = dms[dm_id]
     else:
@@ -259,10 +258,14 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
     u_ids = [user['u_id'] for user in dm['members']]
     if auth_user_id not in u_ids:
         raise AccessError(description="dm_id is valid but user is not a member of the channel")
-    if start > len(dm['messages']):
+    dm_messages = []
+    for message in stored_messages.values():
+        if message['is_channel'] == False and message['id'] == dm_id:
+            dm_messages.append({'message': message['message'], 'message_id': message['message_id'], 'u_id': message['u_id'], 'time_sent': message['time_sent']})
+    if start > len(dm_messages):
         raise InputError(description="Start is greater than the total number of messages in channel")
     messages = []
-    not_displayed = list(reversed(dm['messages']))[start:]
+    not_displayed = list(reversed(dm_messages))[start:]
     messages.extend(not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
     end = -1 if len(messages) == len(not_displayed) else start + other.PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}

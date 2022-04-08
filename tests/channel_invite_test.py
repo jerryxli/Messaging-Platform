@@ -42,7 +42,7 @@ def check_user(user_token, u_id, channel_id):
 
 def test_invite_public(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
 
     u_id = create_user2['auth_user_id']
     response = requests.post(other.CHANNEL_INVITE_URL, json={'token': user_token_1, 'channel_id': channel_id, 'u_id': u_id})
@@ -52,7 +52,7 @@ def test_invite_public(clear_store, create_user, create_user2):
 
 def test_invite_private(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
 
     u_id = create_user2['auth_user_id']
     response = requests.post(other.CHANNEL_INVITE_URL, json={'token': user_token_1, 'channel_id': channel_id, 'u_id': u_id})
@@ -62,8 +62,8 @@ def test_invite_private(clear_store, create_user, create_user2):
 
 def test_invite_multiple(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
-    channel_id_1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
-    channel_id_2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel2', 'is_public': True}).json()['channel_id']
+    channel_id_1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
+    channel_id_2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel2', 'is_public': True}).json()['channel_id']
 
     u_id_1 = create_user2['auth_user_id']
     user_token_2 = create_user2['token']
@@ -83,7 +83,7 @@ def test_invite_multiple(clear_store, create_user, create_user2, create_user3):
 
 def test_invite_auth_user_id_invalid(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
     requests.post(other.LOGOUT_URL, json={'token': user_token_1})
 
     u_id = create_user2['auth_user_id']
@@ -98,13 +98,13 @@ def test_invite_error_invalid_channel(clear_store, create_user, create_user2):
 
 def test_invite_error_invalid_user(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': False}).json()['channel_id']
     response = requests.post(other.CHANNEL_INVITE_URL, json={'token': user_token_1, 'channel_id': channel_id, 'u_id': create_user['auth_user_id'] + 1})
     assert response.status_code == 400
 
 def test_invite_error_already_joined(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
     
     u_id = create_user2['auth_user_id']
     u_id_token = create_user2['token']
@@ -114,7 +114,7 @@ def test_invite_error_already_joined(clear_store, create_user, create_user2):
 
 def test_invite_error_not_member(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
 
     user_token_2 = create_user2['token']
     u_id = create_user3['auth_user_id']

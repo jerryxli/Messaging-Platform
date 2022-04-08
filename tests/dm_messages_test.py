@@ -24,6 +24,8 @@ def register_user_2():
 def test_basic_get_dm_messages(clear_store, register_user_1):
     user_1 = register_user_1
     dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_1['token'], 'u_ids':[]}).json()['dm_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json = {'token': user_1['token'], 'is_public': True, 'name': 'my_channel'}).json()['channel_id']
+    response = requests.post(other.MESSAGE_SEND_URL, json = {'token': user_1['token'], 'channel_id': channel_id, 'message': 'hey'})
     message_id = requests.post(other.MESSAGE_SENDDM_URL, json={'token': user_1['token'], 'dm_id': dm_id, 'message': "HEY ME"}).json()['message_id']
     response = requests.get(other.DM_MESSAGES_URL, params = {"token": user_1['token'], 'dm_id': dm_id, 'start': 0})
     assert response.status_code == 200

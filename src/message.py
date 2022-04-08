@@ -40,17 +40,13 @@ def message_send_v1(user_id, channel_id, message):
         
     if len(message) > 1000 or len(message) < 1:
         raise InputError(description="Length of message is less than 1 or over 1000 characters")
-
-    if other.check_user_in_channel(user_id, message_channel):
-        new_message_id = store['messages']
-        message_channel['messages'].append({'message_id': new_message_id, 'u_id': user_id, 'message': message, 'time_sent': time()})
-        store['channels'] = channels
-        store['messages'] += 1
-        data_store.set(store)
-        return ({'message_id': new_message_id})
-    else:
+    if not other.check_user_in_channel(user_id, message_channel):
         raise AccessError(description="channel_id is valid and the user is not a member of the channel")
-
+    messages = store['messages']
+    new_message_id = len(messages)
+    messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id, 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id}
+    data_store.set(store)
+    return ({'message_id': new_message_id})
     
 def message_edit_v1(user_id, message_id, message):
     """
@@ -72,23 +68,22 @@ def message_edit_v1(user_id, message_id, message):
         Returns { } when successful
     """
     store = data_store.get()
+    messages = store['messages']
     channels = store['channels']
     dms = store['dms']
-    message_info = get_message_and_channel(message_id)
-
-    if message_info is None:
-        raise InputError(description="message_id does not refer to a valid message within a channel/DM that the authorised user has joined")
-    print(user_id)
-    if message_info['type'] == 'channel':
-        u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['owner_members']]
-        all_u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['all_members']]
+    if message_id not in messages:
+        raise InputError(description="message_id does not refer to a valid message")
+    else:
+        curr_message = messages[message_id]
+    if curr_message['is_channel'] == True:
+        u_ids = [user['u_id'] for user in channels[curr_message['id']]['owner_members']]
+        all_u_ids = [user['u_id'] for user in channels[curr_message['id']]['all_members']]
         if user_id not in u_ids and user_id not in all_u_ids:
             raise InputError(description="message_id is valid but user is not in channel")
-        if message_info['message']['u_id'] != user_id and user_id not in u_ids:
+        if curr_message['u_id'] != user_id and user_id not in u_ids:
             raise AccessError(description="message_id is valid but user does not have permissions to edit")
-
     else:
-        u_ids = [user['u_id'] for user in dms[message_info['dm_id']]['members']]
+        u_ids = [user['u_id'] for user in dms[curr_message['id']]['members']]
         if user_id not in u_ids:
             raise InputError(description="message_id is valid but user is not in dm")
     if len(message) > 1000:
@@ -96,10 +91,11 @@ def message_edit_v1(user_id, message_id, message):
     if message == '':
         message_remove_v1(user_id, message_id)
     else:
-        message_info['message']['message'] = message
-    store['channels'] = channels
-    store['dms'] = dms
-    data_store.set(store)
+        curr_message['message'] = message
+        messages['message'] = curr_message
+        store['messages'] = messages
+        print(store)
+        data_store.set(store)
     return {}
 
 
@@ -123,37 +119,23 @@ def message_remove_v1(user_id, message_id):
     store = data_store.get()
     channels = store['channels']
     dms = store['dms']
-    message_info = get_message_and_channel(message_id)
-
-    if message_info is None:
-        raise InputError(description="message_id does not refer to a valid message within a channel/DM that the authorised user has joined")
-    if message_info['type'] == 'channel':
-        u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['owner_members']]
-        all_u_ids = [user['u_id'] for user in channels[message_info['channel_id']]['all_members']]
+    messages = store['messages']
+    if message_id not in messages:
+        raise InputError(description="message_id does not refer to a valid message")
+    else:
+        message = messages[message_id]
+    if message['is_channel'] == True:
+        u_ids = [user['u_id'] for user in channels[message['id']]['owner_members']]
+        all_u_ids = [user['u_id'] for user in channels[message['id']]['all_members']]
         if user_id not in u_ids and user_id not in all_u_ids:
             raise InputError(description="message_id is valid but user is not in channel")
-        if message_info['message']['u_id'] != user_id and user_id not in u_ids:
-            raise AccessError(description="message_id is valid but user does not have permissions to edit")
+        if message['u_id'] != user_id and user_id not in u_ids:
+            raise AccessError(description="message_id is valid but user does not have permissions to remove")
     else:
-        u_ids = [user['u_id'] for user in dms[message_info['dm_id']]['members']]
+        u_ids = [user['u_id'] for user in dms[message['id']]['members']]
         if user_id not in u_ids:
             raise InputError(description="message_id is valid but user is not in dm")
-    message_info['channel']['messages'].remove(message_info['message'])
-    store['channels'] = channels
-    store['dms'] = dms
+    messages.pop(message['id'])
+    store['messages'] = messages
     data_store.set(store)
     return {}
-    
-def get_message_and_channel(message_id):
-    store = data_store.get()
-    channels = store['channels']
-    dms = store['dms']
-    for key, channel in channels.items():
-        for message in channel['messages']:
-            if message_id == message['message_id']:
-                return {'message': message, 'channel': channel, 'type': 'channel', 'channel_id': key}
-    for key, channel in dms.items():
-        for message in channel['messages']:
-            if message_id == message['message_id']:
-                return {'message': message, 'channel': channel, 'type': 'dm', 'dm_id': key}
-    return None
