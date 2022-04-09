@@ -27,7 +27,7 @@ def create_user2():
 
 def test_basic_get_messages_success(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.get(other.CHANNEL_MESSAGES_URL, params= {'channel_id': channel_id, 'start':0, 'token': user_token_1})
     assert response.json() == {'messages': [], 'start': 0, 'end': -1}         
@@ -45,7 +45,7 @@ def test_basic_get_messages_success(clear_store, create_user):
 def test_pagination_functionality(clear_store, create_user):
     user_1_token = create_user['token']
 
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={"token": user_1_token, "name": "My Paginated Channel", "is_public": False}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={"token": user_1_token, "name": "My Paginated Channel", "is_public": False}).json()['channel_id']
 
     for i in range(0, 124):
         requests.post(other.MESSAGE_SEND_URL, json={"token": user_1_token, "channel_id": channel_id, "message": str(i)})
@@ -68,13 +68,6 @@ def test_pagination_functionality(clear_store, create_user):
     assert counter == -1
 
 
-
-
-
-
-
-
-
 def test_invalid_channel_id(clear_store, create_user):
     user_token_1 = create_user['token']
     response = requests.get(other.CHANNEL_MESSAGES_URL, params= {'channel_id': 1, 'start':0, 'token': user_token_1})
@@ -84,7 +77,7 @@ def test_invalid_channel_id(clear_store, create_user):
 def test_user_not_in_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.get(other.CHANNEL_MESSAGES_URL, params= {'channel_id': channel_id, 'start':0, 'token': user_token_2})
     assert response.status_code == 403
@@ -92,7 +85,7 @@ def test_user_not_in_channel(clear_store, create_user, create_user2):
 
 def test_channel_messages_with_no_messages(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.get(other.CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
     expected_output = {'messages': [], 'start': 0, 'end': -1}
@@ -102,7 +95,7 @@ def test_channel_messages_with_no_messages(clear_store, create_user):
 
 def test_channel_messages_start_exceeds(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     current = 0
     response = requests.get(other.CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': current, 'token': user_token_1})
@@ -116,7 +109,7 @@ def test_channel_messages_start_exceeds(clear_store, create_user):
 
 def test_invalid_auth_id(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.LOGOUT_URL, json={'token': user_token_1})
     response = requests.get(other.CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 

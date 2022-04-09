@@ -111,22 +111,27 @@ def channel_messages_v2(auth_user_id:int, channel_id:int, start:int)->dict:
     """
     store = data_store.get()
     channels = store['channels']
-    if channel_id in channels.keys():
+    stored_messages = store['messages']
+    if channel_id in channels:
         channel = channels[channel_id]
     else:
         raise InputError(description='channel_id does not refer to a valid channel')
     if not other.check_user_in_channel(auth_user_id, channel):
         raise AccessError(description="User is not a member of the channel")
-
-    if start > len(channel['messages']):
+    channel_messages = []
+    for message in stored_messages.values():
+        if message['is_channel'] == True and message['id'] == channel_id:
+            channel_messages.append({'message': message['message'], 'message_id': message['message_id'], 'u_id': message['u_id'], 'time_sent': message['time_sent']})
+    if start > len(channel_messages):
         raise InputError(description="start is greater than the total number of messages in the channel")
-
     messages = []
-    not_displayed = list(reversed(channel['messages']))[start:]
+    not_displayed = list(reversed(channel_messages))[start:]
     messages.extend(not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
-    
+
     end = -1 if len(messages) == len(not_displayed) else start + other.PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}
+
+
 
 
 def channel_join_v2(auth_user_id:int, channel_id:int)->None:

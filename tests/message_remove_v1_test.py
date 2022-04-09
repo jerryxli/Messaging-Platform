@@ -28,7 +28,7 @@ def create_user2():
 
 def test_basic_message_removal(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
@@ -43,7 +43,7 @@ def test_basic_message_removal(clear_store, create_user):
 
 def test_message_already_removed(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
@@ -60,7 +60,7 @@ def test_message_already_removed(clear_store, create_user):
 
 def test_message_id_invalid(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     response = requests.delete(other.MESSAGE_REMOVE_URL, json={'token': user_token_1, 'message_id': message_id + 1})
@@ -70,7 +70,7 @@ def test_message_id_invalid(clear_store, create_user):
 def test_user_id_didnt_send_message(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     response = requests.post(other.CHANNEL_JOIN_URL, json={
@@ -83,7 +83,7 @@ def test_user_id_didnt_send_message(clear_store, create_user, create_user2):
 def test_user_without_permissions(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     response = requests.post(other.CHANNEL_JOIN_URL, json={
@@ -95,7 +95,7 @@ def test_user_without_permissions(clear_store, create_user, create_user2):
 
 def test_user_leaves_channel(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "Hello World"}).json()['message_id']
     response = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token_1, 'channel_id': channel_id})

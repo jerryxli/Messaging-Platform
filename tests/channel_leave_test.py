@@ -28,8 +28,8 @@ def create_user3():
 def test_owner_leaves(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id_1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    channel_id_2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
+    channel_id_1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id_2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     request_data_1 = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token_1, 'channel_id': channel_id_1})
     request_data_2 = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token_2, 'channel_id': channel_id_2})
     channel_details_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id_2, 'token': user_token_2})
@@ -45,7 +45,7 @@ def test_owner_leaves(clear_store, create_user, create_user2):
 def test_member_leaves(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.CHANNEL_JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id})
     request_data_1 = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token_2, 'channel_id': channel_id})
     channel_details_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_1})
@@ -79,7 +79,7 @@ def test_member_leaves(clear_store, create_user, create_user2):
 
 def test_invalid_member(clear_store, create_user):
     user_token = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.LOGOUT_URL, json={'token': user_token})
     response = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token, 'channel_id': channel_id})
     assert response.status_code == 403
@@ -88,8 +88,8 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
-    channel_id_1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    channel_id_2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
+    channel_id_1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id_2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     request_data_1 = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token_2, 'channel_id': channel_id_1})
     request_data_2 = requests.post(other.CHANNEL_LEAVE_URL, json={'token': user_token_3, 'channel_id': channel_id_2})
     assert request_data_1.status_code == 403

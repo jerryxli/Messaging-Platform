@@ -30,7 +30,7 @@ def test_listall_v2_no_channels(clear_store, create_user):
 
 def test_listall_v2_one_public(clear_store, create_user):
     user_token = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
     
     response = requests.get(other.CHANNELS_LISTALL_URL, params= {'token': user_token})
     response_data = response.json()
@@ -39,10 +39,10 @@ def test_listall_v2_one_public(clear_store, create_user):
 
 def test_listall_v2_mul_privacy(clear_store, create_user):
     user_token = create_user['token']
-    channel_id1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
-    channel_id2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel2', 'is_public': False}).json()['channel_id']
-    channel_id3 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel3', 'is_public': True}).json()['channel_id']
-    channel_id4 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel4', 'is_public': False}).json()['channel_id']
+    channel_id1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel2', 'is_public': False}).json()['channel_id']
+    channel_id3 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel3', 'is_public': True}).json()['channel_id']
+    channel_id4 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel4', 'is_public': False}).json()['channel_id']
 
     response = requests.get(other.CHANNELS_LISTALL_URL, params={'token': user_token})
     response_data = response.json()
@@ -55,10 +55,10 @@ def test_listall_v2_not_in_bothprivacy(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
 
-    channel_id1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
-    channel_id2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'Channel2', 'is_public': False}).json()['channel_id']
-    channel_id3 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_2, 'name': 'Channel3', 'is_public': True}).json()['channel_id']
-    channel_id4 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_2, 'name': 'Channel4', 'is_public': False}).json()['channel_id']
+    channel_id1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel1', 'is_public': True}).json()['channel_id']
+    channel_id2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel2', 'is_public': False}).json()['channel_id']
+    channel_id3 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_2, 'name': 'Channel3', 'is_public': True}).json()['channel_id']
+    channel_id4 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_2, 'name': 'Channel4', 'is_public': False}).json()['channel_id']
 
     response_1 = requests.get(other.CHANNELS_LISTALL_URL, params={'token': user_token_1})
     response_data_1 = response_1.json()
@@ -74,7 +74,7 @@ def test_listall_v2_not_in_bothprivacy(clear_store, create_user, create_user2):
 
 def test_invalid_user_token(clear_store, create_user):
     user_token = create_user['token']
-    requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.LOGOUT_URL, json={'token': user_token})
     response = requests.get(other.CHANNELS_LISTALL_URL, params={'token': user_token})
     assert response.status_code == 403

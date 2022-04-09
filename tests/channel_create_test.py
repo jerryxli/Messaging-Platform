@@ -22,7 +22,7 @@ def clear_store():
 
 def test_add_public_channel(clear_store, create_user):
     user1 = create_user
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user1['token'], 'name': 'my house', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user1['token'], 'name': 'my house', 'is_public': True}).json()['channel_id']
     response = requests.get(other.CHANNELS_LIST_URL, params={'token': user1['token']})
     assert response.json() == { 'channels': [{'channel_id': channel_id, 'name': 'my house'}]}
     response = requests.get(other.CHANNEL_DETAILS_URL, params={'token': user1['token'], 'channel_id': channel_id})
@@ -30,26 +30,26 @@ def test_add_public_channel(clear_store, create_user):
 
 def test_add_private_channel(clear_store, create_user):
     user1 = create_user
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user1['token'], 'name': 'my house', 'is_public': False}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user1['token'], 'name': 'my house', 'is_public': False}).json()['channel_id']
     response = requests.get(other.CHANNELS_LIST_URL, params={'token': user1['token']})
     assert response.json() == { 'channels': [{'channel_id': channel_id, 'name': 'my house'}]}
     
 
 def test_null_name(clear_store, create_user):
     user1 = create_user
-    response = requests.post(other.CHANNEL_CREATE_URL, json={'token': user1['token'], 'name': '', 'is_public': True})
+    response = requests.post(other.CHANNELS_CREATE_URL, json={'token': user1['token'], 'name': '', 'is_public': True})
     assert response.status_code == 400
     
 
 def test_long_name(clear_store, create_user):
     user1 = create_user
-    response = requests.post(other.CHANNEL_CREATE_URL, json={'token': user1['token'], 'name': 'sadoiasjdoiasjdoaisdjaoisdjaoisdjaoisjdadsjgfoiasjfgoiasjdfoiajsdofiajsdoifjaosdifjaoisdjf', 'is_public': True})
+    response = requests.post(other.CHANNELS_CREATE_URL, json={'token': user1['token'], 'name': 'sadoiasjdoiasjdoaisdjaoisdjaoisdjaoisjdadsjgfoiasjfgoiasjdfoiajsdofiajsdoifjaosdifjaoisdjf', 'is_public': True})
     assert response.status_code == 400
 
 def test_invalid_JWT(clear_store, create_user):
     user1 = create_user
     requests.post(other.LOGOUT_URL, json={'token': user1['token']})
-    response = requests.post(other.CHANNEL_CREATE_URL, json={'token': user1['token'], 'name': 'hello', 'is_public': True})
+    response = requests.post(other.CHANNELS_CREATE_URL, json={'token': user1['token'], 'name': 'hello', 'is_public': True})
     assert response.status_code == 403
 
 

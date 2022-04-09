@@ -35,8 +35,8 @@ def create_stub_user():
 def test_creator_of_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id_1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    channel_id_2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
+    channel_id_1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id_2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     channel_details_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id_1, 'token': user_token_1}).json()
     channel_details_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id_2, 'token': user_token_2}).json()
 
@@ -57,7 +57,7 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
 def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     channel_join = requests.post(other.CHANNEL_JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id}).json()
     channel_details_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_1}).json()
     channel_details_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_2}).json()
@@ -98,7 +98,7 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
 
 def test_invalid_user(clear_store, create_user):
     user_token = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.LOGOUT_URL, json={'token': user_token})
     request_data = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id}, json={'token': user_token})
     assert request_data.status_code == 403
@@ -107,8 +107,8 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
-    channel_id_1 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    channel_id_2 = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
+    channel_id_1 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+    channel_id_2 = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_2, 'name': 'kitchen', 'is_public': False}).json()['channel_id']
     request_data_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id_1, 'token': user_token_2})
     request_data_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id_2, 'token': user_token_3})
     assert request_data_1.status_code == 403
@@ -117,7 +117,7 @@ def test_unauthorised_user_id(clear_store, create_user, create_user2, create_use
 def test_invalid_channel_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel', 'is_public': True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'My Channel', 'is_public': True}).json()['channel_id']
     request_data_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id + 1, 'token': user_token_1})
     request_data_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id + 2, 'token': user_token_2})
     assert request_data_1.status_code == 400
@@ -126,7 +126,7 @@ def test_invalid_channel_id(clear_store, create_user, create_user2):
 def test_from_stub_code(clear_store, create_stub_user):
     stub_token = create_stub_user['token']
     stub_uid = create_stub_user['auth_user_id']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={'token': stub_token, 'name': "Hayden", 'is_public': False}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': stub_token, 'name': "Hayden", 'is_public': False}).json()['channel_id']
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': stub_token})
     assert channel_details.json() ==  {
         'name': 'Hayden',

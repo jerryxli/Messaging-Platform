@@ -19,7 +19,7 @@ JWT_SECRET = "COMP1531_H13A_CAMEL"
 
 LOGIN_URL = f"{url}/auth/login/v2"
 REGISTER_URL = f"{url}/auth/register/v2"
-CHANNEL_CREATE_URL = f"{url}/channels/create/v2"
+CHANNELS_CREATE_URL = f"{url}/channels/create/v2"
 CHANNELS_LISTALL_URL = f"{url}/channels/listall/v2"
 CHANNEL_DETAILS_URL = f"{url}/channel/details/v2"
 CHANNEL_JOIN_URL = f"{url}/channel/join/v2"
@@ -82,7 +82,7 @@ def clear_v1():
     store['users'] = {}
     store['channels'] = {}
     store['dms'] = {}
-    store['messages'] = 0
+    store['messages'] = {}
     data_store.set(store)
 
 def verify_user(auth_user_id: int)->bool:

@@ -21,7 +21,7 @@ def test_basic_user_remove(clear_store, register_user_1, register_user_2):
     user_1 = register_user_1
     user_2 = register_user_2
     assert 400 == requests.post(other.REGISTER_URL, json={"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).status_code
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={"name": "MYCHANNEL", "token": user_2['token'], "is_public": True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={"name": "MYCHANNEL", "token": user_2['token'], "is_public": True}).json()['channel_id']
     requests.post(other.CHANNEL_JOIN_URL, json={'channel_id': channel_id, "token": user_1['token']})
     requests.post(other.MESSAGE_SEND_URL, json={"token": user_2['token'], "channel_id": channel_id, "message": "HEY THERE GUYS"})
     response = requests.delete(other.USER_REMOVE_URL, json={'token': user_1['token'], 'u_id': user_2['auth_user_id']})
@@ -36,7 +36,7 @@ def test_basic_user_remove_v2(clear_store, register_user_1, register_user_2):
     user_1 = register_user_1
     user_2 = register_user_2
     requests.post(other.CHANGE_PERM_URL, json={'token': user_1['token'], 'u_id': user_2['auth_user_id'], 'permission_id': other.GLOBAL_PERMISSION_OWNER})
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={"name": "MYCHANNEL", "token": user_1['token'], "is_public": True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={"name": "MYCHANNEL", "token": user_1['token'], "is_public": True}).json()['channel_id']
     requests.post(other.DM_CREATE_URL, json={'token': user_1['token'], 'u_ids': [user_2['auth_user_id']]})
     requests.post(other.CHANNEL_JOIN_URL, json={'channel_id': channel_id, "token": user_2['token']})
     response = requests.delete(other.USER_REMOVE_URL, json={'token': user_1['token'], 'u_id': user_2['auth_user_id']})
@@ -57,7 +57,7 @@ def test_unauthorised_attempt(clear_store, register_user_1, register_user_2):
 def test_remove_after_leave(clear_store, register_user_1, register_user_2):
     user_1 = register_user_1
     user_2 = register_user_2
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={"name": "MYCHANNEL", "token": user_1['token'], "is_public": True}).json()['channel_id']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={"name": "MYCHANNEL", "token": user_1['token'], "is_public": True}).json()['channel_id']
     requests.post(other.CHANNEL_JOIN_URL, json={'channel_id': channel_id, "token": user_2['token']})   
     requests.post(other.MESSAGE_SEND_URL, json={"token": user_2['token'], "channel_id": channel_id, "message": "HEY THERE GUYS"})
     requests.post(other.MESSAGE_SEND_URL, json={"token": user_1['token'], "channel_id": channel_id, "message": "HEY THERE GUYS IM ALSO HERE"})

@@ -39,7 +39,7 @@ def create_user3():
 def test_private_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': False}).json()['channel_id']
     response = requests.post(other.CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})
@@ -49,7 +49,7 @@ def test_private_channel(clear_store, create_user, create_user2):
 def test_successfully_joined_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'test', 'is_public': True}).json()['channel_id']
     response = requests.post(other.CHANNEL_JOIN_URL, json={
                              'token': user_token_2, 'channel_id': channel_id})
@@ -91,7 +91,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
     response_1 = requests.post(other.CHANNEL_JOIN_URL, json={
                                'token': user_token_2, 'channel_id': channel_id})
@@ -141,7 +141,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
 
 def test_channel_doesnt_exist(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
     response = requests.post(other.CHANNEL_JOIN_URL, json={
                              'token': user_token_1, 'channel_id': channel_id + 1})
@@ -150,7 +150,7 @@ def test_channel_doesnt_exist(clear_store, create_user):
 
 def test_user_already_in_channel(clear_store, create_user):
     user_token_1 = create_user['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(other.CHANNEL_JOIN_URL, json={
                              'token': user_token_1, 'channel_id': channel_id})
@@ -160,7 +160,7 @@ def test_user_already_in_channel(clear_store, create_user):
 def test_list_and_join(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
 
     assert requests.get(other.CHANNELS_LIST_URL, params={'token': user_token_1}).json() == {'channels': [{'channel_id': channel_id,'name': 'test2'}]}
@@ -175,7 +175,7 @@ def test_global_owner_join_private(clear_store, create_user, create_user2, creat
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_2, 'name': 'secret', 'is_public': False}).json()['channel_id']
     response = requests.post(other.CHANNEL_JOIN_URL, json={
                              'token': user_token_3, 'channel_id': channel_id})
@@ -190,7 +190,7 @@ def test_global_owner_join_private(clear_store, create_user, create_user2, creat
 def test_fake_id(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
-    channel_id = requests.post(other.CHANNEL_CREATE_URL, json={
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'test2', 'is_public': True}).json()['channel_id']
     requests.post(other.LOGOUT_URL, json={'token': user_token_2})
     response = requests.post(other.CHANNEL_JOIN_URL, json={
