@@ -18,7 +18,16 @@ def create_user():
     return user_info
 
 
-def test_basic_message_react(clear_store, create_user):
+@pytest.fixture
+def create_user2():
+    user_input = {'email': "z54626@unsw.edu.au", 'password': "Password",
+                  'name_first': "Jane", 'name_last': "Gyuri"}
+    request_data = requests.post(other.REGISTER_URL, json=user_input)
+    user_info = request_data.json()
+    return user_info
+
+
+def test_basic_channel_message_react(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
@@ -66,4 +75,40 @@ def test_message_contains_react_already(clear_store, create_user):
     assert response.status_code == 200
     response = requests.post(other.MESSAGE_REACT_URL, json={
                              'token': user_token_1, 'message_id': message_id, 'react_id': 1})
+    assert response.status_code == 400
+
+
+def test_user_and_message_not_in_same_channel(clear_store, create_user, create_user2):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
+                               'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
+
+    message_id = requests.post(other.MESSAGE_SEND_URL, json={
+                               'token': user_token_1, 'channel_id': channel_id, 'message': "not in channel"}).json()['message_id']
+    response = requests.post(other.MESSAGE_REACT_URL, json={
+                             'token': user_token_2, 'message_id': message_id, 'react_id': 1})
+    assert response.status_code == 400
+
+
+def test_basic_dm_message_react(clear_store, create_user):
+    user_token_1 = create_user['token']
+    dm_id = requests.post(other.DM_CREATE_URL, json={
+                          'token': user_token_1, 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(other.MESSAGE_SENDDM_URL, json={
+                               'token': user_token_1, 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.post(other.MESSAGE_REACT_URL, json={
+        'token': user_token_1, 'message_id': message_id, 'react_id': 1})
+    assert response.status_code == 200
+
+
+def test_user_and_message_not_in_same_dm(clear_store, create_user, create_user2):
+    user_token_1 = create_user['token']
+    user_token_2 = create_user2['token']
+    dm_id = requests.post(other.DM_CREATE_URL, json={
+                          'token': user_token_1, 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(other.MESSAGE_SENDDM_URL, json={
+                               'token': user_token_1, 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.post(other.MESSAGE_REACT_URL, json={
+        'token': user_token_2, 'message_id': message_id, 'react_id': 1})
     assert response.status_code == 400
