@@ -13,6 +13,7 @@ from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
 
+
 def message_send_v1(user_id, channel_id, message):
     """
     Send a message from the authorised user to the channel specified by channel_id
@@ -36,18 +37,23 @@ def message_send_v1(user_id, channel_id, message):
     if channel_id in channels.keys():
         message_channel = channels[channel_id]
     else:
-        raise InputError(description="channel_id does not refer to a valid channel")
-        
+        raise InputError(
+            description="channel_id does not refer to a valid channel")
+
     if len(message) > 1000 or len(message) < 1:
-        raise InputError(description="Length of message is less than 1 or over 1000 characters")
+        raise InputError(
+            description="Length of message is less than 1 or over 1000 characters")
     if not other.check_user_in_channel(user_id, message_channel):
-        raise AccessError(description="channel_id is valid and the user is not a member of the channel")
+        raise AccessError(
+            description="channel_id is valid and the user is not a member of the channel")
     messages = store['messages']
     new_message_id = len(messages)
-    messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id, 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id}
+    messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id,
+                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id}
     data_store.set(store)
     return ({'message_id': new_message_id})
-    
+
+
 def message_edit_v1(user_id, message_id, message):
     """
     Given a message, update its text with new text. 
@@ -72,20 +78,26 @@ def message_edit_v1(user_id, message_id, message):
     channels = store['channels']
     dms = store['dms']
     if message_id not in messages:
-        raise InputError(description="message_id does not refer to a valid message")
+        raise InputError(
+            description="message_id does not refer to a valid message")
     else:
         curr_message = messages[message_id]
     if curr_message['is_channel'] == True:
-        u_ids = [user['u_id'] for user in channels[curr_message['id']]['owner_members']]
-        all_u_ids = [user['u_id'] for user in channels[curr_message['id']]['all_members']]
+        u_ids = [user['u_id']
+                 for user in channels[curr_message['id']]['owner_members']]
+        all_u_ids = [user['u_id']
+                     for user in channels[curr_message['id']]['all_members']]
         if user_id not in u_ids and user_id not in all_u_ids:
-            raise InputError(description="message_id is valid but user is not in channel")
+            raise InputError(
+                description="message_id is valid but user is not in channel")
         if curr_message['u_id'] != user_id and user_id not in u_ids:
-            raise AccessError(description="message_id is valid but user does not have permissions to edit")
+            raise AccessError(
+                description="message_id is valid but user does not have permissions to edit")
     else:
         u_ids = [user['u_id'] for user in dms[curr_message['id']]['members']]
         if user_id not in u_ids:
-            raise InputError(description="message_id is valid but user is not in dm")
+            raise InputError(
+                description="message_id is valid but user is not in dm")
     if len(message) > 1000:
         raise InputError(description="message over 1000 characters")
     if message == '':
@@ -99,7 +111,6 @@ def message_edit_v1(user_id, message_id, message):
     return {}
 
 
-
 def message_remove_v1(user_id, message_id):
     """
     Given a message_id for a message, this message is removed from the channel/DM
@@ -108,7 +119,7 @@ def message_remove_v1(user_id, message_id):
         AccessError     - Occurs when the message_id is valid and the message was not sent by the user trying to edit
         AccessError     - Occurs when the message_id is valid and the user does not have owner permissions in the channel/DM
         InputError      - Occurs when message_id does not refer to a valid message within a channel/DM  
-    
+
     Arguments:
         token (int)         - The token of the user
         message_id (int)    - The id of the message
@@ -121,21 +132,31 @@ def message_remove_v1(user_id, message_id):
     dms = store['dms']
     messages = store['messages']
     if message_id not in messages:
-        raise InputError(description="message_id does not refer to a valid message")
+        raise InputError(
+            description="message_id does not refer to a valid message")
     else:
         message = messages[message_id]
     if message['is_channel'] == True:
-        u_ids = [user['u_id'] for user in channels[message['id']]['owner_members']]
-        all_u_ids = [user['u_id'] for user in channels[message['id']]['all_members']]
+        u_ids = [user['u_id']
+                 for user in channels[message['id']]['owner_members']]
+        all_u_ids = [user['u_id']
+                     for user in channels[message['id']]['all_members']]
         if user_id not in u_ids and user_id not in all_u_ids:
-            raise InputError(description="message_id is valid but user is not in channel")
+            raise InputError(
+                description="message_id is valid but user is not in channel")
         if message['u_id'] != user_id and user_id not in u_ids:
-            raise AccessError(description="message_id is valid but user does not have permissions to remove")
+            raise AccessError(
+                description="message_id is valid but user does not have permissions to remove")
     else:
         u_ids = [user['u_id'] for user in dms[message['id']]['members']]
         if user_id not in u_ids:
-            raise InputError(description="message_id is valid but user is not in dm")
+            raise InputError(
+                description="message_id is valid but user is not in dm")
     messages.pop(message['id'])
     store['messages'] = messages
     data_store.set(store)
     return {}
+
+
+def message_react_v1():
+    pass
