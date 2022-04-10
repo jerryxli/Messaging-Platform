@@ -186,6 +186,7 @@ def message_react_v1(user_id, message_id, react_id):
             description="message_id does not refer to a valid message")
     else:
         message = messages[message_id]
+
     if message['is_channel'] == True:
         u_ids = [user['u_id']
                  for user in channels[message['id']]['owner_members']]
@@ -193,14 +194,13 @@ def message_react_v1(user_id, message_id, react_id):
                      for user in channels[message['id']]['all_members']]
         if user_id not in u_ids and user_id not in all_u_ids:
             raise InputError(
-                description="message_id is not a valid message within the channel")
+                description="user is not in the channel the message was sent from")
     else:
         u_ids = [user['u_id'] for user in dms[message['id']]['members']]
         if user_id not in u_ids:
             raise InputError(
-                description="message_id is not a valid message within the dm")
+                description="user is not in the dm the message was sent from")
 
-    # add react
     if message['react_id'] == react_id:
         if user_id not in message['react_u_ids']:
             message['react_u_ids'].append(user_id)
@@ -209,6 +209,7 @@ def message_react_v1(user_id, message_id, react_id):
                 description="message already contains a react from this user")
     else:
         raise InputError(description="react_id is not valid")
+
     store['messages'] = messages
     data_store.set(store)
     return {}
