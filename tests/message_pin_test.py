@@ -33,7 +33,7 @@ def test_basic_channel_message_pin(clear_store, create_user):
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     message_id = requests.post(other.MESSAGE_SEND_URL, json={
-                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay react works"}).json()['message_id']
+                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay pin works"}).json()['message_id']
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
@@ -45,7 +45,7 @@ def test_message_id_is_invalid(clear_store, create_user):
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     message_id = requests.post(other.MESSAGE_SEND_URL, json={
-                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay react works"}).json()['message_id']
+                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay pin works"}).json()['message_id']
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_1, 'message_id': int(message_id) + 1})
     assert response.status_code == 400
@@ -60,20 +60,20 @@ def test_user_does_not_have_permissions(clear_store, create_user, create_user2):
                              'token': user_token_2, 'channel_id': channel_id})
     assert response.status_code == 200
     message_id = requests.post(other.MESSAGE_SEND_URL, json={
-                               'token': user_token_2, 'channel_id': channel_id, 'message': "yay react works"}).json()['message_id']
+                               'token': user_token_2, 'channel_id': channel_id, 'message': "yay pin works"}).json()['message_id']
 
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_2, 'message_id': message_id})
     assert response.status_code == 403
 
 
-def test_message_is_already_pinned(clear_store, create_user):
+def test_message_is_already_pinned_channel(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     message_id = requests.post(other.MESSAGE_SEND_URL, json={
-                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay react works"}).json()['message_id']
+                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay pin works"}).json()['message_id']
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
@@ -89,7 +89,7 @@ def test_user_is_not_in_channel(clear_store, create_user, create_user2):
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
 
     message_id = requests.post(other.MESSAGE_SEND_URL, json={
-                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay react works"}).json()['message_id']
+                               'token': user_token_1, 'channel_id': channel_id, 'message': "yay pin works"}).json()['message_id']
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_2, 'message_id': message_id})
     assert response.status_code == 400
@@ -114,5 +114,19 @@ def test_user_and_message_not_in_same_dm(clear_store, create_user, create_user2)
     message_id = requests.post(other.MESSAGE_SENDDM_URL, json={
                                'token': user_token_1, 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
     response = requests.post(other.MESSAGE_PIN_URL, json={
-        'token': user_token_2, 'message_id': message_id, 'react_id': 1})
+        'token': user_token_2, 'message_id': message_id})
+    assert response.status_code == 400
+
+
+def test_message_is_already_pinned_dm(clear_store, create_user):
+    user_token_1 = create_user['token']
+    dm_id = requests.post(other.DM_CREATE_URL, json={
+                          'token': user_token_1, 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(other.MESSAGE_SENDDM_URL, json={
+                               'token': user_token_1, 'dm_id': dm_id, 'message': 'hey there'}).json()['message_id']
+    response = requests.post(other.MESSAGE_PIN_URL, json={
+                             'token': user_token_1, 'message_id': message_id})
+    assert response.status_code == 200
+    response = requests.post(other.MESSAGE_PIN_URL, json={
+                             'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 400
