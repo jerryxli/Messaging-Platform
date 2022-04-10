@@ -18,16 +18,7 @@ def create_user():
     return user_info
 
 
-@pytest.fixture
-def create_user2():
-    user_input = {'email': "z54626@unsw.edu.au", 'password': "Password",
-                  'name_first': "Jane", 'name_last': "Gyuri"}
-    request_data = requests.post(other.REGISTER_URL, json=user_input)
-    user_info = request_data.json()
-    return user_info
-
-
-def test_basic_message_react():
+def test_basic_message_react(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
@@ -39,7 +30,7 @@ def test_basic_message_react():
     assert response.status_code == 200
 
 
-def test_message_id_invalid():
+def test_message_id_invalid(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
@@ -51,7 +42,7 @@ def test_message_id_invalid():
     assert response.status_code == 400
 
 
-def test_react_id_invalid():
+def test_react_id_invalid(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
@@ -63,7 +54,7 @@ def test_react_id_invalid():
     assert response.status_code == 400
 
 
-def test_message_contains_react_already():
+def test_message_contains_react_already(clear_store, create_user):
     user_token_1 = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={
                                'token': user_token_1, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
