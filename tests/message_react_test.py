@@ -38,7 +38,7 @@ def test_message_id_invalid(clear_store, create_user):
     message_id = requests.post(other.MESSAGE_SEND_URL, json={
                                'token': user_token_1, 'channel_id': channel_id, 'message': "message id invalid"}).json()['message_id']
     response = requests.post(other.MESSAGE_REACT_URL, json={
-                             'token': user_token_1, 'message_id': -100, 'react_id': 1})
+                             'token': user_token_1, 'message_id': int(message_id) + 1, 'react_id': 1})
     assert response.status_code == 400
 
 
