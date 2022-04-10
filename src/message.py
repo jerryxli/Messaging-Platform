@@ -49,7 +49,7 @@ def message_send_v1(user_id, channel_id, message):
     messages = store['messages']
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id,
-                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id}
+                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'is_pinned': False}
     data_store.set(store)
     return ({'message_id': new_message_id})
 
@@ -174,4 +174,37 @@ def message_pin_v1(user_id, message_id):
     Return Value:
         Returns {} when successful 
     """
-    pass
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    messages = store['messages']
+    if message_id not in messages:
+        raise InputError(
+            description="message_id does not refer to a valid message")
+    else:
+        message = messages[message_id]
+
+    if message['is_channel'] == True:
+        u_ids = [user['u_id']
+                 for user in channels[message['id']]['owner_members']]
+        all_u_ids = [user['u_id']
+                     for user in channels[message['id']]['all_members']]
+        if user_id not in u_ids and user_id not in all_u_ids:
+            raise InputError(
+                description="message and user are in different channels")
+        if user_id not in u_ids:
+            raise AccessError(
+                description="message_id is valid but user does not have permissions to remove")
+    else:
+        u_ids = [user['u_id'] for user in dms[message['id']]['members']]
+        if user_id not in u_ids:
+            raise InputError(
+                description="message and user are in different dms")
+
+    if message['is_pinned'] == True:
+        raise InputError(description="message is already pinned")
+    else:
+        message['is_pinned'] = True
+    store['messages'] = messages
+    data_store.set(store)
+    return {}

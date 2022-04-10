@@ -14,7 +14,7 @@ from src.error import InputError, AccessError
 import src.other as other
 
 
-def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
+def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
     """
     Creates a dm between the auth_user_id and the user(s) in the u_ids dict
 
@@ -48,7 +48,7 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
         user = other.non_password_global_permission_field(users[id])
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
-        members.append(user) 
+        members.append(user)
 
     name = ''
     user_handles = []
@@ -66,10 +66,11 @@ def dm_create_v1(auth_user_id:int, u_ids:list)->dict:
     dms[dm_id] = dm_info
     store['dms'] = dms
     data_store.set(store)
-    
+
     return {'dm_id': dm_id}
 
-def dm_list_v1(auth_user_id:int)->dict:
+
+def dm_list_v1(auth_user_id: int) -> dict:
     """
     Lists all dms auth_user_id is apart of
 
@@ -90,10 +91,10 @@ def dm_list_v1(auth_user_id:int)->dict:
         if auth_user_id in ids:
             dm_list.append({'name': value['name'], 'dm_id': key})
 
-    return { 'dms': dm_list }
+    return {'dms': dm_list}
 
 
-def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
+def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     """
     Remove an existing DM, so all members are no longer in the DM. 
     This can only be done by the original creator of the DM.
@@ -117,7 +118,7 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
-    if auth_user_id == dm['owner_members']: 
+    if auth_user_id == dm['owner_members']:
         dms.pop(dm_id)
     elif user in dm['members']:
         raise AccessError(description="User is not the original DM creator")
@@ -127,9 +128,9 @@ def dm_remove_v1(auth_user_id:int, dm_id:int)->None:
     store['dms'] = dms
     data_store.set(store)
     return
-    
 
-def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
+
+def dm_details_v1(auth_user_id: int, dm_id: int) -> dict:
     """
     Returns details of the dm in a dict
 
@@ -163,7 +164,7 @@ def dm_details_v1(auth_user_id:int, dm_id:int)->dict:
     return dm_details
 
 
-def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
+def dm_leave_v1(auth_user_id: int, dm_id: int) -> None:
     """
     Removes auth_user_id from dm of dm_id
 
@@ -201,7 +202,7 @@ def dm_leave_v1(auth_user_id:int, dm_id:int)->None:
     return None
 
 
-def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
+def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
     """
     Allows a user to send a message in the specified DM
 
@@ -213,7 +214,7 @@ def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
     Errors
         AccessError        - Where the user does not belong to the specified DM
         InputError         - Where the DM id is invalid or the message is not between 1 and 1000 characters
-    
+
     Return Value:
         Dictionary containing message_id, on success
     """
@@ -229,12 +230,13 @@ def dm_send_v1(auth_user_id:int, message:str, dm_id:int)->dict:
         raise AccessError(description="User is not part of DM")
     messages = store['messages']
     new_message_id = len(messages)
-    messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': message, 'time_sent': time(), 'is_channel': False, 'id': dm_id}
+    messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id,
+                                'message': message, 'time_sent': time(), 'is_channel': False, 'id': dm_id, 'is_pinned': False}
     data_store.set(store)
     return {'message_id': new_message_id}
 
 
-def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
+def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
     """
     Returns the messages of a dm from start index + 50
 
@@ -257,15 +259,20 @@ def dm_messages_v1(auth_user_id:int, dm_id:int, start:int)->dict:
         raise InputError(description='dm_id does not refer to a valid channel')
     u_ids = [user['u_id'] for user in dm['members']]
     if auth_user_id not in u_ids:
-        raise AccessError(description="dm_id is valid but user is not a member of the channel")
+        raise AccessError(
+            description="dm_id is valid but user is not a member of the channel")
     dm_messages = []
     for message in stored_messages.values():
         if message['is_channel'] == False and message['id'] == dm_id:
-            dm_messages.append({'message': message['message'], 'message_id': message['message_id'], 'u_id': message['u_id'], 'time_sent': message['time_sent']})
+            dm_messages.append({'message': message['message'], 'message_id': message['message_id'],
+                               'u_id': message['u_id'], 'time_sent': message['time_sent']})
     if start > len(dm_messages):
-        raise InputError(description="Start is greater than the total number of messages in channel")
+        raise InputError(
+            description="Start is greater than the total number of messages in channel")
     messages = []
     not_displayed = list(reversed(dm_messages))[start:]
-    messages.extend(not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
-    end = -1 if len(messages) == len(not_displayed) else start + other.PAGE_THRESHOLD
+    messages.extend(
+        not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
+    end = -1 if len(messages) == len(not_displayed) else start + \
+        other.PAGE_THRESHOLD
     return {'messages': messages, 'start': start, 'end': end}
