@@ -2,6 +2,7 @@ from src.config import url
 import pytest
 import requests
 import src.other as other
+import tests.helper_functions as helper_functions
 
 @pytest.fixture
 def clear_store():
@@ -29,8 +30,7 @@ def test_basic_user_remove(clear_store, register_user_1, register_user_2):
     assert channel_messages[0]['message'] == 'Removed user'
     assert response.status_code == 200
     response = requests.get(other.USER_PROFILE_URL, params= {'u_id': user_2['auth_user_id'], 'token': user_1['token']})
-    print(response.json())
-    assert other.strip_url_image_profile(response.json()['user']) == {"u_id": user_2['auth_user_id'], "email":"", "name_first": "Removed", "name_last": "user", "handle_str": ""}
+    assert helper_functions.strip_url_image_profile(response.json()['user']) == {"u_id": user_2['auth_user_id'], "email":"", "name_first": "Removed", "name_last": "user", "handle_str": ""}
     assert 200 == requests.post(other.REGISTER_URL, json={"email":"z12345@unsw.edu.au", "password": "epicpassword", "name_first": "FirstName", "name_last": "LastName"}).status_code
     
 def test_basic_user_remove_v2(clear_store, register_user_1, register_user_2):

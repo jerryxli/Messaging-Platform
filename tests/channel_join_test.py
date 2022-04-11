@@ -2,6 +2,7 @@ from src.config import url
 import pytest
 import requests
 import src.other as other
+import tests.helper_functions as helper_functions
 
 
 @pytest.fixture
@@ -57,7 +58,7 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_2}).json()
     assert channel_details['name'] == 'test'
     assert channel_details['is_public'] == True
-    assert other.strip_array_url_image(channel_details['owner_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details['owner_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -66,7 +67,7 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
                 'handle_str': 'namelastname',
             }
         ]
-    assert other.strip_array_url_image(channel_details['all_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details['all_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -99,7 +100,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_3}).json()
     assert channel_details['name'] == 'test2'
     assert channel_details['is_public'] == True
-    assert other.strip_array_url_image(channel_details['owner_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details['owner_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -108,7 +109,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
                 'handle_str': 'namelastname',
             }
         ]
-    assert other.strip_array_url_image(channel_details['all_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details['all_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',

@@ -2,6 +2,7 @@ from src.config import url
 import requests
 import pytest
 import src.other as other
+import tests.helper_functions as helper_functions
 
 @pytest.fixture
 def clear_store():
@@ -52,7 +53,7 @@ def test_member_leaves(clear_store, create_user, create_user2):
     channel_details_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_2})
     assert channel_details_1.json()['name'] == "My Channel!"
     assert channel_details_1.json()['is_public'] == True
-    assert other.strip_array_url_image(channel_details_1.json()['owner_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details_1.json()['owner_members']) == [
                                 {
                                     'u_id': create_user['auth_user_id'],
                                     'email': "z432324@unsw.edu.au",
@@ -61,7 +62,7 @@ def test_member_leaves(clear_store, create_user, create_user2):
                                     'handle_str': "twixchocolate",
                                 }
                             ]
-    assert other.strip_array_url_image(channel_details_1.json()['all_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details_1.json()['all_members']) == [
                                 {
                                     'u_id': create_user['auth_user_id'],
                                     'email': "z432324@unsw.edu.au",

@@ -3,6 +3,8 @@ from src.config import port, url
 import requests
 import pytest
 import src.other as other
+import tests.helper_functions as helper_functions
+
 
 @pytest.fixture
 def clear_store():
@@ -42,7 +44,7 @@ def test_owner_addowner(clear_store, create_user, create_user2):
     assert request_data_1.status_code == 200
     assert request_data_2.json() == {}
     assert request_data_2.status_code == 200
-    assert other.strip_array_url_image(channel_details_1['owner_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details_1['owner_members']) == [
                                                     {
                                                         'u_id': create_user2['auth_user_id'],
                                                         'email': "z54626@unsw.edu.au",
@@ -58,7 +60,7 @@ def test_owner_addowner(clear_store, create_user, create_user2):
                                                         'handle_str': "twixchocolate",
                                                     },   
                                                  ]
-    assert other.strip_array_url_image(channel_details_2['owner_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details_2['owner_members']) == [
                                                     {
                                                         'u_id': create_user['auth_user_id'],
                                                         'email': "z432324@unsw.edu.au",
@@ -88,7 +90,7 @@ def test_global_owner_add_themselves(clear_store, create_user, create_user2):
     assert response.json() == {}
     assert response.status_code == 200
 
-    assert other.strip_array_url_image(channel_details['owner_members']) ==  [
+    assert helper_functions.strip_array_url_image(channel_details['owner_members']) ==  [
                                                     {
                                                         'u_id': create_user2['auth_user_id'],
                                                         'email': "z54626@unsw.edu.au",

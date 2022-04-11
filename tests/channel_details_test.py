@@ -3,6 +3,8 @@ from .helper_functions import is_valid_dictionary_output
 import requests
 import pytest
 import src.other as other
+import tests.helper_functions as helper_functions
+
 
 @pytest.fixture
 def clear_store():
@@ -63,7 +65,7 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     channel_details_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_2}).json()
     assert channel_details_1['name'] == "My Channel!"
     assert channel_details_1['is_public'] == True
-    assert other.strip_array_url_image(channel_details_1['owner_members']) == [
+    assert helper_functions.strip_array_url_image(channel_details_1['owner_members']) == [
                                 {
                                     'u_id': create_user['auth_user_id'],
                                     'email': "z432324@unsw.edu.au",
@@ -72,7 +74,7 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
                                     'handle_str': "twixchocolate",
                                 }
                             ]
-    assert other.strip_array_url_image(channel_details_1['all_members']) == [{
+    assert helper_functions.strip_array_url_image(channel_details_1['all_members']) == [{
                                     'u_id': create_user['auth_user_id'],
                                     'email': "z432324@unsw.edu.au",
                                     'name_first': "Twix",
@@ -127,5 +129,5 @@ def test_from_stub_code(clear_store, create_stub_user):
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': stub_token})
     assert channel_details.json()['name'] == "Hayden"
     assert channel_details.json()['is_public'] == False
-    assert other.strip_array_url_image(channel_details.json()['owner_members']) == [{'u_id': stub_uid, 'email': 'example@gmail.com', 'name_first': 'Hayden','name_last': 'Jacobs','handle_str': 'haydenjacobs'}]
-    assert other.strip_array_url_image(channel_details.json()['all_members']) == [{'u_id': stub_uid, 'email': 'example@gmail.com', 'name_first': 'Hayden', 'name_last': 'Jacobs', 'handle_str': 'haydenjacobs'}]
+    assert helper_functions.strip_array_url_image(channel_details.json()['owner_members']) == [{'u_id': stub_uid, 'email': 'example@gmail.com', 'name_first': 'Hayden','name_last': 'Jacobs','handle_str': 'haydenjacobs'}]
+    assert helper_functions.strip_array_url_image(channel_details.json()['all_members']) == [{'u_id': stub_uid, 'email': 'example@gmail.com', 'name_first': 'Hayden', 'name_last': 'Jacobs', 'handle_str': 'haydenjacobs'}]

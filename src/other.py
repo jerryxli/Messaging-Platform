@@ -299,11 +299,3 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
 
-def strip_url_image_profile(profile: dict):
-    return {k: v for k, v in profile.items() if k not in ['profile_img_url']}
-
-def strip_array_url_image(profiles: dict):
-    output = []
-    for profile in profiles:
-        output.append(strip_url_image_profile(profile))
-    return output
