@@ -87,7 +87,8 @@ def auth_register_v2(email: str, password: str, name_first: str, name_last: str)
     if new_user_id == 0:
         global_permission = other.GLOBAL_PERMISSION_OWNER
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-                           'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions': []}
+                           'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 
+                           'sessions': [], 'profile_img_url': ""}
     users[new_user_id] = new_user_dictionary
     data_store.set(store)
     jwt = other.create_JWT(new_user_id)

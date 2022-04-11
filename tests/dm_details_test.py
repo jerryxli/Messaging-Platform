@@ -38,21 +38,14 @@ def test_creator_of_dm(clear_store, create_user, create_user2):
     dm_id_2 = requests.post(other.DM_CREATE_URL, json={'token': user_token_2, 'u_ids': [create_user2['auth_user_id']]}).json()['dm_id']
     dm_details_1 = requests.get(other.DM_DETAILS_URL, params={'dm_id': dm_id_1, 'token': user_token_1})
     dm_details_2 = requests.get(other.DM_DETAILS_URL, params={'dm_id': dm_id_2, 'token': user_token_2})
-    expected_output =   {   
-                            'name': 'twixchocolate', 
-                            'members': 
-                            [
-                            {
+    assert dm_details_1.json()['name'] == 'twixchocolate'
+    assert other.strip_array_url_image(dm_details_1.json()['members']) == [{
                                 'u_id': create_user['auth_user_id'],
                                 'email': "z432324@unsw.edu.au",
                                 'name_first': "Twix",
                                 'name_last': "Chocolate",
                                 'handle_str': "twixchocolate",
-                            } 
-                            ]
-                        }
-
-    assert dm_details_1.json() == expected_output
+                            } ]
     assert dm_details_1.status_code == 200
     assert dm_details_2.status_code == 200
 
@@ -62,9 +55,8 @@ def test_member_of_dm(clear_store, create_user, create_user2):
     user_id_2 = create_user2['auth_user_id']
     dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token_1, 'u_ids': [user_id_2]}).json()['dm_id']
     dm_details_1 = requests.get(other.DM_DETAILS_URL, params={'dm_id': dm_id, 'token': user_token_2})
-    expected_output =  {    
-                            'name': 'snickerslickers, twixchocolate', 
-                            'members': [
+    assert dm_details_1.json()['name'] == 'snickerslickers, twixchocolate'
+    assert other.strip_array_url_image(dm_details_1.json()['members'])== [
                                 {
                                     'u_id': create_user2['auth_user_id'],
                                     'email': "z54626@unsw.edu.au",
@@ -79,10 +71,8 @@ def test_member_of_dm(clear_store, create_user, create_user2):
                                     'name_last': "Chocolate",
                                     'handle_str': "twixchocolate",
                                 }
-                            ],
-                        }
+                            ]
     assert dm_details_1.status_code == 200
-    assert dm_details_1.json() == expected_output
     
 def test_invalid_user(clear_store, create_user):
     user_token = create_user['token']
@@ -117,9 +107,8 @@ def test_from_stub_code(clear_store, create_stub_user):
     dm_id = requests.post(other.DM_CREATE_URL, json={'token': stub_token, 'u_ids': []}).json()['dm_id']
     dm_details = requests.get(other.DM_DETAILS_URL, params={'dm_id': dm_id, 'token': stub_token})
     
-    assert dm_details.json() ==  {
-        'name': 'haydenjacobs',
-        'members': [
+    assert dm_details.json()['name'] == "haydenjacobs"
+    assert other.strip_array_url_image(dm_details.json()['members']) == [
             {
                 'u_id': stub_uid,
                 'email': 'example@gmail.com',
@@ -127,5 +116,4 @@ def test_from_stub_code(clear_store, create_stub_user):
                 'name_last': 'Jacobs',
                 'handle_str': 'haydenjacobs',
             }
-        ],
-    }
+        ]
