@@ -20,7 +20,8 @@ def test_photo_upload_first(clear_store, create_user):
     u_id = create_user['auth_user_id']
     token = create_user['token']
     profile_repsonse = requests.get(other.USER_PROFILE_URL, params={"u_id": u_id, "token": token})
-    assert profile_repsonse.json()['user']['profile_img_url'] == ""
+    assert profile_repsonse.json()['user']['profile_img_url'] != ""
+    old_url = profile_repsonse.json()['user']['profile_img_url']
     img_url = "http://www.cse.unsw.edu.au/~tw/Toby2062.jpg"
     upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 0, "y_start": 0, "x_end": 100, "y_end": 100})
     assert upload_image_response.status_code == 200
@@ -28,6 +29,7 @@ def test_photo_upload_first(clear_store, create_user):
 
     profile_repsonse_1 = requests.get(other.USER_PROFILE_URL, params={"u_id": u_id, "token": token})
     assert profile_repsonse_1.json()['user']['profile_img_url'] != ""
+    assert profile_repsonse_1.json()['user']['profile_img_url'] != old_url
 
 def test_invalid_token(clear_store, create_user):
     token = create_user['token']
