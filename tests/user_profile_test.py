@@ -1,6 +1,5 @@
 import requests
 import pytest
-from src.config import url
 import src.other as other
 
 @pytest.fixture
