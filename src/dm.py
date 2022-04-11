@@ -275,4 +275,8 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
         not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
     end = -1 if len(messages) == len(not_displayed) else start + \
         other.PAGE_THRESHOLD
+
+    if '@' in message:
+        other.create_notification(-1, dm_id, auth_user_id, dm['name'], message, 'tagged')
+
     return {'messages': messages, 'start': start, 'end': end}

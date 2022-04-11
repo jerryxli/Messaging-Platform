@@ -50,6 +50,10 @@ def message_send_v1(user_id, channel_id, message):
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id,
                                 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'is_pinned': False}
+    
+    if '@' in message:
+        other.create_notification(channel_id, -1, user_id, None, message_channel['name'], message, 'tagged')
+
     data_store.set(store)
     return ({'message_id': new_message_id})
 
@@ -108,6 +112,7 @@ def message_edit_v1(user_id, message_id, message):
         store['messages'] = messages
         print(store)
         data_store.set(store)
+    
     return {}
 
 
