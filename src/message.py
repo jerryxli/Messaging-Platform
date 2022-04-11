@@ -49,7 +49,9 @@ def message_send_v1(user_id, channel_id, message):
     messages = store['messages']
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id,
-                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'react_id': 1, 'react_u_ids': []}
+                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': []}
+    messages[new_message_id]['reacts'].append(
+        {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
     data_store.set(store)
     return ({'message_id': new_message_id})
 
@@ -201,15 +203,25 @@ def message_react_v1(user_id, message_id, react_id):
             raise InputError(
                 description="user is not in the dm the message was sent from")
 
-    if message['react_id'] == react_id:
-        if user_id not in message['react_u_ids']:
-            message['react_u_ids'].append(user_id)
-        else:
-            raise InputError(
-                description="message already contains a react from this user")
-    else:
-        raise InputError(description="react_id is not valid")
+    # if message['react_id'] == react_id:
+    #     if user_id not in message['react_u_ids']:
+    #         message['react_u_ids'].append(user_id)
+    #     else:
+    #         raise InputError(
+    #             description="message already contains a react from this user")
+    # else:
+    #     raise InputError(description="react_id is not valid")
 
+    for react in message['reacts']:
+        if react['react_id'] == react_id:
+            if react['is_this_user_reacted']:
+                raise InputError(
+                    description="message already contains a react from this user")
+            else:
+                react['is_this_user_reacted'] = True
+                react['u_ids'].append(user_id)
+        else:
+            raise InputError(description="react_id is not valid")
     store['messages'] = messages
     data_store.set(store)
     return {}
