@@ -208,3 +208,55 @@ def message_pin_v1(user_id, message_id):
     store['messages'] = messages
     data_store.set(store)
     return {}
+
+
+def message_unpin_v1(user_id, message_id):
+    """
+    Given a message within a channel or DM, remove its mark it as "pinned".
+
+    Exceptions:
+        AccessError     - Occurs when the message_id is valid and the user does not have owner permissions in the channel/DM
+        InputError      - Occurs when the message_id is not a valid message within the channel/DM that the user has joined
+        InputError      - Occurs when message is not pinned
+
+    Arguments:
+        token (int)         - The token of the user
+        message_id (int)    - The id of the message
+
+    Return Value:
+        Returns {} when successful 
+    """
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    messages = store['messages']
+    if message_id not in messages:
+        raise InputError(
+            description="message_id does not refer to a valid message")
+    else:
+        message = messages[message_id]
+
+    if message['is_channel'] == True:
+        u_ids = [user['u_id']
+                 for user in channels[message['id']]['owner_members']]
+        all_u_ids = [user['u_id']
+                     for user in channels[message['id']]['all_members']]
+        if user_id not in u_ids and user_id not in all_u_ids:
+            raise InputError(
+                description="message and user are in different channels")
+        if user_id not in u_ids:
+            raise AccessError(
+                description="message_id is valid but user does not have permissions to remove")
+    else:
+        u_ids = [user['u_id'] for user in dms[message['id']]['members']]
+        if user_id not in u_ids:
+            raise InputError(
+                description="message and user are in different dms")
+
+    if not message['is_pinned']:
+        raise InputError(description="message is not pinned")
+    else:
+        message['is_pinned'] = False
+    store['messages'] = messages
+    data_store.set(store)
+    return {}
