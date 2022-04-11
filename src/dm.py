@@ -232,6 +232,10 @@ def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id,
                                 'message': message, 'time_sent': time(), 'is_channel': False, 'id': dm_id, 'is_pinned': False}
+    
+    if '@' in message:
+        other.create_notification(-1, dm_id, auth_user_id, None, dm['name'], message, 'tagged')
+    
     data_store.set(store)
     return {'message_id': new_message_id}
 
@@ -275,8 +279,5 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
         not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
     end = -1 if len(messages) == len(not_displayed) else start + \
         other.PAGE_THRESHOLD
-
-    if '@' in message:
-        other.create_notification(-1, dm_id, auth_user_id, None, dm['name'], message, 'tagged')
 
     return {'messages': messages, 'start': start, 'end': end}
