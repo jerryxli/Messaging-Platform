@@ -277,6 +277,6 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
         other.PAGE_THRESHOLD
 
     if '@' in message:
-        other.create_notification(-1, dm_id, auth_user_id, dm['name'], message, 'tagged')
+        other.create_notification(-1, dm_id, auth_user_id, None, dm['name'], message, 'tagged')
 
     return {'messages': messages, 'start': start, 'end': end}
