@@ -60,8 +60,26 @@ def test_y_end_less(clear_store, create_user):
     upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 0, "y_start": 65, "x_end": 10, "y_end": 1})
     assert upload_image_response.status_code == 400
 
-def test_x_y_not_in_image(clear_store, create_user):
+def test_x_start_not_in_image(clear_store, create_user):
     token = create_user['token']
     img_url = "http://www.cse.unsw.edu.au/~tw/Toby2062.jpg"
-    upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 9000, "y_start": 9000, "x_end": 9001, "y_end": 9001})
+    upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 9000, "y_start": 0, "x_end": 9002, "y_end": 2})
+    assert upload_image_response.status_code == 400
+
+def test_y_start_not_in_image(clear_store, create_user):
+    token = create_user['token']
+    img_url = "http://www.cse.unsw.edu.au/~tw/Toby2062.jpg"
+    upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 0, "y_start": 9090, "x_end": 2, "y_end": 9092})
+    assert upload_image_response.status_code == 400
+
+def test_x_end_not_in_image(clear_store, create_user):
+    token = create_user['token']
+    img_url = "http://www.cse.unsw.edu.au/~tw/Toby2062.jpg"
+    upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 0, "y_start": 0, "x_end": 9001, "y_end": 2})
+    assert upload_image_response.status_code == 400
+
+def test_y_end_not_in_image(clear_store, create_user):
+    token = create_user['token']
+    img_url = "http://www.cse.unsw.edu.au/~tw/Toby2062.jpg"
+    upload_image_response = requests.post(other.USER_UPLOADPHOTO_URL, json={"token": token, "img_url": img_url, "x_start": 0, "y_start": 0, "x_end": 2, "y_end": 9001})
     assert upload_image_response.status_code == 400
