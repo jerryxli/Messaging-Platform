@@ -116,6 +116,11 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     store = data_store.get()
     dms = store['dms']
     users = store['users']
+    msg_count = 0
+    for msg in store['messages']:
+        if msg['is_channel'] == False and msg['id'] == dm_id:
+            msg_count += 1
+    
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
@@ -133,7 +138,7 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     for user in dm['members']:
         other.user_stats_update(0,-1,0,user['u_id'])
     other.user_stats_update(0,-1,0, auth_user_id)
-    other.server_stats_update(0,-1,0)
+    other.server_stats_update(0,-1,msg_count)
         
     data_store.set(store)
     return

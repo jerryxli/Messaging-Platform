@@ -53,3 +53,14 @@ def test_multi_user_stats(clear_store, create_user, create_user2):
     assert response1.json()['involvement_rate'] == 3/4
     assert response2.json()['involvement_rate'] == 1/2
 
+def test_deprecating_stats(clear_store, create_user, create_user2):
+    user1 = create_user
+    user2 = create_user2
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json = {'token': user1['token'], 'name': 'Happy', 'is_public': True}).json()['channel_id']
+    requests.post(other.MESSAGE_SEND_URL, json = {'token': user1['token'], 'message': 'hey', 'channel_id': channel_id})
+    requests.post(other.CHANNEL_JOIN_URL, json = {'token': user2['token'], 'channel_id': channel_id})
+    requests.post(other.MESSAGE_SEND_URL, json = {'token': user1['token'], 'message': 'hey', 'channel_id': channel_id})
+    requests.post(other.MESSAGE_SEND_URL, json = {'token': user2['token'], 'message': 'hey back', 'channel_id': channel_id})
+    requests.post(other.CHANNEL_LEAVE_URL, json = {'token': user2['token'], 'channel_id': channel_id})
+    response2 = requests.get(other.USER_STATS_URL, params = {'token': user2['token']})
+    assert response2.json()['involvement_rate'] == 1/4
