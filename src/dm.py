@@ -231,7 +231,7 @@ def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
     messages = store['messages']
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': message,
-                                'time_sent': time(), 'is_channel': False, 'id': dm_id, 'reacts': []}
+                                'time_sent': time(), 'is_channel': False, 'id': dm_id, 'reacts': [], 'is_pinned': False}
     messages[new_message_id]['reacts'].append(
         {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
     data_store.set(store)
