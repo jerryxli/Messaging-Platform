@@ -1,3 +1,4 @@
+from os import remove
 from src.config import url
 import time
 import pytest
@@ -32,8 +33,10 @@ def long_string():
 def test_sendlater_success(clear_store, create_user1):
     user_token = create_user1['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
-    response = requests.post(other.MESSAGE_SENDLATER_URL, json={'token': user_token, 'channel_id': channel_id, 'message': "Test message", 'time_sent': time.time() + 2})
+    response = requests.post(other.MESSAGE_SENDLATER_URL, json={'token': user_token, 'channel_id': channel_id, 'message': "Test message", 'time_sent': time.time() + 10})
+    channel_messages = requests.get(other.CHANNEL_MESSAGES_URL, params={'token':user_token, 'channel_id': channel_id, 'start': 0})
     assert response.status_code == 200
+    assert channel_messages.json()['messages'] == []
 
 def test_indepth_sendlater_success(clear_store, create_user1):
     user_token = create_user1['token']
@@ -48,6 +51,19 @@ def test_indepth_sendlater_success(clear_store, create_user1):
     assert response.status_code == 200
     assert message_response.status_code == 200
     assert message_response.json()['messages'] == expected_message
+
+def test_functions_on_unsent_message(clear_store, create_user1):
+    user_token = create_user1['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    sendlater_response = requests.post(other.MESSAGE_SENDLATER_URL, json={'token': user_token, 'channel_id': channel_id, 'message': "Success!", 'time_sent': time.time() + 10})
+    message_id = sendlater_response.json()['message_id']
+    react_response = requests.post(other.MESSAGE_REACT_URL, json={'token': user_token, 'message_id': message_id, 'react_id': 1})
+    edit_response = requests.put(other.MESSAGE_EDIT_URL, json={'token': user_token, 'message_id': message_id, 'message': "invalid edit"})
+    remove_response = requests.delete(other.MESSAGE_REMOVE_URL, json={'token': user_token, 'message_id': message_id})
+    assert sendlater_response.status_code == 200
+    assert react_response.status_code == 400
+    assert edit_response.status_code == 400
+    assert remove_response.status_code == 400
 
 def test_invalid_channel_id(clear_store, create_user1):
     user_token = create_user1['token']
