@@ -147,6 +147,7 @@ def user_remove_v1(token: str, u_id: int)->dict:
     users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': other.GLOBAL_PERMISSION_REMOVED, 'sessions': []}
     store['users'] = users
     data_store.set(store)
+    #are the stats for server meant to decrease when this occurs
     return {}
     
 def user_set_handle_v1(token: str, handle_str: str)->dict:
@@ -181,3 +182,46 @@ def user_set_handle_v1(token: str, handle_str: str)->dict:
 
     data_store.set(store)
     return {}
+
+def user_stats_v1(auth_user_id: int):
+    shape = {'channels_joined': [], 'dms_joined': [], 'messages_sent': [], 'involvement_rate': 0}
+    store = data_store.get()
+    user_stats = store['user_stats'][auth_user_id]
+    for change in user_stats['stats']:
+        shape['channels_joined'].append({'time': change['time'], 'channels_joined': change['num_channels']})
+        shape['dms_joined'].append({'time': change['time'], 'dms_joined': change['num_dms']})
+        shape['messages_sent'].append({'time': change['time'], 'messages_sent': change['num_msg']})
+    server_stats = store['server_stats']
+    user_recent = user_stats['stats'][len(user_stats['stats']) - 1]
+    print(user_recent)
+    server_recent = server_stats['stats'][len(server_stats['stats']) - 1]
+    print(server_recent)
+    num_channels_joined = user_recent['num_channels']
+    num_dms_joined = user_recent['num_dms']
+    num_msgs_sent = user_recent['num_msg']
+    num_channels = server_recent['num_channels']
+    num_dms = server_recent['num_dms']
+    num_messages = server_recent['num_msg']
+    if num_channels + num_dms + num_messages == 0:
+        shape['involvement_rate'] = 0
+    else:
+        shape['involvement_rate'] = (num_channels_joined + num_dms_joined + num_msgs_sent)/(num_channels + num_dms + num_messages)
+    return shape
+
+def users_stats_v1():
+    shape = {'channels_exist': [], 'dms_exist': [], 'messages_exist': [], 'utilization_rate': 0}
+    store = data_store.get()
+    server_stats = store['server_stats']
+    for change in server_stats['stats']:
+        shape['channels_exist'].append({'time': change['time'], 'channels_exist': change['num_channels']})
+        shape['dms_exist'].append({'time': change['time'], 'dms_exist': change['num_dms']})
+        shape['messages_exist'].append({'time': change['time'], 'messages_exist': change['num_messages']})
+    user_stats = store['user_stats']
+    num_users_in_channel = 0
+    num_users = 0
+    for user in user_stats:
+        if user['stats'][len(user['stats']) - 1]['num_channels'] >= 1:
+            num_users_in_channel += 1
+        num_users += 1
+    shape['utilization_rate'] = num_users_in_channel/num_users
+    return shape

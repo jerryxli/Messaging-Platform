@@ -8,8 +8,7 @@ from src.other import clear_v1, user_id_from_JWT, is_valid_JWT
 from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
 from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
-from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, users_all_v1
-from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
+from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_stats_v1, users_stats_v1, user_remove_v1
 from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
 
@@ -371,6 +370,17 @@ def handle_dm_messages():
         raise AccessError(description="JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
+@APP.route("/user/stats/v1", methods = ["GET"])
+def handle_user_stats():
+    if not is_valid_JWT(request.args.get('token')):
+        raise AccessError(description="JWT no longer valid")
+    return user_stats_v1(user_id_from_JWT(request.args.get('token')))
+
+@APP.route("/user/stats/v1", methods = ["GET"])
+def handle_users_stats():
+    if not is_valid_JWT(request.args.get('token')):
+        raise AccessError(description="JWT no longer valid")
+    return users_stats_v1()
 # NO NEED TO MODIFY BELOW THIS POINT
 
 

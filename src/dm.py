@@ -49,6 +49,7 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
         members.append(user)
+        other.user_stats_update(0,1,0,id)
 
     name = ''
     user_handles = []
@@ -65,6 +66,9 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
     dm_info['messages'] = []
     dms[dm_id] = dm_info
     store['dms'] = dms
+    other.user_stats_update(0,1,0,auth_user_id)
+    other.server_stats_update(0,1,0)
+    
     data_store.set(store)
 
     return {'dm_id': dm_id}
@@ -126,6 +130,11 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
         raise AccessError(description="User is not in DM")
 
     store['dms'] = dms
+    for user in dm['members']:
+        other.user_stats_update(0,-1,0,user['u_id'])
+    other.user_stats_update(0,-1,0, auth_user_id)
+    other.server_stats_update(0,-1,0)
+        
     data_store.set(store)
     return
 
@@ -196,7 +205,7 @@ def dm_leave_v1(auth_user_id: int, dm_id: int) -> None:
         dm['members'].remove(user)
     else:
         raise AccessError(description="User is not in DM")
-
+    other.user_stats_update(0,-1,0, auth_user_id)
     store['dms'] = dms
     data_store.set(store)
     return None
@@ -232,6 +241,8 @@ def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id,
                                 'message': message, 'time_sent': time(), 'is_channel': False, 'id': dm_id, 'is_pinned': False}
+    other.user_stats_update(0,0,1,auth_user_id)
+    other.server_stats_update(0,0,1)
     data_store.set(store)
     return {'message_id': new_message_id}
 
