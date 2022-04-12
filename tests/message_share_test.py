@@ -45,7 +45,7 @@ def test_basic_share_from_dm_to_channel(clear_store, register_user_1, register_u
 def test_both_negative_1(clear_store, register_user_1, register_user_2):
     user_1 = register_user_1
     user_2 = register_user_2
-    channel_id = requests.post(other.CHANNELS_CREATE_URL, json = {"token": user_1['token'], 'name': 'apples', 'is_public': True}).json()['channel_id']
+    requests.post(other.CHANNELS_CREATE_URL, json = {"token": user_1['token'], 'name': 'apples', 'is_public': True}).json()['channel_id']
     dm_id = requests.post(other.DM_CREATE_URL, json = {'token': user_1['token'], 'u_ids': [user_2['auth_user_id']]}).json()['dm_id']
     message_id = requests.post(other.MESSAGE_SENDDM_URL, json = {'token': user_1['token'], 'message': 'hey', 'dm_id': dm_id}).json()['message_id']
     response = requests.post(other.MESSAGE_SHARE_URL, json = {'token': user_1['token'], 'og_message_id': message_id, 'message': 'double hey', 'channel_id': -1, 'dm_id': -1})
