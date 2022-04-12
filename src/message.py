@@ -49,7 +49,9 @@ def message_send_v1(user_id, channel_id, message):
     messages = store['messages']
     new_message_id = len(messages)
     messages[new_message_id] = {'message_id': new_message_id, 'u_id': user_id,
-                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'is_pinned': False}
+                                'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
+    messages[new_message_id]['reacts'].append(
+        {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
     data_store.set(store)
     return ({'message_id': new_message_id})
 
@@ -205,6 +207,112 @@ def message_pin_v1(user_id, message_id):
         raise InputError(description="message is already pinned")
     else:
         message['is_pinned'] = True
+    store['messages'] = messages
+    data_store.set(store)
+    return {}
+
+
+def message_unpin_v1(user_id, message_id):
+    """
+    Given a message within a channel or DM, remove its mark it as "pinned".
+
+    Exceptions:
+        AccessError     - Occurs when the message_id is valid and the user does not have owner permissions in the channel/DM
+        InputError      - Occurs when the message_id is not a valid message within the channel/DM that the user has joined
+        InputError      - Occurs when message is not pinned
+
+    Arguments:
+        token (int)         - The token of the user
+        message_id (int)    - The id of the message
+
+    Return Value:
+        Returns {} when successful 
+    """
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    messages = store['messages']
+    if message_id not in messages:
+        raise InputError(
+            description="message_id does not refer to a valid message")
+    else:
+        message = messages[message_id]
+
+    if message['is_channel'] == True:
+        u_ids = [user['u_id']
+                 for user in channels[message['id']]['owner_members']]
+        all_u_ids = [user['u_id']
+                     for user in channels[message['id']]['all_members']]
+        if user_id not in u_ids and user_id not in all_u_ids:
+            raise InputError(
+                description="message and user are in different channels")
+        if user_id not in u_ids:
+            raise AccessError(
+                description="message_id is valid but user does not have permissions to remove")
+    else:
+        u_ids = [user['u_id'] for user in dms[message['id']]['members']]
+        if user_id not in u_ids:
+            raise InputError(
+                description="message and user are in different dms")
+
+    if not message['is_pinned']:
+        raise InputError(description="message is not pinned")
+    else:
+        message['is_pinned'] = False
+    store['messages'] = messages
+    data_store.set(store)
+    return {}
+
+def message_react_v1(user_id, message_id, react_id):
+    """
+    Given a message_id for a message, the authroised user adds a 'react' to the message from the channel/DM
+
+    Exceptions:
+        InputError      - Occurs when the message_id is not a valid message within the channel
+        InputError      - Occurs when the react_id is not a valid react ID, ie != 1
+        InputError      - Occurs when the message already contains a react with ID react_id
+
+    Arguments:
+        token (int)         - The token of the user
+        message_id (int)    - The id of the message
+        react_id (int)      - The id of the react (1 == valid, 0 == invalid)
+
+    Return Value:
+        Returns {} when successful 
+    """
+
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    messages = store['messages']
+
+    if message_id not in messages:
+        raise InputError(
+            description="message_id does not refer to a valid message")
+    else:
+        message = messages[message_id]
+
+    if message['is_channel'] == True:
+        all_u_ids = [user['u_id']
+                     for user in channels[message['id']]['all_members']]
+        if user_id not in all_u_ids:
+            raise InputError(
+                description="user is not in the channel the message was sent from")
+    else:
+        u_ids = [user['u_id'] for user in dms[message['id']]['members']]
+        if user_id not in u_ids:
+            raise InputError(
+                description="user is not in the dm the message was sent from")
+
+    for react in message['reacts']:
+        if react['react_id'] == react_id:
+            if user_id in react['u_ids']:
+                raise InputError(
+                    description="message already contains a react from this user")
+            else:
+                react['u_ids'].append(user_id)
+        else:
+            raise InputError(description="react_id is not valid")
     store['messages'] = messages
     data_store.set(store)
     return {}
