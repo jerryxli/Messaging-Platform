@@ -109,7 +109,6 @@ def message_edit_v1(user_id, message_id, message):
         curr_message['message'] = message
         messages['message'] = curr_message
         store['messages'] = messages
-        print(store)
         data_store.set(store)
     return {}
 
