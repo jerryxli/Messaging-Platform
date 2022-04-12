@@ -8,8 +8,6 @@ Created: 11.04.2022
 Description: Allows the user to receive notifiations when they are tagged in a message,
 when a user reacts to their message and when they are added to a channel or dm.
 """
-
-from time import time
 from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
