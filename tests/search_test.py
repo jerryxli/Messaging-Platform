@@ -59,11 +59,21 @@ def test_messages_do_not_contain_query(clear_store, create_user1):
     assert response.json() == expected_output
     assert response.status_code == 200
 
-def test_non_member_query(clear_store, create_user1, create_user2):
+def test_channel_non_member_query(clear_store, create_user1, create_user2):
     user_token_1 = create_user1['token']
     user_token_2 = create_user2['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': "hello"})
+    response = requests.get(other.SEARCH_URL, params={'token': user_token_2, 'query_str': "word"})
+    expected_output = {'messages': []}
+    assert response.json() == expected_output
+    assert response.status_code == 200
+
+def test_dm_non_member_query(clear_store, create_user1, create_user2):
+    user_token_1 = create_user1['token']
+    user_token_2 = create_user2['token']
+    dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token_1, 'u_ids': []}).json()['dm_id']
+    requests.post(other.MESSAGE_SENDDM_URL, json={'token': user_token_1, 'dm_id': dm_id, 'message': "hello"})
     response = requests.get(other.SEARCH_URL, params={'token': user_token_2, 'query_str': "word"})
     expected_output = {'messages': []}
     assert response.json() == expected_output
