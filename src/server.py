@@ -10,7 +10,7 @@ from src.channels import channels_create_v2, channels_list_v2, channels_listall_
 from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
 from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, users_all_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1, message_react_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
 
 
@@ -260,6 +260,18 @@ def handle_message_edit():
     message_edit_v1(user_id, int(message_id), message)
     return {}
 
+
+@APP.route("/message/react/v1", methods=['POST'])
+def handle_message_react():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    message_id = request_data['message_id']
+    react_id = request_data['react_id']
+    if not is_valid_JWT(user_token):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    message_react_v1(user_id, int(message_id), react_id)
+    return {}
 
 @APP.route("/message/pin/v1", methods=['POST'])
 def handle_message_pin():
