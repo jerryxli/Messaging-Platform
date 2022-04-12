@@ -134,7 +134,8 @@ def channel_messages_v2(auth_user_id: int, channel_id: int, start: int) -> dict:
             description="start is greater than the total number of messages in the channel")
     messages = []
     for message in channel_messages:
-        message['reacts'][0]['is_this_user_reacted'] = auth_user_id in message['reacts'][0]['u_ids']
+        for index in range(len(message['reacts'])):
+            message['reacts'][index]['is_this_user_reacted'] = auth_user_id in message['reacts'][index]['u_ids']
     not_displayed = list(reversed(channel_messages))[start:]
     messages.extend(
         not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])

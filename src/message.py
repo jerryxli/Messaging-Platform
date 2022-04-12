@@ -190,11 +190,9 @@ def message_react_v1(user_id, message_id, react_id):
         message = messages[message_id]
 
     if message['is_channel'] == True:
-        u_ids = [user['u_id']
-                 for user in channels[message['id']]['owner_members']]
         all_u_ids = [user['u_id']
                      for user in channels[message['id']]['all_members']]
-        if user_id not in u_ids and user_id not in all_u_ids:
+        if user_id not in all_u_ids:
             raise InputError(
                 description="user is not in the channel the message was sent from")
     else:
