@@ -30,10 +30,12 @@ def notifications_get_v1(auth_user_id: int) -> dict:
     notifications = list()
     store = data_store.get()
     notifications = store['notifications']
-
-    user_notifications = notifications[auth_user_id]
+    user_notifications = list()
+    if notifications.get(auth_user_id):
+        user_notifications = notifications[auth_user_id]
     if len(user_notifications) > 20:
         reversed_list = user_notifications[-20:]
-        return {'notifications': reversed_list.reverse()}
-    
-    return {'notifications': user_notifications.reverse()}
+        reversed_list.reverse()
+        return {'notifications': reversed_list}
+    user_notifications.reverse()
+    return {'notifications': user_notifications}
