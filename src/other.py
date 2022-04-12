@@ -319,10 +319,10 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
     if channel_id < 0:
         messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
                             'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
-                            'is_reacted': False, 'is_pinned': False}
+                            'reacts': [], 'is_pinned': False}
     else: 
         messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
                             'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
-                            'is_reacted': False, 'is_pinned': False}
+                            'reacts': [], 'is_pinned': False}
     
     # Replace with tagging notification later
