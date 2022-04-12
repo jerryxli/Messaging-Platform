@@ -383,6 +383,14 @@ def handle_dm_messages():
         raise AccessError(description="JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
+@APP.route("/message/sendlaterdm/v1", methods=["POST"])
+def handle_message_sendlaterdm():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(request_data['token'])
+    return dm_send_v1(user_id, request_data['dm_id'], request_data['message'], request_data['time_sent'])
+
 # NO NEED TO MODIFY BELOW THIS POINT
 
 
