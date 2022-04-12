@@ -203,22 +203,12 @@ def message_react_v1(user_id, message_id, react_id):
             raise InputError(
                 description="user is not in the dm the message was sent from")
 
-    # if message['react_id'] == react_id:
-    #     if user_id not in message['react_u_ids']:
-    #         message['react_u_ids'].append(user_id)
-    #     else:
-    #         raise InputError(
-    #             description="message already contains a react from this user")
-    # else:
-    #     raise InputError(description="react_id is not valid")
-
     for react in message['reacts']:
         if react['react_id'] == react_id:
-            if react['is_this_user_reacted']:
+            if user_id in react['u_ids']:
                 raise InputError(
                     description="message already contains a react from this user")
             else:
-                react['is_this_user_reacted'] = True
                 react['u_ids'].append(user_id)
         else:
             raise InputError(description="react_id is not valid")

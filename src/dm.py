@@ -267,11 +267,13 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
     for message in stored_messages.values():
         if message['is_channel'] == False and message['id'] == dm_id:
             dm_messages.append({'message': message['message'], 'message_id': message['message_id'],
-                               'u_id': message['u_id'], 'time_sent': message['time_sent']})
+                               'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts']})
     if start > len(dm_messages):
         raise InputError(
             description="Start is greater than the total number of messages in channel")
     messages = []
+    for message in dm_messages:
+        message['reacts'][0]['is_this_user_reacted'] = auth_user_id in message['reacts'][0]['u_ids']
     not_displayed = list(reversed(dm_messages))[start:]
     messages.extend(
         not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
