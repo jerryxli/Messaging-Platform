@@ -191,21 +191,19 @@ def user_stats_v1(auth_user_id: int):
         shape['channels_joined'].append({'time': change['time'], 'channels_joined': change['num_channels']})
         shape['dms_joined'].append({'time': change['time'], 'dms_joined': change['num_dms']})
         shape['messages_sent'].append({'time': change['time'], 'messages_sent': change['num_msg']})
-    server_stats = store['server_stats']
     user_recent = user_stats['stats'][len(user_stats['stats']) - 1]
-    print(user_recent)
-    server_recent = server_stats['stats'][len(server_stats['stats']) - 1]
-    print(server_recent)
     num_channels_joined = user_recent['num_channels']
     num_dms_joined = user_recent['num_dms']
     num_msgs_sent = user_recent['num_msg']
-    num_channels = server_recent['num_channels']
-    num_dms = server_recent['num_dms']
-    num_messages = server_recent['num_msg']
+    num_channels = len(store['channels'])
+    num_dms = len(store['dms'])
+    num_messages = len(store['messages'])
     if num_channels + num_dms + num_messages == 0:
         shape['involvement_rate'] = 0
     else:
         shape['involvement_rate'] = (num_channels_joined + num_dms_joined + num_msgs_sent)/(num_channels + num_dms + num_messages)
+    if shape['involvement_rate'] > 1:
+        shape['involvement_rate'] = 1
     return shape
 
 def users_stats_v1():

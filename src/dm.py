@@ -66,7 +66,6 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
     dm_info['messages'] = []
     dms[dm_id] = dm_info
     store['dms'] = dms
-    other.user_stats_update(0,1,0,auth_user_id)
     other.server_stats_update(0,1,0)
     
     data_store.set(store)
@@ -116,14 +115,11 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     store = data_store.get()
     dms = store['dms']
     users = store['users']
-    msg_count = 0
-    for msg in store['messages']:
-        if msg['is_channel'] == False and msg['id'] == dm_id:
-            msg_count += 1
-    
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
+    for user in dm['members']:
+        other.user_stats_update(0,-1,0,user['u_id'])
     updated_messages = {msg_id: val for msg_id, val in store['messages'].items() if val['is_channel'] == True or val['id'] != dm_id}
     store['messages'] = updated_messages
     user = other.non_password_global_permission_field(users[auth_user_id])
@@ -137,10 +133,6 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
         raise AccessError(description="User is not in DM")
 
     store['dms'] = dms
-    for user in dm['members']:
-        other.user_stats_update(0,-1,0,user['u_id'])
-    other.user_stats_update(0,-1,0, auth_user_id)
-    other.server_stats_update(0,-1,msg_count)
         
     data_store.set(store)
     return

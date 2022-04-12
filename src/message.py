@@ -52,7 +52,6 @@ def message_send_v1(user_id, channel_id, message):
                                 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'is_pinned': False}
     other.user_stats_update(0,0,1, user_id)
     other.server_stats_update(0,0,1)
-    print(store['server_stats'])
     data_store.set(store)
     return ({'message_id': new_message_id})
 

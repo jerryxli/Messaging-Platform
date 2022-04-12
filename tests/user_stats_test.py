@@ -64,3 +64,34 @@ def test_deprecating_stats(clear_store, create_user, create_user2):
     requests.post(other.CHANNEL_LEAVE_URL, json = {'token': user2['token'], 'channel_id': channel_id})
     response2 = requests.get(other.USER_STATS_URL, params = {'token': user2['token']})
     assert response2.json()['involvement_rate'] == 1/4
+
+def test_involvement_greater_1(clear_store, create_user):
+    user1 = create_user
+    dm_id = requests.post(other.DM_CREATE_URL, json = {'token': user1['token'], 'u_ids': []}).json()['dm_id']
+    requests.post(other.MESSAGE_SENDDM_URL, json = {'token': user1['token'], 'message': 'hey', 'dm_id': dm_id})
+    requests.post(other.CHANNELS_CREATE_URL, json = {'token': user1['token'], 'name': 'Happy', 'is_public': True}).json()['channel_id']
+    response1 = requests.get(other.USER_STATS_URL, params = {'token': user1['token']})
+    assert response1.json()['involvement_rate'] == 1
+    requests.delete(other.DM_REMOVE_URL, json = {'token': user1['token'], 'dm_id': dm_id})
+    response = requests.get(other.USER_STATS_URL, params = {'token': user1['token']})
+    assert response.json()['involvement_rate'] == 1
+
+def test_complex_many_operations(clear_store, create_user, create_user2):
+    user1 = create_user
+    user2 = create_user2
+    dm_id1 = requests.post(other.DM_CREATE_URL, json = {'token': user1['token'], 'u_ids': []}).json()['dm_id']
+    dm_id2 = requests.post(other.DM_CREATE_URL, json = {'token': user1['token'], 'u_ids': [user2['auth_user_id']]}).json()['dm_id']
+    requests.post(other.MESSAGE_SENDDM_URL, json = {'token': user1['token'], 'message': 'hey', 'dm_id': dm_id1})
+    requests.post(other.MESSAGE_SENDDM_URL, json = {'token': user2['token'], 'message': 'hey', 'dm_id': dm_id2})
+    requests.post(other.MESSAGE_SENDDM_URL, json = {'token': user1['token'], 'message': 'hey', 'dm_id': dm_id2})
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json = {'token': user1['token'], 'name': 'Happy', 'is_public': True}).json()['channel_id']
+    requests.post(other.MESSAGE_SEND_URL, json = {'token': user1['token'], 'message': 'hey', 'channel_id': channel_id})
+    requests.post(other.CHANNEL_JOIN_URL, json = {'token': user2['token'], 'channel_id': channel_id})
+    requests.post(other.MESSAGE_SEND_URL, json = {'token': user2['token'], 'message': 'hey', 'channel_id': channel_id})
+    requests.delete(other.DM_REMOVE_URL, json = {'token': user1['token'], 'dm_id': dm_id1})
+    response1 = requests.get(other.USER_STATS_URL, params = {'token': user1['token']})
+    response2 = requests.get(other.USER_STATS_URL, params = {'token': user2['token']})
+    assert response1.json()['involvement_rate'] == 5/6
+    assert response2.json()['involvement_rate'] == 4/6
+    
+    
