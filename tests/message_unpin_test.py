@@ -37,9 +37,23 @@ def test_basic_channel_message_unpin(clear_store, create_user):
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
+    response = requests.get(other.CHANNEL_MESSAGES_URL, params={
+                            'channel_id': channel_id, 'start': 0, 'token': user_token_1})
+    list_msg_id = [message['message_id']
+                   for message in response.json()['messages']]
+    assert message_id in list_msg_id
+    message_index = list_msg_id.index(message_id)
+    assert response.json()['messages'][message_index]['is_pinned'] == True
     response = requests.post(other.MESSAGE_UNPIN_URL, json={
                              'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
+    response = requests.get(other.CHANNEL_MESSAGES_URL, params={
+                            'channel_id': channel_id, 'start': 0, 'token': user_token_1})
+    list_msg_id = [message['message_id']
+                   for message in response.json()['messages']]
+    assert message_id in list_msg_id
+    message_index = list_msg_id.index(message_id)
+    assert response.json()['messages'][message_index]['is_pinned'] == False
 
 
 def test_message_id_is_invalid(clear_store, create_user):
@@ -113,9 +127,26 @@ def test_basic_dm_message_pin(clear_store, create_user):
     response = requests.post(other.MESSAGE_PIN_URL, json={
                              'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
+    response = requests.get(other.DM_MESSAGES_URL, params={
+                            "token": user_token_1, 'dm_id': dm_id, 'start': 0})
+    assert response.status_code == 200
+    list_msg_ids = [message['message_id']
+                    for message in response.json()['messages']]
+    assert message_id in list_msg_ids
+    message_index = list_msg_ids.index(message_id)
+    assert response.json()['messages'][message_index]['is_pinned'] == True
     response = requests.post(other.MESSAGE_UNPIN_URL, json={
                              'token': user_token_1, 'message_id': message_id})
     assert response.status_code == 200
+    response = requests.get(other.DM_MESSAGES_URL, params={
+                            "token": user_token_1, 'dm_id': dm_id, 'start': 0})
+    assert response.status_code == 200
+    list_msg_ids = [message['message_id']
+                    for message in response.json()['messages']]
+    assert message_id in list_msg_ids
+    message_index = list_msg_ids.index(message_id)
+    assert response.json()['messages'][message_index]['is_pinned'] == False
+    
 
 
 def test_user_is_not_in_dm(clear_store, create_user, create_user2):

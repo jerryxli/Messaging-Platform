@@ -128,7 +128,7 @@ def channel_messages_v2(auth_user_id: int, channel_id: int, start: int) -> dict:
     for message in stored_messages.values():
         if message['is_channel'] == True and message['id'] == channel_id:
             channel_messages.append(
-                {'message': message['message'], 'message_id': message['message_id'], 'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts']})
+                {'message': message['message'], 'message_id': message['message_id'], 'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts'], 'is_pinned': message['is_pinned']})
     if start > len(channel_messages):
         raise InputError(
             description="start is greater than the total number of messages in the channel")
