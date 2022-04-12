@@ -65,6 +65,10 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
     dm_info['messages'] = []
     dms[dm_id] = dm_info
     store['dms'] = dms
+    for id in u_ids:
+        if id != auth_user_id:
+            other.create_notification(-1, dm_id, auth_user_id, id, name, None, 'added')
+
     data_store.set(store)
 
     return {'dm_id': dm_id}

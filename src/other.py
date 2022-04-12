@@ -78,11 +78,13 @@ def clear_v1():
         None
 
     """
+    print("Clearing store....")
     store = data_store.get()
     store['users'] = {}
     store['channels'] = {}
     store['dms'] = {}
     store['messages'] = {}
+    store['notifications'] = {}
     data_store.set(store)
 
 def verify_user(auth_user_id: int)->bool:
@@ -299,6 +301,41 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
 
+def check_user_in_dm(auth_user_id:int, dm:dict)->bool: 
+    """
+    Checks whether a user is in a dm or not
+
+    Arguments:
+        user_id (int)   - the id of the user
+        dm (dict)       - the dm to check
+
+    Returns:
+        A boolean, true if the user is in the dm, false if not
+    """
+    ids = [user['u_id'] for user in dm['members']]
+    return bool(auth_user_id in ids)
+
+def check_user_is_member(auth_user_id:int, dm_id:int, channel_id:int)->bool:
+    """
+    Checks whether a user is in a dm or a channel
+
+    Arguments:
+        auth_user_id (int)      - the id of the user
+        dm_id (int)             - the dm_id of the dm to check
+        channel_id (int)        - the channel_id of the channel to check
+
+    Returns:
+        A boolean, true if the user is in the dm or channel, false if not
+    """
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    if dm_id < 0:
+        is_member = check_user_in_channel(auth_user_id, channels[channel_id])
+    else:
+        is_member = check_user_in_dm(auth_user_id, dms[dm_id])
+    return is_member
+
 def id_to_handle(auth_user_id:int)->str:
     """
     Gets the handle from a user_id
@@ -364,7 +401,6 @@ def get_handles(message:str)->list:
     for handle in handles:
         if handle in user_handles:
             valid_handles.append(handle)
-
     return valid_handles
 
 def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, room_name:str, message:str, type:str)->None:
@@ -391,21 +427,33 @@ def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, r
         handles = get_handles(message)
         for handle in handles:
             u_id = handle_to_id(handle)
-            if not notifications.get(u_id):
+            is_member = check_user_is_member(u_id, dm_id, channel_id)
+            if is_member and not notifications.get(u_id):
                 notifications[u_id] = list()
-            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} tagged you in {room_name}: {message[:20]}"})
+            elif is_member:
+                notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
                                         'notification_message': f"{user_handle} tagged you in {room_name}: {message[:20]}"})
 
     if type == 'reacted':
-        if not notifications.get(u_id):
+        is_member = check_user_is_member(u_id, dm_id, channel_id)
+        if is_member and not notifications.get(u_id):
             notifications[u_id] = list()
-        notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} reacted to your message in {room_name}"})
+        elif is_member:
+            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
                                         'notification_message': f"{user_handle} reacted to your message in {room_name}"})
 
     if type == 'added':
-        if not notifications.get(u_id):
+        is_member = check_user_is_member(u_id, dm_id, channel_id)
+        if is_member and not notifications.get(u_id):
             notifications[u_id] = list()
-        notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} has added you to {room_name}"})
+        elif is_member:
+            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
                                         'notification_message': f"{user_handle} has added you to {room_name}"})
 
     data_store.set(store)

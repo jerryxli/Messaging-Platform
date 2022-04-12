@@ -31,6 +31,7 @@ initial_object = {
     'channels': {},
     'messages': {},
     'dms': {},
+    'notifications': {},
 }
 
 

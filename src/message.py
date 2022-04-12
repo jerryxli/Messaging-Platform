@@ -97,11 +97,17 @@ def message_edit_v1(user_id, message_id, message):
         if curr_message['u_id'] != user_id and user_id not in u_ids:
             raise AccessError(
                 description="message_id is valid but user does not have permissions to edit")
+        channel_id = curr_message['id']
+        dm_id = -1
+        room_name = channels[channel_id]['name']
     else:
         u_ids = [user['u_id'] for user in dms[curr_message['id']]['members']]
         if user_id not in u_ids:
             raise InputError(
                 description="message_id is valid but user is not in dm")
+        channel_id = -1
+        dm_id = curr_message['id']
+        room_name = dms[dm_id]['name']
     if len(message) > 1000:
         raise InputError(description="message over 1000 characters")
     if message == '':
@@ -111,6 +117,8 @@ def message_edit_v1(user_id, message_id, message):
         messages['message'] = curr_message
         store['messages'] = messages
         print(store)
+        if '@' in message:
+            other.create_notification(channel_id, dm_id, user_id, None, room_name, message, 'tagged')
         data_store.set(store)
     
     return {}
