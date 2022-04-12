@@ -286,7 +286,7 @@ def message_react_v1(user_id, message_id, react_id):
     dms = store['dms']
     messages = store['messages']
 
-    if message_id not in messages:
+    if message_id not in messages or messages[message_id] == "invalid":
         raise InputError(
             description="message_id does not refer to a valid message")
     else:
