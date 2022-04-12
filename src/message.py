@@ -8,10 +8,11 @@ Created: 19.03.2022
 
 Description: Allows the user to send, edit and remove messages.
 """
-from time import time
+from time import time, sleep
 from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
+import threading
 
 
 def message_send_v1(user_id, channel_id, message):
@@ -77,7 +78,7 @@ def message_edit_v1(user_id, message_id, message):
     messages = store['messages']
     channels = store['channels']
     dms = store['dms']
-    if message_id not in messages:
+    if message_id not in messages or messages[message_id] == "invalid":
         raise InputError(
             description="message_id does not refer to a valid message")
     else:
@@ -131,7 +132,7 @@ def message_remove_v1(user_id, message_id):
     channels = store['channels']
     dms = store['dms']
     messages = store['messages']
-    if message_id not in messages:
+    if message_id not in messages or messages[message_id] == "invalid":
         raise InputError(
             description="message_id does not refer to a valid message")
     else:
@@ -178,7 +179,7 @@ def message_pin_v1(user_id, message_id):
     channels = store['channels']
     dms = store['dms']
     messages = store['messages']
-    if message_id not in messages:
+    if message_id not in messages or messages[message_id] == "invalid":
         raise InputError(
             description="message_id does not refer to a valid message")
     else:
@@ -200,7 +201,7 @@ def message_pin_v1(user_id, message_id):
         if user_id not in u_ids:
             raise InputError(
                 description="message and user are in different dms")
-
+    
     if message['is_pinned'] == True:
         raise InputError(description="message is already pinned")
     else:
@@ -208,3 +209,48 @@ def message_pin_v1(user_id, message_id):
     store['messages'] = messages
     data_store.set(store)
     return {}
+
+def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sent:int)->dict:
+    """
+    Allows the user to send a message at a specified time in the future
+
+    Exceptions:
+        AccessError     - Occurs when auth_user_id is not a member of the channel
+        InputError      - Occurs when the channel_id is invalid
+        InputError      - Occurs when the length of the message is not within the bounds
+        InputError      - Occurs when the time sent is in the past
+
+    Arguments:
+        auth_user_id (int)      - The id of the user
+        channel_id (int)        - The id of the channel
+        message (str)           - The message that will be sent
+        time_sent (int)         - The time that the message should be sent
+
+    Return Value:
+        Returns { 'message_id' } upon successful creation
+    """   
+    store = data_store.get()
+    messages = store['messages']
+    channels = store['channels']
+    if time_sent < time():
+        raise InputError(description="The specified time is in the past")
+    if channel_id in channels.keys():
+        message_channel = channels[channel_id]
+    else:
+        raise InputError(description="Channel_id does not refer to a valid channel")
+
+    if len(message) > 1000 or len(message) < 1:
+        raise InputError(
+            description="Length of message is less than 1 or over 1000 characters")
+    if not other.check_user_in_channel(auth_user_id, message_channel):
+        raise AccessError(
+            description="channel_id is valid and the user is not a member of the channel")
+
+    message_id = len(messages)
+    messages[message_id] = "invalid"
+    message_thread = threading.Thread(target = other.sendlater_thread_function, args = (auth_user_id, message_id, channel_id, -1, time_sent, message), daemon = True)
+    message_thread.start()
+
+    data_store.set(store)
+    return ({'message_id': message_id})
+
