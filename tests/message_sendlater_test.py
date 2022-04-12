@@ -44,7 +44,7 @@ def test_indepth_sendlater_success(clear_store, create_user1):
     time.sleep(3)
     message_response = requests.get(other.CHANNEL_MESSAGES_URL, params={'token': user_token, 'channel_id': channel_id, 'start': 0})    
     expected_message = [{'message_id': response.json()['message_id'], 'message': "Success!",
-                        'u_id': user_id,'time_sent': timestamp}]
+                        'u_id': user_id,'time_sent': timestamp,'reacts': [], 'is_pinned': False}]
     assert response.status_code == 200
     assert message_response.status_code == 200
     assert message_response.json()['messages'] == expected_message
