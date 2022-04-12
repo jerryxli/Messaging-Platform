@@ -281,7 +281,6 @@ def message_share_v1(u_id: int, og_message_id: int, message: str, channel_id: in
     else:
         og_message = messages[og_message_id]
         if og_message['is_channel']:
-            
             valid_users = [user['u_id'] for user in store['channels'][og_message['id']]['all_members']]
         else:
             valid_users = [user['u_id'] for user in store['dms'][og_message['id']]['members']]
@@ -289,14 +288,13 @@ def message_share_v1(u_id: int, og_message_id: int, message: str, channel_id: in
         if u_id not in valid_users:
             raise InputError("User trying to share from channel/dm that they aren't part of")
     if u_id not in all_u_ids:
-        raise InputError("User trying to share to channel/dm that they aren't part of")
+        raise AccessError("User trying to share to channel/dm that they aren't part of")
     if len(message) > 1000:
         raise InputError("Message to be attached is too long")
     overall_message = "> " + og_message['message'] + "\n" + message
     if is_channel:
-        message_id = message_send_v1(u_id, channel_id, overall_message)
+        message_id = message_send_v1(u_id, channel_id, overall_message)['message_id']
     else:
-        print(type(dm_id))
-        message_id = dm_send_v1(u_id, overall_message, dm_id)
+        message_id = dm_send_v1(u_id, overall_message, dm_id)['message_id']
     data_store.set(store)
     return {"shared_message_id": message_id}
