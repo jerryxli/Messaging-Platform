@@ -66,6 +66,18 @@ def test_dm_tagged_message_notification(clear_store, create_user1):
 #     assert response.json() == expected_output
 #     assert response.status_code == 200
 
+def test_message_edit_to_include_tag(clear_store, create_user1):
+    user_token = create_user1['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
+    message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token, 'channel_id': channel_id, 'message': 'Tagged nobody!'}).json()['message_id']
+    initial_response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    requests.put(other.MESSAGE_EDIT_URL, json={'token': user_token, 'message_id': message_id, 'message': 'Tagged @twixfix'})
+    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    expected_output = [{'channel_id': channel_id, 'dm_id': -1, 'notification_message': 'twixfix tagged you in Cool Channel: Tagged @twixfix'}]
+    assert initial_response.json()['notifications'] == []
+    assert response.json()['notifications'] == expected_output
+    assert response.status_code == 200
+
 def test_user_is_added_channel(clear_store, create_user1, create_user2):
     user_token = create_user1['token']
     user_token_2 = create_user2['token']
