@@ -213,11 +213,11 @@ def users_stats_v1():
     for change in server_stats['stats']:
         shape['channels_exist'].append({'time': change['time'], 'channels_exist': change['num_channels']})
         shape['dms_exist'].append({'time': change['time'], 'dms_exist': change['num_dms']})
-        shape['messages_exist'].append({'time': change['time'], 'messages_exist': change['num_messages']})
+        shape['messages_exist'].append({'time': change['time'], 'messages_exist': change['num_msg']})
     user_stats = store['user_stats']
     num_users_in_channel = 0
     num_users = 0
-    for user in user_stats:
+    for user in user_stats.values():
         if user['stats'][len(user['stats']) - 1]['num_channels'] >= 1:
             num_users_in_channel += 1
         num_users += 1

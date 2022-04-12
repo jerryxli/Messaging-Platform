@@ -376,7 +376,7 @@ def handle_user_stats():
         raise AccessError(description="JWT no longer valid")
     return user_stats_v1(user_id_from_JWT(request.args.get('token')))
 
-@APP.route("/user/stats/v1", methods = ["GET"])
+@APP.route("/users/stats/v1", methods = ["GET"])
 def handle_users_stats():
     if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description="JWT no longer valid")

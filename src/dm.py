@@ -118,6 +118,11 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
+    msg_count = 0
+    for msg in store['messages'].values():
+        if msg['is_channel'] == False and msg['id'] == dm_id:
+            msg_count += 1
+    other.server_stats_update(0, -1, -msg_count)
     for user in dm['members']:
         other.user_stats_update(0,-1,0,user['u_id'])
     updated_messages = {msg_id: val for msg_id, val in store['messages'].items() if val['is_channel'] == True or val['id'] != dm_id}
