@@ -32,7 +32,7 @@ def test_basic_stats(clear_store, create_user):
     response = requests.get(other.USER_STATS_URL, params = {'token': user['token']})
     assert response.status_code == 200
     assert response.json()['involvement_rate'] == 0
-    channel_id = requests.post(other.CHANNELS_CREATE_URL, json = {'token': user['token'], 'name': 'Happy', 'is_public': True})
+    requests.post(other.CHANNELS_CREATE_URL, json = {'token': user['token'], 'name': 'Happy', 'is_public': True})
     response = requests.get(other.USER_STATS_URL, params = {'token': user['token']})
     assert response.json()['involvement_rate'] == 1
     channels_join = response.json()['channels_joined']
