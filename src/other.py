@@ -326,4 +326,4 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
                         'reacts': [], 'is_pinned': False}
 
     # if '@' in message:
-        # other.create_notification(channel_id, -1, user_id, None, message_channel['name'], message, 'tagged')
+        # other.create_notification(channel_id, dm_id, user_id, None, message_channel['name'], message, 'tagged')
