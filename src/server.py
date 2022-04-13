@@ -397,7 +397,6 @@ def handle_dm_messages():
         raise AccessError(description="JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
-<<<<<<< HEAD
 @APP.route("/user/stats/v1", methods = ["GET"])
 def handle_user_stats():
     if not is_valid_JWT(request.args.get('token')):
@@ -409,7 +408,7 @@ def handle_users_stats():
     if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description="JWT no longer valid")
     return users_stats_v1()
-=======
+
 @APP.route("/message/share/v1", methods=['POST'])
 def handle_message_share():
     request_data = request.get_json()
@@ -417,7 +416,6 @@ def handle_message_share():
         raise AccessError(description="JWT no longer valid")
     return message_share_v1(user_id_from_JWT(request_data['token']), int(request_data['og_message_id']), request_data['message'], int(request_data['channel_id']), int(request_data['dm_id']))
 
->>>>>>> master
 # NO NEED TO MODIFY BELOW THIS POINT
 
 
