@@ -363,9 +363,8 @@ def handle_to_id(user_handle:str)->int:
     """
     store = data_store.get()
     users = store['users']
-    for user_id, user_info in users.items():
-        if user_handle == user_info['handle']:
-            return user_id
+    user_handles_id = {user_info['handle']:user_id for user_id, user_info in users.items()}
+    return user_handles_id[user_handle]
 
 def get_handles(message:str)->list:
     """
