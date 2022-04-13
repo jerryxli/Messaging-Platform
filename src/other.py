@@ -511,16 +511,15 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
     if channel_id < 0:
         messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
                             'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
-                            'reacts': [], 'is_pinned': False}
+                            'reacts': [{'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}], 'is_pinned': False}
         room_name = dms[dm_id]['name']
     else: 
         messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
-                        'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
-                        'reacts': [], 'is_pinned': False}
+                            'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
+                            'reacts': [{'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}], 'is_pinned': False}
         room_name = channels[channel_id]['name']
 
     if '@' in message:
         create_notification(channel_id, dm_id, auth_user_id, None, room_name, message, 'tagged')
-
 
 
