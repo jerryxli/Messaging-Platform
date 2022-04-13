@@ -82,7 +82,6 @@ def test_sendlater_tag(clear_store, create_user1):
     assert response.json()['notifications'] == expected_output
     assert response.status_code == 200
 
-
 def test_sendlaterdm_tag(clear_store, create_user1):
     user_token = create_user1['token']
     dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token, 'u_id': []}).json()['channel_id']
@@ -92,7 +91,6 @@ def test_sendlaterdm_tag(clear_store, create_user1):
     expected_output = [{'channel_id': -1, 'dm_id': dm_id, 'notification_message': 'twixfix tagged you in twixfix: Tag you later @twixfix'}]
     assert response.json()['notifications'] == expected_output
     assert response.status_code == 200
-
 
 def test_user_is_added_channel(clear_store, create_user1, create_user2):
     user_token = create_user1['token']
