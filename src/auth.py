@@ -13,6 +13,7 @@ import jwt
 from src.data_store import data_store
 from src.error import AccessError, InputError
 import src.other as other
+from time import time
 from src.config import port
 
 def auth_login_v2(email: str, password: str)->dict:
@@ -79,6 +80,7 @@ def auth_register_v2(email: str, password: str, name_first: str, name_last: str)
 
     store = data_store.get()
     users = store['users']
+    user_stats = store['user_stats']
     new_user_id = len(users)
     global_permission = other.GLOBAL_PERMISSION_USER
 
@@ -86,10 +88,13 @@ def auth_register_v2(email: str, password: str, name_first: str, name_last: str)
 
     if new_user_id == 0:
         global_permission = other.GLOBAL_PERMISSION_OWNER
+        store['server_stats'] = {'time_created': time(), 'stats': [{'num_channels':0, 'num_dms':0, 'num_msg': 0, 'time': time()}]}
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
                            'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 
                            'sessions': [], 'profile_img_url': f"http://localhost:{port}/static/default.jpg"}
     users[new_user_id] = new_user_dictionary
+    new_user_stats = {'time_created': time(), 'stats': [{'num_channels':0, 'num_dms':0, 'num_msg': 0, 'time': time()}]}
+    user_stats[new_user_id] = new_user_stats
     data_store.set(store)
     jwt = other.create_JWT(new_user_id)
     return {'token': jwt, 'auth_user_id': new_user_id}

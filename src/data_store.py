@@ -32,8 +32,9 @@ initial_object = {
     'messages': {},
     'dms': {},
     'notifications': {},
+    'user_stats': {},
+    'server_stats': {}
 }
-
 
 def pickle_and_store(object_to_persist: dict):
     with open(FILE_LOCATION, "wb") as file:

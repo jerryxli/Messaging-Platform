@@ -49,6 +49,7 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
         user['u_id'] = id
         user['handle_str'] = user.pop('handle')
         members.append(user)
+        other.user_stats_update(0,1,0,id)
 
     name = ''
     user_handles = []
@@ -65,9 +66,11 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
     dm_info['messages'] = []
     dms[dm_id] = dm_info
     store['dms'] = dms
+
     for id in u_ids:
         if id != auth_user_id:
             other.create_notification(-1, dm_id, auth_user_id, id, name, None, 'added')
+    other.server_stats_update(0,1,0)
 
     data_store.set(store)
 
@@ -119,6 +122,13 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
+    msg_count = 0
+    for msg in store['messages'].values():
+        if msg['is_channel'] == False and msg['id'] == dm_id:
+            msg_count += 1
+    other.server_stats_update(0, -1, -msg_count)
+    for user in dm['members']:
+        other.user_stats_update(0,-1,0,user['u_id'])
     updated_messages = {msg_id: val for msg_id, val in store['messages'].items() if val['is_channel'] == True or val['id'] != dm_id}
     store['messages'] = updated_messages
     user = other.non_password_global_permission_field(users[auth_user_id])
@@ -132,6 +142,7 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
         raise AccessError(description="User is not in DM")
 
     store['dms'] = dms
+        
     data_store.set(store)
     return
 
@@ -202,7 +213,7 @@ def dm_leave_v1(auth_user_id: int, dm_id: int) -> None:
         dm['members'].remove(user)
     else:
         raise AccessError(description="User is not in DM")
-
+    other.user_stats_update(0,-1,0, auth_user_id)
     store['dms'] = dms
     data_store.set(store)
     return None
@@ -243,6 +254,8 @@ def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
 
     if '@' in message:
         other.create_notification(-1, dm_id, auth_user_id, None, dm['name'], message, 'tagged')
+    other.user_stats_update(0,0,1,auth_user_id)
+    other.server_stats_update(0,0,1)
 
     data_store.set(store)
     return {'message_id': new_message_id}

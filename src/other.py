@@ -1,7 +1,9 @@
 from src.data_store import data_store
+from time import time, sleep
 import jwt
 import re
 from src.config import url
+from time import time
 
 MAX_FIRST_NAME_LENGTH = 50
 MAX_LAST_NAME_LENGTH = 50
@@ -85,6 +87,8 @@ def clear_v1():
     store['dms'] = {}
     store['messages'] = {}
     store['notifications'] = {}
+    store['user_stats'] = {}
+    store['server_stats'] = {}
     data_store.set(store)
 
 def verify_user(auth_user_id: int)->bool:
@@ -141,9 +145,6 @@ def non_password_global_permission_field(user: dict)->dict:
     """
     user = {k: v for k, v in user.items() if k not in ['password', 'global_permission', 'sessions']}
     return user
-
-
-
 
 def is_handle_taken(handle: str)->bool:
     """
@@ -457,4 +458,61 @@ def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, r
                                         'notification_message': f"{user_handle} has added you to {room_name}"})
 
     data_store.set(store)
+
+def user_stats_update(channels: int, dms: int, messages: int, u_id: int):
+    store = data_store.get()
+    user_stats = store['user_stats'][u_id]
+    changes = user_stats['stats']
+    current = changes[len(changes) - 1]
+    new_stats = current.copy()
+    new_stats['num_channels'] += channels
+    new_stats['num_dms'] += dms
+    new_stats['num_msg'] += messages
+    new_stats['time'] = time()
+    store['user_stats'][u_id]['stats'].append(new_stats)
+    data_store.set(store)
+    
+def server_stats_update(channels: int, dms: int, messages: int):
+    store = data_store.get()
+    server_stats = store['server_stats']
+    changes = server_stats['stats']
+    current = changes[len(changes) - 1]
+    new_stats = current.copy()
+    new_stats['num_channels'] += channels
+    new_stats['num_dms'] += dms
+    new_stats['num_msg'] += messages
+    new_stats['time'] = time()
+    store['server_stats']['stats'].append(new_stats)
+    data_store.set(store)
+    
+def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int, 
+                                dm_id:int, time_sent:int, message:str)->None:
+    """
+    Thread that sends the message at a specified time
+
+    Arguments:
+        auth_user_id (int)      - the id of the user
+        message_id (int)        - the id of the message
+        channel_id (int)        - the id of the channel
+        dm_id (int)             - the id of the dm
+        time_sent (int)         - the time that the message should be sent
+        message (str)           - the message
+
+    Returns:
+        None
+    """
+    store = data_store.get()
+    messages = store['messages']
+    sleep(time_sent - time())
+    # if channel_id < 0:
+    #     messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
+    #                         'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
+    #                         'reacts': [], 'is_pinned': False}
+    # else: 
+    messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
+                        'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
+                        'reacts': [], 'is_pinned': False}
+
+    # if '@' in message:
+        # other.create_notification(channel_id, dm_id, user_id, None, message_channel['name'], message, 'tagged')
 
