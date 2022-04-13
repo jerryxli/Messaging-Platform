@@ -355,7 +355,8 @@ def message_react_v1(user_id, message_id, react_id):
     for react in message['reacts']:
         if react['react_id'] == react_id:
             if user_id in react['u_ids']:
-                react.pop()
+                raise InputError(
+                    description="message already contains a react from this user")
             else:
                 react['u_ids'].append(user_id)
         else:
