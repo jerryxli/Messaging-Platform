@@ -12,11 +12,8 @@ from time import time
 from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
-<<<<<<< HEAD
 import threading
-=======
 from src.dm import dm_send_v1
->>>>>>> 18321a61096b991d3bb461900000a377054c8ee3
 
 
 def message_send_v1(user_id, channel_id, message):
