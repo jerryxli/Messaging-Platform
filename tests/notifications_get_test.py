@@ -88,7 +88,7 @@ def test_sendlaterdm_tag(clear_store, create_user1):
     requests.post(other.MESSAGE_SENDLATERDM_URL, json={'token': user_token, 'dm_id': dm_id, 'message': "Tag you later @twixfix", 'time_sent': time() + 1})
     sleep(2)
     response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
-    expected_output = [{'channel_id': -1, 'dm_id': dm_id, 'notification_message': 'twixfix tagged you in twixfix: Tag you later @twixfix'}]
+    expected_output = [{'channel_id': -1, 'dm_id': dm_id, 'notification_message': 'twixfix tagged you in twixfix: Tag you later @twixf'}]
     assert response.json()['notifications'] == expected_output
     assert response.status_code == 200
 
