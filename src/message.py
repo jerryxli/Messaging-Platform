@@ -380,8 +380,8 @@ def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sen
     """   
     store = data_store.get()
     messages = store['messages']
-
     channels = store['channels']
+
     if time_sent < time():
         raise InputError(description="The specified time is in the past")
     if channel_id in channels.keys():
@@ -399,7 +399,6 @@ def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sen
     message_id = len(messages)
     messages[message_id] = "invalid"
     message_thread = threading.Thread(target = other.sendlater_thread_function, args = (auth_user_id, message_id, channel_id, -1, time_sent, message), daemon = True)
-
     message_thread.start()
 
     data_store.set(store)
@@ -426,19 +425,19 @@ def message_sendlaterdm_v1(auth_user_id:int, dm_id:int, message:str, time_sent:i
     """
     store = data_store.get()
     messages = store['messages']
-
     dms = store['dms']
+
     if time_sent < time():
         raise InputError(description="The specified time is in the past")
     if dm_id in dms.keys():
-        message_channel = dms[dm_id]
+        message_dm = dms[dm_id]
     else:
         raise InputError(description="Channel_id does not refer to a valid channel")
 
     if len(message) > 1000 or len(message) < 1:
         raise InputError(
             description="Length of message is less than 1 or over 1000 characters")
-    if not other.check_user_in_channel(auth_user_id, message_channel):
+    if not other.check_user_in_dm(auth_user_id, message_dm):
         raise AccessError(
             description="channel_id is valid and the user is not a member of the channel")
 
