@@ -288,7 +288,7 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
             description="dm_id is valid but user is not a member of the channel")
     dm_messages = []
     for message in stored_messages.values():
-        if message['is_channel'] == False and message['id'] == dm_id:
+        if message != "invalid" and message['is_channel'] == False and message['id'] == dm_id:
             dm_messages.append({'message': message['message'], 'message_id': message['message_id'],
                                'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts'], 'is_pinned': message['is_pinned']})
     if start > len(dm_messages):
