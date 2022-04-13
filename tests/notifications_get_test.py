@@ -130,6 +130,15 @@ def test_more_than_20_notifications(clear_store, create_user1):
     assert len(response.json()['notifications']) == 20
     assert response.status_code == 200
 
+def test_more_than_20_notifications(clear_store, create_user1):
+    user_token = create_user1['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
+    for _ in range(21):
+        requests.post(other.MESSAGE_SEND_URL, json={'token': user_token, 'channel_id': channel_id, 'message': 'Tagged myself @twixfix'}).json()['message_id']
+    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    assert len(response.json()['notifications']) == 20
+    assert response.status_code == 200
+
 def test_invalid_user_token(clear_store, create_user1):
     user_token = create_user1['token']
     requests.post(other.LOGOUT_URL, json={'token': user_token})
