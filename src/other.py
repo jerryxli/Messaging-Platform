@@ -299,3 +299,17 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
 
+def check_user_in_dm(auth_user_id:int, dm:dict)->bool: 
+    """
+    Checks whether a user is in a dm or not
+
+    Arguments:
+        user_id (int)   - the id of the user
+        dm (dict)       - the dm to check
+
+    Returns:
+        A boolean, true if the user is in the dm, false if not
+    """
+    ids = [user['u_id'] for user in dm['members']]
+    return bool(auth_user_id in ids)
+
