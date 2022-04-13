@@ -448,7 +448,6 @@ def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, r
                                         'notification_message': f"{user_handle} reacted to your message in {room_name}"})
 
     if type == 'added':
-        is_member = check_user_is_member(u_id, dm_id, channel_id)
         if not notifications.get(u_id):
             notifications[u_id] = list()
         notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
