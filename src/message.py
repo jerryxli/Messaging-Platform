@@ -8,7 +8,7 @@ Created: 19.03.2022
 
 Description: Allows the user to send, edit and remove messages.
 """
-from time import time, sleep
+from time import time
 from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
@@ -54,6 +54,9 @@ def message_send_v1(user_id, channel_id, message):
                                 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
     messages[new_message_id]['reacts'].append(
         {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
+
+    if '@' in message:
+        other.create_notification(channel_id, -1, user_id, None, message_channel['name'], message, 'tagged')
     other.user_stats_update(0, 0, 1, user_id)
     other.server_stats_update(0, 0, 1)
     data_store.set(store)
@@ -99,11 +102,17 @@ def message_edit_v1(user_id, message_id, message):
         if curr_message['u_id'] != user_id and user_id not in u_ids:
             raise AccessError(
                 description="message_id is valid but user does not have permissions to edit")
+        channel_id = curr_message['id']
+        dm_id = -1
+        room_name = channels[channel_id]['name']
     else:
         u_ids = [user['u_id'] for user in dms[curr_message['id']]['members']]
         if user_id not in u_ids:
             raise InputError(
                 description="message_id is valid but user is not in dm")
+        channel_id = -1
+        dm_id = curr_message['id']
+        room_name = dms[dm_id]['name']
     if len(message) > 1000:
         raise InputError(description="message over 1000 characters")
     if message == '':
@@ -112,7 +121,10 @@ def message_edit_v1(user_id, message_id, message):
         curr_message['message'] = message
         messages['message'] = curr_message
         store['messages'] = messages
+        if '@' in message:
+            other.create_notification(channel_id, dm_id, user_id, None, room_name, message, 'tagged')
         data_store.set(store)
+    
     return {}
 
 
@@ -346,12 +358,17 @@ def message_react_v1(user_id, message_id, react_id):
         if user_id not in all_u_ids:
             raise InputError(
                 description="user is not in the channel the message was sent from")
+        channel_id = message['id']
+        dm_id = -1
+        room_name = channels[channel_id]['name']
     else:
         u_ids = [user['u_id'] for user in dms[message['id']]['members']]
         if user_id not in u_ids:
             raise InputError(
                 description="user is not in the dm the message was sent from")
-
+        channel_id = -1
+        dm_id = message['id']
+        room_name = dms[dm_id]['name']
     for react in message['reacts']:
         if react['react_id'] == react_id:
             if user_id in react['u_ids']:
@@ -362,6 +379,9 @@ def message_react_v1(user_id, message_id, react_id):
         else:
             raise InputError(description="react_id is not valid")
     store['messages'] = messages
+
+    other.create_notification(channel_id, dm_id, user_id, message['u_id'], room_name, message, 'reacted')
+
     data_store.set(store)
     return {}
 

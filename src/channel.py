@@ -60,7 +60,10 @@ def channel_invite_v2(auth_user_id, channel_id, u_id):
         user['u_id'] = user_id
         user['handle_str'] = user.pop('handle')
         channel['all_members'].append(altered_users[u_id])
+
+    other.create_notification(channel_id, -1, auth_user_id, u_id, channel['name'], None, 'added')
     other.user_stats_update(1,0,0,u_id)
+
     data_store.set(store)
 
 
