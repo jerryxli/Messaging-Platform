@@ -115,6 +115,8 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
+    updated_messages = {msg_id: val for msg_id, val in store['messages'].items() if val['is_channel'] == True or val['id'] != dm_id}
+    store['messages'] = updated_messages
     user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')

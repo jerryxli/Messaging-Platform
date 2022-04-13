@@ -312,3 +312,4 @@ def check_user_in_dm(auth_user_id:int, dm:dict)->bool:
     """
     ids = [user['u_id'] for user in dm['members']]
     return bool(auth_user_id in ids)
+
