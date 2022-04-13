@@ -54,8 +54,8 @@ def message_send_v1(user_id, channel_id, message):
                                 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
     messages[new_message_id]['reacts'].append(
         {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
-    other.user_stats_update(0,0,1, user_id)
-    other.server_stats_update(0,0,1)
+    other.user_stats_update(0, 0, 1, user_id)
+    other.server_stats_update(0, 0, 1)
     data_store.set(store)
     return ({'message_id': new_message_id})
 
@@ -159,7 +159,7 @@ def message_remove_v1(user_id, message_id):
                 description="message_id is valid but user is not in dm")
     messages.pop(message['id'])
     store['messages'] = messages
-    other.server_stats_update(0,0,-1)
+    other.server_stats_update(0, 0, -1)
     data_store.set(store)
     return {}
 
@@ -206,7 +206,7 @@ def message_pin_v1(user_id, message_id):
         if user_id not in u_ids:
             raise InputError(
                 description="message and user are in different dms")
-    
+
     if message['is_pinned'] == True:
         raise InputError(description="message is already pinned")
     else:
@@ -267,6 +267,7 @@ def message_unpin_v1(user_id, message_id):
     data_store.set(store)
     return {}
 
+
 def message_share_v1(u_id: int, og_message_id: int, message: str, channel_id: int, dm_id: int):
     store = data_store.get()
     if channel_id not in store['channels'] and dm_id not in store['dms']:
@@ -286,19 +287,24 @@ def message_share_v1(u_id: int, og_message_id: int, message: str, channel_id: in
     else:
         og_message = messages[og_message_id]
         if og_message['is_channel']:
-            valid_users = [user['u_id'] for user in store['channels'][og_message['id']]['all_members']]
+            valid_users = [user['u_id']
+                           for user in store['channels'][og_message['id']]['all_members']]
         else:
-            valid_users = [user['u_id'] for user in store['dms'][og_message['id']]['members']]
+            valid_users = [user['u_id']
+                           for user in store['dms'][og_message['id']]['members']]
             valid_users.append(store['dms'][og_message['id']]['owner_members'])
         if u_id not in valid_users:
-            raise InputError("User trying to share from channel/dm that they aren't part of")
+            raise InputError(
+                "User trying to share from channel/dm that they aren't part of")
     if u_id not in all_u_ids:
-        raise AccessError("User trying to share to channel/dm that they aren't part of")
+        raise AccessError(
+            "User trying to share to channel/dm that they aren't part of")
     if len(message) > 1000:
         raise InputError("Message to be attached is too long")
     overall_message = "> " + og_message['message'] + "\n" + message
     if is_channel:
-        message_id = message_send_v1(u_id, channel_id, overall_message)['message_id']
+        message_id = message_send_v1(u_id, channel_id, overall_message)[
+            'message_id']
     else:
         message_id = dm_send_v1(u_id, overall_message, dm_id)['message_id']
     data_store.set(store)
@@ -306,6 +312,60 @@ def message_share_v1(u_id: int, og_message_id: int, message: str, channel_id: in
 
 
 def message_react_v1(user_id, message_id, react_id):
+    """
+    Given a message within a channel or DM the authorised user is part of, remove a "react" to that particular message.
+
+    Exceptions:
+        InputError      - Occurs when the message_id is not a valid message within the channel
+        InputError      - Occurs when the react_id is not a valid react ID, ie != 1
+        InputError      - Occurs when the message already contains a react with ID react_id
+
+    Arguments:
+        token (int)         - The token of the user
+        message_id (int)    - The id of the message
+        react_id (int)      - The id of the react (1 == valid, 0 == invalid)
+
+    Return Value:
+        Returns {} when successful 
+    """
+
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    messages = store['messages']
+
+    if message_id not in messages or messages[message_id] == "invalid":
+        raise InputError(
+            description="message_id does not refer to a valid message")
+    else:
+        message = messages[message_id]
+
+    if message['is_channel'] == True:
+        all_u_ids = [user['u_id']
+                     for user in channels[message['id']]['all_members']]
+        if user_id not in all_u_ids:
+            raise InputError(
+                description="user is not in the channel the message was sent from")
+    else:
+        u_ids = [user['u_id'] for user in dms[message['id']]['members']]
+        if user_id not in u_ids:
+            raise InputError(
+                description="user is not in the dm the message was sent from")
+
+    for react in message['reacts']:
+        if react['react_id'] == react_id:
+            if user_id in react['u_ids']:
+                react.pop()
+            else:
+                react['u_ids'].append(user_id)
+        else:
+            raise InputError(description="react_id is not valid")
+    store['messages'] = messages
+    data_store.set(store)
+    return {}
+
+
+def message_unreact_v1(user_id, message_id, react_id):
     """
     Given a message_id for a message, the authroised user adds a 'react' to the message from the channel/DM
 
@@ -349,10 +409,10 @@ def message_react_v1(user_id, message_id, react_id):
     for react in message['reacts']:
         if react['react_id'] == react_id:
             if user_id in react['u_ids']:
-                raise InputError(
-                    description="message already contains a react from this user")
+                react['u_ids'].remove(user_id)
             else:
-                react['u_ids'].append(user_id)
+                raise InputError(
+                    description="the message does not contain a react with ID react_id from the authorised user")
         else:
             raise InputError(description="react_id is not valid")
     store['messages'] = messages
@@ -360,7 +420,7 @@ def message_react_v1(user_id, message_id, react_id):
     return {}
 
 
-def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sent:int)->dict:
+def message_sendlater_v1(auth_user_id: int, channel_id: int, message: str, time_sent: int) -> dict:
     """
     Allows the user to send a message at a specified time in the future
 
@@ -378,7 +438,7 @@ def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sen
 
     Return Value:
         Returns { 'message_id' } upon successful creation
-    """   
+    """
     store = data_store.get()
     messages = store['messages']
     channels = store['channels']
@@ -387,7 +447,8 @@ def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sen
     if channel_id in channels.keys():
         message_channel = channels[channel_id]
     else:
-        raise InputError(description="Channel_id does not refer to a valid channel")
+        raise InputError(
+            description="Channel_id does not refer to a valid channel")
 
     if len(message) > 1000 or len(message) < 1:
         raise InputError(
@@ -398,7 +459,8 @@ def message_sendlater_v1(auth_user_id:int, channel_id:int, message:str, time_sen
 
     message_id = len(messages)
     messages[message_id] = "invalid"
-    message_thread = threading.Thread(target = other.sendlater_thread_function, args = (auth_user_id, message_id, channel_id, -1, time_sent, message), daemon = True)
+    message_thread = threading.Thread(target=other.sendlater_thread_function, args=(
+        auth_user_id, message_id, channel_id, -1, time_sent, message), daemon=True)
     message_thread.start()
 
     data_store.set(store)

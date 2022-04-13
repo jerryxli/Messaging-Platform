@@ -47,7 +47,7 @@ def test_basic_channel_message_unreact(clear_store, create_user):
     assert message_id in list_msg_id
     message_index = list_msg_id.index(message_id)
     assert response.json()['messages'][message_index]['reacts'][0] == {
-        'react_id': 1, 'u_ids': [0], 'is_this_user_reacted': False}
+        'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}
 
 
 def test_message_id_invalid(clear_store, create_user):
@@ -131,7 +131,7 @@ def test_basic_dm_message_react(clear_store, create_user):
     assert message_id in list_msg_ids
     message_index = list_msg_ids.index(message_id)
     assert response.json()['messages'][message_index]['reacts'][0] == {
-        'react_id': 1, 'u_ids': [create_user['auth_user_id']], 'is_this_user_reacted': False}
+        'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}
 
 
 def test_user_and_message_not_in_same_dm(clear_store, create_user, create_user2):
