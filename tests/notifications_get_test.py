@@ -2,6 +2,7 @@ from src.config import url
 import pytest
 import requests
 import src.other as other
+from time import time, sleep
 
 @pytest.fixture
 def clear_store():
@@ -70,6 +71,28 @@ def test_message_edit_to_include_tag(clear_store, create_user1):
     assert initial_response.json()['notifications'] == []
     assert response.json()['notifications'] == expected_output
     assert response.status_code == 200
+
+def test_sendlater_tag(clear_store, create_user1):
+    user_token = create_user1['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
+    requests.post(other.MESSAGE_SENDLATER_URL, json={'token': user_token, 'channel_id': channel_id, 'message': "Tag you later @twixfix", 'time_sent': time() + 1})
+    sleep(2)
+    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    expected_output = [{'channel_id': channel_id, 'dm_id': -1, 'notification_message': 'twixfix tagged you in Cool Channel: Tag you later @twixfix'}]
+    assert response.json()['notifications'] == expected_output
+    assert response.status_code == 200
+
+
+def test_sendlaterdm_tag(clear_store, create_user1):
+    user_token = create_user1['token']
+    dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token, 'u_id': []}).json()['channel_id']
+    requests.post(other.MESSAGE_SENDLATERDM_URL, json={'token': user_token, 'dm_id': dm_id, 'message': "Tag you later @twixfix", 'time_sent': time() + 1})
+    sleep(2)
+    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    expected_output = [{'channel_id': -1, 'dm_id': dm_id, 'notification_message': 'twixfix tagged you in twixfix: Tag you later @twixfix'}]
+    assert response.json()['notifications'] == expected_output
+    assert response.status_code == 200
+
 
 def test_user_is_added_channel(clear_store, create_user1, create_user2):
     user_token = create_user1['token']
