@@ -11,7 +11,9 @@ get information of the messages within a channel and join a channel.
 """
 from src.data_store import data_store
 from src.error import InputError, AccessError
+from time import time
 import src.other as other
+import threading
 
 
 def channel_invite_v2(auth_user_id, channel_id, u_id):
@@ -314,3 +316,58 @@ def channel_removeowner_v1(auth_user_id:int, channel_id:int, u_id:int)->None:
     channels[channel_id] = channel
     store['channels'] = channels
     data_store.set(store)
+
+def print_standup(auth_user_id:int, channel:dict,  channel_id:int):
+    #print standup messages
+    store = data_store.get()
+    messages = store['messages']
+    new_message_id = len(messages)
+    messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': channel['standup_messages'], 'time_sent': time(), 'is_channel': True, 'id': channel_id}
+    #then clear standup_messages and set standup_active to false
+    channel['standup_messages'] = ''
+    channel['standup_active'] = False
+
+
+def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
+    """
+    Starts the standup period for 'length' seconds.  
+
+    Exceptions:
+        InputError      - Occurs when channel_id is invalid
+        InputError      - Occurs when length is a negative integer
+        InputError      - Occurs when an active standup is already running
+        AcessError      - Occurs when the auth user is not a member of the channel
+
+    Arguments:
+        auth_user_id (int)  - the id of the user
+        channel_id (int)    - the id of the channel
+        length (int)        - the length of the standup
+
+    Returns:
+        Returns {time_finish} on successful creation
+    """
+    store = data_store.get()
+    channels = store['channels']
+    users = store['users']
+
+    if length < 0:
+        raise InputError(description="Length is negative")
+
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError(description="Channel id not valid")
+        
+    user = other.non_password_global_permission_field(users[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
+    if user in channel['all_members']:
+        channel['standup_active'] = True
+        # create thread here
+        standup_thread = threading.Timer(length, print_standup, args = (auth_user_id, channel, channel_id))
+        standup_thread.start()
+    else:
+        raise AccessError(description="User is not a member of channel")
+    
+    data_store.set(store)
+    return time.time() + length
