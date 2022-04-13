@@ -8,10 +8,12 @@ from src.other import clear_v1, user_id_from_JWT, is_valid_JWT
 from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
 from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
-from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, user_uploadphoto_v1, users_all_v1
-from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1, message_share_v1, message_react_v1
+from src.search import search_v1
+from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_uploadphoto_v1
+from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1, users_stats_v1, user_stats_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1, message_react_v1, message_sendlater_v1, message_share_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
+from src.search import search_v1
 
 
 def quit_gracefully(*args):
@@ -398,6 +400,34 @@ def handle_dm_messages():
         raise AccessError(description="JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
+@APP.route("/user/stats/v1", methods = ["GET"])
+def handle_user_stats():
+    if not is_valid_JWT(request.args.get('token')):
+        raise AccessError(description="JWT no longer valid")
+    return user_stats_v1(user_id_from_JWT(request.args.get('token')))
+
+@APP.route("/users/stats/v1", methods = ["GET"])
+def handle_users_stats():
+    if not is_valid_JWT(request.args.get('token')):
+        raise AccessError(description="JWT no longer valid")
+    return users_stats_v1()
+
+@APP.route("/message/sendlater/v1", methods=["POST"])
+def handle_message_sendlater():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(request_data['token'])
+    return message_sendlater_v1(user_id, request_data['channel_id'], request_data['message'], request_data['time_sent'])
+
+@APP.route("/search/v1", methods=["GET"])
+def handle_search():
+    user_token = request.args.get('token')
+    query_string = request.args.get('query_str')
+    if not is_valid_JWT(user_token):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return search_v1(user_id, query_string)
 
 @APP.route("/message/share/v1", methods=['POST'])
 def handle_message_share():
@@ -414,6 +444,8 @@ def handle_message_sendlaterdm():
         raise AccessError(description="JWT no longer valid")
     user_id = user_id_from_JWT(request_data['token'])
     return dm_send_v1(user_id, request_data['dm_id'], request_data['message'], request_data['time_sent'])
+
+
 # NO NEED TO MODIFY BELOW THIS POINT
 
 
