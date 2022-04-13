@@ -345,17 +345,17 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
     store = data_store.get()
     messages = store['messages']
     sleep(time_sent - time())
-    # if channel_id < 0:
-    #     messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
-    #                         'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
-    #                         'reacts': [], 'is_pinned': False}
-    # else: 
-    messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
-                        'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
-                        'reacts': [], 'is_pinned': False}
+    if channel_id < 0:
+        messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
+                            'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
+                            'reacts': [{'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}], 'is_pinned': False}
+    else: 
+        messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
+                            'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
+                            'reacts': [{'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}], 'is_pinned': False}
 
     # if '@' in message:
-        # other.create_notification(channel_id, dm_id, user_id, None, message_channel['name'], message, 'tagged')
+        # other.create_notification(channel_id, dm_id, user_id, None, room_name, message, 'tagged')
 
 def check_user_in_dm(auth_user_id:int, dm:dict)->bool: 
     """
