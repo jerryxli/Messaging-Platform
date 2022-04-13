@@ -14,7 +14,7 @@ from src.data_store import data_store
 from src.error import AccessError, InputError
 import src.other as other
 from time import time
-
+from src.config import port
 
 def auth_login_v2(email: str, password: str)->dict:
     """
@@ -90,7 +90,8 @@ def auth_register_v2(email: str, password: str, name_first: str, name_last: str)
         global_permission = other.GLOBAL_PERMISSION_OWNER
         store['server_stats'] = {'time_created': time(), 'stats': [{'num_channels':0, 'num_dms':0, 'num_msg': 0, 'time': time()}]}
     new_user_dictionary = {'name_first': name_first, 'name_last': name_last, 'email': email,
-                           'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 'sessions': []}
+                           'password': hashed_password, 'handle': handle, 'global_permission': global_permission, 
+                           'sessions': [], 'profile_img_url': f"http://localhost:{port}/static/default.jpg"}
     users[new_user_id] = new_user_dictionary
     new_user_stats = {'time_created': time(), 'stats': [{'num_channels':0, 'num_dms':0, 'num_msg': 0, 'time': time()}]}
     user_stats[new_user_id] = new_user_stats

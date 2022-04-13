@@ -1,6 +1,11 @@
 from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
+import imgspy
+import requests
+import urllib.request
+from PIL import Image
+from src.config import port
 
 def user_profile_v1(token: str, u_id: int)->dict:
     """
@@ -25,7 +30,7 @@ def user_profile_v1(token: str, u_id: int)->dict:
     store = data_store.get()
     user = store['users'][u_id]
 
-    return_dictionary = {'u_id': u_id, 'email': user['email'], 'name_first': user['name_first'], 'name_last': user['name_last'], 'handle_str': user['handle']}
+    return_dictionary = {'u_id': u_id, 'email': user['email'], 'name_first': user['name_first'], 'name_last': user['name_last'], 'handle_str': user['handle'], 'profile_img_url': user['profile_img_url']}
 
     return {"user": return_dictionary}
 
@@ -95,6 +100,45 @@ def user_setemail_v1(token: str, email: str)->dict:
 
     return {}
 
+def user_uploadphoto_v1(token: str, img_url: str, x_start: int, y_start: int, x_end: int, y_end: int)->dict:
+    if not other.is_valid_JWT(token):
+        raise AccessError(description="The token provided is not valid.")
+    
+    if x_end <= x_start or y_end <= y_start:
+        raise InputError("x_end or y_end is less than x_start or y_start respectively.")
+
+
+    with requests.get(img_url, stream=True) as res:
+        image_data = imgspy.info(res.raw)
+
+    if image_data == None:
+        raise InputError("Not possible to fetch the given URL.")
+
+    if image_data['type'] not in ['jpg', 'jpeg']:
+        raise InputError("Image is not a JPEG/JPG.")
+    # Complete second check
+    if x_start < 0 or x_start > image_data['width']:
+        raise InputError("x_start not within image size")
+    if x_end < 0 or x_end > image_data['width']:
+        raise InputError("x_end not within image size")
+    if y_start < 0 or y_start > image_data['height']:
+        raise InputError("y_start not within image size")
+    if y_end < 0 or y_end > image_data['height']:
+        raise InputError("y_end not within image size")
+
+    file_path = f"static/user_{other.user_id_from_JWT(token)}.jpg"
+    urllib.request.urlretrieve(img_url, file_path)
+    image_local = Image.open(file_path)
+    cropped_image = image_local.crop((x_start, y_start, x_end, y_end))
+    cropped_image.save(file_path)
+
+    store = data_store.get()
+    users = store['users']
+    users[other.user_id_from_JWT(token)]['profile_img_url'] = f"http://localhost:{port}/{file_path}"
+    data_store.set(store)
+
+    return {}
+
 
 def users_all_v1(auth_user_id: int)->dict:
     """
@@ -144,7 +188,7 @@ def user_remove_v1(token: str, u_id: int)->dict:
     for message in store['messages'].values():
         if message['u_id'] == u_id:
             message['message'] = 'Removed user'
-    users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': other.GLOBAL_PERMISSION_REMOVED, 'sessions': []}
+    users[u_id] = {'name_first': 'Removed', 'name_last': 'user', 'email': '', 'password': '', 'handle': '', 'global_permission': other.GLOBAL_PERMISSION_REMOVED, 'sessions': [], 'profile_img_url': ""}
     store['users'] = users
     data_store.set(store)
     #are the stats for server meant to decrease when this occurs

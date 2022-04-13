@@ -30,3 +30,12 @@ def is_valid_dictionary_output(dictionary_output: dict, template_dictionary: dic
         if not isinstance(dictionary_output[key], template_dictionary[key]):
             return False
     return True
+
+def strip_url_image_profile(profile: dict):
+    return {k: v for k, v in profile.items() if k not in ['profile_img_url']}
+
+def strip_array_url_image(profiles: dict):
+    output = []
+    for profile in profiles:
+        output.append(strip_url_image_profile(profile))
+    return output
