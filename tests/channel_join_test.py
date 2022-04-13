@@ -2,6 +2,7 @@ from src.config import url
 import pytest
 import requests
 import src.other as other
+import tests.helper_functions as helper_functions
 
 
 @pytest.fixture
@@ -55,10 +56,9 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
                              'token': user_token_2, 'channel_id': channel_id})
     assert response.status_code == 200
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_2}).json()
-    expected_outcome = {
-        'name': 'test',
-        'is_public': True,
-        'owner_members': [
+    assert channel_details['name'] == 'test'
+    assert channel_details['is_public'] == True
+    assert helper_functions.strip_array_url_image(channel_details['owner_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -66,8 +66,8 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
                 'name_last': 'Lastname',
                 'handle_str': 'namelastname',
             }
-        ],
-        'all_members': [
+        ]
+    assert helper_functions.strip_array_url_image(channel_details['all_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -83,8 +83,6 @@ def test_successfully_joined_channel(clear_store, create_user, create_user2):
                 'handle_str': 'name1lastname1',
             },
         ]
-    }
-    assert channel_details == expected_outcome
 
 
 def test_successfully_joined_channel2(clear_store, create_user, create_user2, create_user3):
@@ -100,10 +98,9 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
                                'token': user_token_3, 'channel_id': channel_id})
     assert response_2.status_code == 200
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_3}).json()
-    expected_outcome = {
-        'name': 'test2',
-        'is_public': True,
-        'owner_members': [
+    assert channel_details['name'] == 'test2'
+    assert channel_details['is_public'] == True
+    assert helper_functions.strip_array_url_image(channel_details['owner_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -111,8 +108,8 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
                 'name_last': 'Lastname',
                 'handle_str': 'namelastname',
             }
-        ],
-        'all_members': [
+        ]
+    assert helper_functions.strip_array_url_image(channel_details['all_members']) == [
             {
                 'u_id': create_user['auth_user_id'],
                 'email': 'z432324@unsw.edu.au',
@@ -134,10 +131,7 @@ def test_successfully_joined_channel2(clear_store, create_user, create_user2, cr
                 'name_last': 'Lastname2',
                 'handle_str': 'name2lastname2',
             },
-        ],
-    }
-    assert channel_details == expected_outcome
-
+        ]
 
 def test_channel_doesnt_exist(clear_store, create_user):
     user_token_1 = create_user['token']

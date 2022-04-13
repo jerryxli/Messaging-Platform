@@ -119,6 +119,8 @@ def dm_remove_v1(auth_user_id: int, dm_id: int) -> None:
     if dm_id not in dms:
         raise InputError(description="dm_id is not valid")
     dm = dms[dm_id]
+    updated_messages = {msg_id: val for msg_id, val in store['messages'].items() if val['is_channel'] == True or val['id'] != dm_id}
+    store['messages'] = updated_messages
     user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
@@ -234,12 +236,14 @@ def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
         raise AccessError(description="User is not part of DM")
     messages = store['messages']
     new_message_id = len(messages)
-    messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id,
-                                'message': message, 'time_sent': time(), 'is_channel': False, 'id': dm_id, 'is_pinned': False}
-    
+    messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': message,
+                                'time_sent': time(), 'is_channel': False, 'id': dm_id, 'reacts': [], 'is_pinned': False}
+    messages[new_message_id]['reacts'].append(
+        {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
+
     if '@' in message:
         other.create_notification(-1, dm_id, auth_user_id, None, dm['name'], message, 'tagged')
-    
+
     data_store.set(store)
     return {'message_id': new_message_id}
 
@@ -273,11 +277,13 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
     for message in stored_messages.values():
         if message['is_channel'] == False and message['id'] == dm_id:
             dm_messages.append({'message': message['message'], 'message_id': message['message_id'],
-                               'u_id': message['u_id'], 'time_sent': message['time_sent']})
+                               'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts'], 'is_pinned': message['is_pinned']})
     if start > len(dm_messages):
         raise InputError(
             description="Start is greater than the total number of messages in channel")
     messages = []
+    for message in dm_messages:
+        message['reacts'][0]['is_this_user_reacted'] = auth_user_id in message['reacts'][0]['u_ids']
     not_displayed = list(reversed(dm_messages))[start:]
     messages.extend(
         not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])

@@ -1,6 +1,6 @@
 import signal
 from json import dumps
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from src.error import AccessError
 from src import config
@@ -8,9 +8,9 @@ from src.other import clear_v1, user_id_from_JWT, is_valid_JWT
 from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1
 from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
 from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
-from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, users_all_v1
+from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, user_uploadphoto_v1, users_all_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1, message_share_v1, message_react_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
 from src.notifications import notifications_get_v1
 
@@ -32,11 +32,15 @@ def defaultHandler(err):
     return response
 
 
-APP = Flask(__name__)
+APP = Flask(__name__, static_folder="../static", static_url_path='/static/')
 CORS(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
+
+@APP.route('/static/<path:path>')
+def serve_static_path(path):
+    return send_from_directory('', path)
 
 
 @APP.route("/clear/v1", methods=['DELETE'])
@@ -92,6 +96,17 @@ def handle_setemail_v1():
     token = request_data['token']
     email = request_data['email']
     return user_setemail_v1(token, email)
+
+@APP.route("/user/profile/uploadphoto/v1", methods=['POST'])
+def handle_uploadphoto_v1():
+    request_data = request.get_json()
+    token = request_data['token']
+    img_url = request_data['img_url']
+    x_start = int(request_data['x_start'])
+    x_end = int(request_data['x_end'])
+    y_start = int(request_data['y_start'])
+    y_end = int(request_data['y_end'])
+    return user_uploadphoto_v1(token, img_url, x_start, y_start, x_end, y_end)
 
 
 @APP.route("/user/profile/sethandle/v1", methods=['PUT'])
@@ -262,6 +277,18 @@ def handle_message_edit():
     return {}
 
 
+@APP.route("/message/react/v1", methods=['POST'])
+def handle_message_react():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    message_id = request_data['message_id']
+    react_id = request_data['react_id']
+    if not is_valid_JWT(user_token):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    message_react_v1(user_id, int(message_id), react_id)
+    return {}
+
 @APP.route("/message/pin/v1", methods=['POST'])
 def handle_message_pin():
     request_data = request.get_json()
@@ -371,6 +398,14 @@ def handle_dm_messages():
     if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description="JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
+
+
+@APP.route("/message/share/v1", methods=['POST'])
+def handle_message_share():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError(description="JWT no longer valid")
+    return message_share_v1(user_id_from_JWT(request_data['token']), int(request_data['og_message_id']), request_data['message'], int(request_data['channel_id']), int(request_data['dm_id']))
 
 
 @APP.route("/notifications/get/v1", methods=["GET"])

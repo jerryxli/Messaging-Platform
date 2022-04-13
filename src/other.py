@@ -457,3 +457,4 @@ def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, r
                                         'notification_message': f"{user_handle} has added you to {room_name}"})
 
     data_store.set(store)
+
