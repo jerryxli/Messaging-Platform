@@ -1,6 +1,5 @@
 import requests
 import pytest
-from src.config import url
 import src.other as other
 from tests.helper_functions import is_valid_dictionary_output, strip_url_image_profile
 
