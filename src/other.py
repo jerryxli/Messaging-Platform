@@ -298,3 +298,4 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     """
     ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
+

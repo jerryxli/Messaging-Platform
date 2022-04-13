@@ -12,7 +12,11 @@ from time import time
 from src.data_store import data_store
 from src.error import InputError, AccessError
 import src.other as other
+<<<<<<< HEAD
 import threading
+=======
+from src.dm import dm_send_v1
+>>>>>>> 18321a61096b991d3bb461900000a377054c8ee3
 
 
 def message_send_v1(user_id, channel_id, message):
@@ -109,7 +113,6 @@ def message_edit_v1(user_id, message_id, message):
         curr_message['message'] = message
         messages['message'] = curr_message
         store['messages'] = messages
-        print(store)
         data_store.set(store)
     return {}
 
@@ -264,6 +267,44 @@ def message_unpin_v1(user_id, message_id):
     data_store.set(store)
     return {}
 
+def message_share_v1(u_id: int, og_message_id: int, message: str, channel_id: int, dm_id: int):
+    store = data_store.get()
+    if channel_id not in store['channels'] and dm_id not in store['dms']:
+        raise InputError("No valid channel/dm id supplied")
+    if channel_id == -1:
+        is_channel = False
+        destination = store['dms'][dm_id]
+        all_u_ids = [user['u_id'] for user in destination['members']]
+        all_u_ids.append(destination['owner_members'])
+    else:
+        is_channel = True
+        destination = store['channels'][channel_id]
+        all_u_ids = [user['u_id'] for user in destination['all_members']]
+    messages = store['messages']
+    if og_message_id not in messages:
+        raise InputError("Invalid message id supplied")
+    else:
+        og_message = messages[og_message_id]
+        if og_message['is_channel']:
+            valid_users = [user['u_id'] for user in store['channels'][og_message['id']]['all_members']]
+        else:
+            valid_users = [user['u_id'] for user in store['dms'][og_message['id']]['members']]
+            valid_users.append(store['dms'][og_message['id']]['owner_members'])
+        if u_id not in valid_users:
+            raise InputError("User trying to share from channel/dm that they aren't part of")
+    if u_id not in all_u_ids:
+        raise AccessError("User trying to share to channel/dm that they aren't part of")
+    if len(message) > 1000:
+        raise InputError("Message to be attached is too long")
+    overall_message = "> " + og_message['message'] + "\n" + message
+    if is_channel:
+        message_id = message_send_v1(u_id, channel_id, overall_message)['message_id']
+    else:
+        message_id = dm_send_v1(u_id, overall_message, dm_id)['message_id']
+    data_store.set(store)
+    return {"shared_message_id": message_id}
+
+
 def message_react_v1(user_id, message_id, react_id):
     """
     Given a message_id for a message, the authroised user adds a 'react' to the message from the channel/DM
@@ -318,7 +359,6 @@ def message_react_v1(user_id, message_id, react_id):
     data_store.set(store)
     return {}
 
-
 def message_sendlaterdm_v1(auth_user_id:int, dm_id:int, message:str, time_sent:int)->dict:
     """
     Allows the user to send a message at a specified time in the future
@@ -362,3 +402,4 @@ def message_sendlaterdm_v1(auth_user_id:int, dm_id:int, message:str, time_sent:i
 
     data_store.set(store)
     return ({'message_id': message_id})
+
