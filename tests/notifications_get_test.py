@@ -121,16 +121,7 @@ def test_no_notifications(clear_store, create_user1):
     assert response.json() == {'notifications': []}
     assert response.status_code == 200
 
-def test_more_than_20_notifications(clear_store, create_user1):
-    user_token = create_user1['token']
-    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
-    for _ in range(21):
-        requests.post(other.MESSAGE_SEND_URL, json={'token': user_token, 'channel_id': channel_id, 'message': 'Tagged myself @twixfix'}).json()['message_id']
-    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
-    assert len(response.json()['notifications']) == 20
-    assert response.status_code == 200
-
-def test_more_than_20_notifications(clear_store, create_user1):
+def test_more_than_20_notifications_channel(clear_store, create_user1):
     user_token = create_user1['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
     for _ in range(21):
