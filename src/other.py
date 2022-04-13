@@ -449,12 +449,9 @@ def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, r
 
     if type == 'added':
         is_member = check_user_is_member(u_id, dm_id, channel_id)
-        if is_member and not notifications.get(u_id):
+        if not notifications.get(u_id):
             notifications[u_id] = list()
-            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
-                                        'notification_message': f"{user_handle} has added you to {room_name}"})
-        elif is_member:
-            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+        notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
                                         'notification_message': f"{user_handle} has added you to {room_name}"})
 
     data_store.set(store)
