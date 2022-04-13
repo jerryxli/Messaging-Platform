@@ -54,6 +54,8 @@ def message_send_v1(user_id, channel_id, message):
                                 'message': message, 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
     messages[new_message_id]['reacts'].append(
         {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
+    other.user_stats_update(0,0,1, user_id)
+    other.server_stats_update(0,0,1)
     data_store.set(store)
     return ({'message_id': new_message_id})
 
@@ -157,6 +159,7 @@ def message_remove_v1(user_id, message_id):
                 description="message_id is valid but user is not in dm")
     messages.pop(message['id'])
     store['messages'] = messages
+    other.server_stats_update(0,0,-1)
     data_store.set(store)
     return {}
 
