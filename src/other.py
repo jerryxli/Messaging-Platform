@@ -325,4 +325,5 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
                         'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
                         'reacts': [], 'is_pinned': False}
     
-    # Replace with tagging notification later
+    # if '@' in message:
+        # other.create_notification(channel_id, -1, user_id, None, message_channel['name'], message, 'tagged')
