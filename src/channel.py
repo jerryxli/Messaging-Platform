@@ -126,7 +126,7 @@ def channel_messages_v2(auth_user_id: int, channel_id: int, start: int) -> dict:
         raise AccessError(description="User is not a member of the channel")
     channel_messages = []
     for message in stored_messages.values():
-        if message['is_channel'] == True and message['id'] == channel_id:
+        if message != "invalid" and message['is_channel'] == True and message['id'] == channel_id:
             channel_messages.append(
                 {'message': message['message'], 'message_id': message['message_id'], 'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts'], 'is_pinned': message['is_pinned']})
     if start > len(channel_messages):
@@ -145,7 +145,7 @@ def channel_messages_v2(auth_user_id: int, channel_id: int, start: int) -> dict:
     return {'messages': messages, 'start': start, 'end': end}
 
 
-def channel_join_v2(auth_user_id: int, channel_id: int) -> None:
+def channel_join_v2(auth_user_id:int, channel_id:int)->None:
     """
     Adds a new user to a channel provided it is public and they aren't already in it
 
