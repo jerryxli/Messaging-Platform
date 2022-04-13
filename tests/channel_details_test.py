@@ -3,6 +3,8 @@ from .helper_functions import is_valid_dictionary_output
 import requests
 import pytest
 import src.other as other
+import tests.helper_functions as helper_functions
+
 
 @pytest.fixture
 def clear_store():
@@ -42,17 +44,17 @@ def test_creator_of_channel(clear_store, create_user, create_user2):
 
     assert is_valid_dictionary_output(channel_details_1, {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list})
     for user in channel_details_1['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int, 'profile_img_url': str})
 
     for user in channel_details_1['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int, 'profile_img_url': str})
     
     assert is_valid_dictionary_output(channel_details_2, {'name': str, 'is_public': bool, 'owner_members': list, 'all_members': list})
     for user in channel_details_2['owner_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int, 'profile_img_url': str})
 
     for user in channel_details_2['all_members']:
-        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int})
+        assert is_valid_dictionary_output(user, {'name_first': str, 'name_last': str, 'email': str, 'handle_str': str, 'u_id': int, 'profile_img_url': str})
 
 def test_member_of_public_channel(clear_store, create_user, create_user2):
     user_token_1 = create_user['token']
@@ -61,9 +63,9 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
     channel_join = requests.post(other.CHANNEL_JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id}).json()
     channel_details_1 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_1}).json()
     channel_details_2 = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': user_token_2}).json()
-    expected_output =  {   'name': 'My Channel!', 
-                            'is_public': True,
-                            'owner_members': [
+    assert channel_details_1['name'] == "My Channel!"
+    assert channel_details_1['is_public'] == True
+    assert helper_functions.strip_array_url_image(channel_details_1['owner_members']) == [
                                 {
                                     'u_id': create_user['auth_user_id'],
                                     'email': "z432324@unsw.edu.au",
@@ -71,9 +73,8 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
                                     'name_last': "Chocolate",
                                     'handle_str': "twixchocolate",
                                 }
-                            ],
-                            'all_members': [
-                                {
+                            ]
+    assert helper_functions.strip_array_url_image(channel_details_1['all_members']) == [{
                                     'u_id': create_user['auth_user_id'],
                                     'email': "z432324@unsw.edu.au",
                                     'name_first': "Twix",
@@ -87,14 +88,12 @@ def test_member_of_public_channel(clear_store, create_user, create_user2):
                                     'name_last': "Lickers",
                                     'handle_str': "snickerslickers",
                                 },
-                            ],
-                        }
+                            ]
     
     assert channel_join == {}
     
 
-    assert channel_details_1 == expected_output
-    assert channel_details_2 == expected_output
+    assert channel_details_1 == channel_details_2
 
 def test_invalid_user(clear_store, create_user):
     user_token = create_user['token']
@@ -128,25 +127,7 @@ def test_from_stub_code(clear_store, create_stub_user):
     stub_uid = create_stub_user['auth_user_id']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': stub_token, 'name': "Hayden", 'is_public': False}).json()['channel_id']
     channel_details = requests.get(other.CHANNEL_DETAILS_URL, params={'channel_id': channel_id, 'token': stub_token})
-    assert channel_details.json() ==  {
-        'name': 'Hayden',
-        'is_public': False,
-        'owner_members': [
-            {
-                'u_id': stub_uid,
-                'email': 'example@gmail.com',
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-                'handle_str': 'haydenjacobs',
-            }
-        ],
-        'all_members': [
-            {
-                'u_id': stub_uid,
-                'email': 'example@gmail.com',
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
-                'handle_str': 'haydenjacobs',
-            }
-        ],
-    }
+    assert channel_details.json()['name'] == "Hayden"
+    assert channel_details.json()['is_public'] == False
+    assert helper_functions.strip_array_url_image(channel_details.json()['owner_members']) == [{'u_id': stub_uid, 'email': 'example@gmail.com', 'name_first': 'Hayden','name_last': 'Jacobs','handle_str': 'haydenjacobs'}]
+    assert helper_functions.strip_array_url_image(channel_details.json()['all_members']) == [{'u_id': stub_uid, 'email': 'example@gmail.com', 'name_first': 'Hayden', 'name_last': 'Jacobs', 'handle_str': 'haydenjacobs'}]
