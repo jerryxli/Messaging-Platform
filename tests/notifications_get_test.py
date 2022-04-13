@@ -21,13 +21,6 @@ def create_user2():
     user_info = request_data.json()
     return user_info
 
-@pytest.fixture
-def create_user3():
-    user_input = {'email': "z536601@unsw.edu.au", 'password': "1243Bops", 'name_first': "Mars", 'name_last': "Bars"}
-    request_data = requests.post(other.REGISTER_URL, json=user_input)
-    user_info = request_data.json()
-    return user_info
-
 def test_channel_tagged_message_notification(clear_store, create_user1):
     user_token = create_user1['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
@@ -37,15 +30,15 @@ def test_channel_tagged_message_notification(clear_store, create_user1):
     assert response.json()['notifications'] == expected_output
     assert response.status_code == 200
 
-# def test_channel_react_message_notification(clear_store, create_user1):
-#     user_token = create_user1['token']
-#     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
-#     message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token, 'channel_id': channel_id, 'message': 'React message'}).json()['message_id']
-#     requests.post(other.MESSAGE_REACT_URL, json={'token': user_token, 'message_id': message_id, 'react_id': 1})
-#     response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
-#     expected_output = [{'channel_id': channel_id, 'dm_id': -1, 'notification_message': 'twixfix reacted to your message in Cool Channel'}]
-#     assert response.json()['notifications'] == expected_output
-#     assert response.status_code == 200
+def test_channel_react_message_notification(clear_store, create_user1):
+    user_token = create_user1['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
+    message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token, 'channel_id': channel_id, 'message': 'React message'}).json()['message_id']
+    requests.post(other.MESSAGE_REACT_URL, json={'token': user_token, 'message_id': message_id, 'react_id': 1})
+    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    expected_output = [{'channel_id': channel_id, 'dm_id': -1, 'notification_message': 'twixfix reacted to your message in Cool Channel'}]
+    assert response.json()['notifications'] == expected_output
+    assert response.status_code == 200
 
 def test_dm_tagged_message_notification(clear_store, create_user1):
     user_token = create_user1['token']
@@ -56,15 +49,15 @@ def test_dm_tagged_message_notification(clear_store, create_user1):
     assert response.json()['notifications'] == expected_output
     assert response.status_code == 200
 
-# def test_dm_react_message_notification(clear_store, create_user1):
-#     user_token = create_user1['token']
-#     dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token, 'u_ids': []}).json()['dm_id']
-#     message_id = requests.post(other.MESSAGE_SENDDM_URL, json={'token': user_token, 'dm_id': dm_id, 'message': 'React message'}).json()['message_id']
-#     requests.post(other.MESSAGE_REACT_URL, json={'token': user_token, 'message_id': message_id, 'react_id': 1})
-#     response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
-#     expected_output = {'notifications': [{'channel_id': -1, 'dm_id': dm_id, 'notification_message': 'twixfix reacted to your message in Cool Channel'}]}
-#     assert response.json() == expected_output
-#     assert response.status_code == 200
+def test_dm_react_message_notification(clear_store, create_user1):
+    user_token = create_user1['token']
+    dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token, 'u_ids': []}).json()['dm_id']
+    message_id = requests.post(other.MESSAGE_SENDDM_URL, json={'token': user_token, 'dm_id': dm_id, 'message': 'React message'}).json()['message_id']
+    requests.post(other.MESSAGE_REACT_URL, json={'token': user_token, 'message_id': message_id, 'react_id': 1})
+    response = requests.get(other.NOTIFICATIONS_GET_URL, params={'token': user_token})
+    expected_output = {'notifications': [{'channel_id': -1, 'dm_id': dm_id, 'notification_message': 'twixfix reacted to your message in twixfix'}]}
+    assert response.json() == expected_output
+    assert response.status_code == 200
 
 def test_message_edit_to_include_tag(clear_store, create_user1):
     user_token = create_user1['token']
@@ -116,7 +109,6 @@ def test_invalid_user_token(clear_store, create_user1):
 def test_user_has_left_channel(clear_store, create_user1, create_user2):
     user_token = create_user1['token']
     user_token_2 = create_user2['token']
-    user_id_2 = create_user2['auth_user_id']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Cool Channel', 'is_public': True}).json()['channel_id']
     requests.post(other.CHANNEL_JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id})
     message_id = requests.post(other.MESSAGE_SEND_URL, json={'token': user_token_2, 'channel_id': channel_id, 'message': 'Test Message'}).json()['message_id']
