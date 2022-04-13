@@ -1,7 +1,7 @@
 from src.config import url
 import requests
 import pytest
-import datetime
+import time
 import src.other as other
 
 @pytest.fixture
@@ -26,13 +26,12 @@ def test_success_start(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
     response = requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': channel_id, 'length': 30})
-    time_start = datetime.now()
-    time_finish = time_start + datetime.timedelta(seconds = 30)
+    time_start = time.time()
+    time_finish = time_start + 30
     
     assert response.status_code == 200
-
     response_data = response.json()
-    assert response_data == datetime.timestamp(time_finish)
+    assert response_data == time_finish
 
 
 def test_negative_length(clear_store, create_user):
@@ -52,7 +51,7 @@ def test_standup_already_running(clear_store, create_user):
     
 def test_invalid_channel(clear_store, create_user):
     user_token = create_user['token']
-    response = requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': None, 'length': 30})
+    response = requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': 0, 'length': 30})
     assert response.status_code == 400
 
 def test_unauthorised_member(clear_store, create_user, create_user2):
