@@ -327,3 +327,17 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
 
     # if '@' in message:
         # other.create_notification(channel_id, dm_id, user_id, None, message_channel['name'], message, 'tagged')
+
+def check_user_in_dm(auth_user_id:int, dm:dict)->bool: 
+    """
+    Checks whether a user is in a dm or not
+
+    Arguments:
+        user_id (int)   - the id of the user
+        dm (dict)       - the dm to check
+
+    Returns:
+        A boolean, true if the user is in the dm, false if not
+    """
+    ids = [user['u_id'] for user in dm['members']]
+    return bool(auth_user_id in ids)

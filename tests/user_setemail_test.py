@@ -13,11 +13,11 @@ def test_normal_change(clear_store):
     token = registration_request.json()['token']
     
     original_profile = requests.get(other.USER_PROFILE_URL, params={"u_id": user_id, "token": token})
-    assert original_profile.json()['user'] == {"email": "z55555@unsw.edu.au", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
+    assert original_profile.json()['user']['email'] == "z55555@unsw.edu.au"
     set_email_request = requests.put(other.USER_SETEMAIL_URL, json={"token": token, "email": "mynewemail@gmail.com"})
     assert set_email_request.json() == {}
     new_profile = requests.get(other.USER_PROFILE_URL, params={"u_id": user_id, "token": token})
-    assert new_profile.json()['user'] == {"email": "mynewemail@gmail.com", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
+    assert new_profile.json()['user']['email'] == "mynewemail@gmail.com"
 
 def test_invalid_token(clear_store):
     registration_request = requests.post(other.REGISTER_URL, json={"email":"z55555@unsw.edu.au", "password":"passwordlong", "name_first":"Jake", "name_last":"Renzella"})
@@ -47,4 +47,4 @@ def test_change_same_email(clear_store):
     setemail_request = requests.put(other.USER_SETEMAIL_URL, json={"token": token, "email": "z55555@unsw.edu.au"})
     assert setemail_request.status_code == 200
     profile = requests.get(other.USER_PROFILE_URL, params={"u_id": user_id, "token": token})
-    assert profile.json()['user'] == {"email": "z55555@unsw.edu.au", "u_id": user_id, "name_first": "Jake", "name_last": "Renzella", "handle_str": "jakerenzella"}
+    assert profile.json()['user']['email'] == "z55555@unsw.edu.au"
