@@ -27,7 +27,6 @@ def search_v1(auth_user_id:int, query_string:str)->dict:
         Returns { 'messages' } on successful creation
     """
     store = data_store.get()
-    users = store['users']
     channels = store['channels']
     dms = store['dms']
     messages = store['messages']
