@@ -33,7 +33,6 @@ def test_remove_dm(clear_store, create_user, create_user2):
     user_id_2 = create_user2['auth_user_id']
 
     dm_id = requests.post(other.DM_CREATE_URL, json={'token': user_token, 'u_ids': [user_id_2]}).json()['dm_id']
-
     response = requests.delete(other.DM_REMOVE_URL, json={'token': user_token, 'dm_id': dm_id})
     assert response.status_code == 200
 
