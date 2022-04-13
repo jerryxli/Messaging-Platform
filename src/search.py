@@ -35,18 +35,14 @@ def search_v1(auth_user_id:int, query_string:str)->dict:
     if len(query_string) > 1000 or len(query_string) < 1:
         raise InputError("The query's character count is out of bounds")
 
-    altered_user = other.non_password_global_permission_field(users[auth_user_id])
-    altered_user['u_id'] = auth_user_id
-    altered_user['handle_str'] = altered_user.pop('handle')
-
     query_messages = list()
     user_channels = list()
     user_dms = list()
     for channel_id, channel_info in channels.items():
-        if altered_user in channel_info['all_members']:
+        if other.check_user_in_channel(auth_user_id, channel_info):
             user_channels.append(channel_id)
     for dm_id, dm_info in dms.items():
-        if altered_user in dm_info['members']:
+        if other.check_user_in_dm(auth_user_id, dm_info):
             user_dms.append(dm_id)
     
     for message in messages.values():
