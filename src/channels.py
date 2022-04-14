@@ -88,7 +88,7 @@ def channels_create_v2(auth_user_id: int, name: str, is_public: bool)->dict:
     channels[new_channel_id] = {'name': name, 'is_public': is_public,
                                 'owner_members': [altered_users[auth_user_id]],
                                 'all_members': [altered_users[auth_user_id]], 'messages': [],
-                                'standup_active': False, 'standup_messages': ''}
+                                'standup_active': False, 'standup_messages': '', 'standup_finish': ''}
     store['channels'] = channels
     other.user_stats_update(1,0,0,auth_user_id)
     other.server_stats_update(1,0,0)

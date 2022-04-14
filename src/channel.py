@@ -97,7 +97,7 @@ def channel_details_v2(auth_user_id: int, channel_id: int) -> dict:
     ids = [user['u_id'] for user in channel['all_members']]
 
     if auth_user_id in ids:
-        return {k: v for k, v in channel.items() if k not in ['messages', 'standup_active', 'standup_messages']}
+        return {k: v for k, v in channel.items() if k not in ['messages', 'standup_active', 'standup_messages', 'standup_finish']}
     else:
         raise AccessError(description="User is not a member of the channel")
 
@@ -386,6 +386,7 @@ def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
         if channel['standup_active'] == True:
             raise InputError(description = "Active standup is already running in the channel")
         channel['standup_active'] = True
+        channel['standup_finish'] = int(time() + length)
         # create thread here
         standup_thread = threading.Thread(target = print_standup_messages, args = (auth_user_id, channel, channel_id, length), daemon = True)
         standup_thread.start()
@@ -393,4 +394,37 @@ def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
         raise AccessError(description="User is not a member of channel")
     
     data_store.set(store)
-    return {'time_finish': int(time() + length)}
+    return {'time_finish': channel['standup_finish']}
+
+def standup_active_v1(auth_user_id:int, channel_id:int):
+    """
+    Starts the standup period for 'length' seconds.  
+
+    Exceptions:
+        InputError      - Occurs when channel_id is invalid
+        AcessError      - Occurs when the auth user is not a member of the channel
+
+    Arguments:
+        auth_user_id (int)  - the id of the user
+        channel_id (int)    - the id of the channel
+
+    Returns:
+        Returns {is_active, time_finish} on successful creation
+    """
+    store = data_store.get()
+    channels = store['channels']
+    users = store['users']
+
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError(description="Channel id does not refer to a valid channel")
+        
+    user = other.non_password_global_permission_field(users[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
+    if user not in channel['all_members']:
+        raise AccessError(description="User is not a member of channel")
+    
+    data_store.set(store)
+    return {'is_active': channel['standup_active'], 'time_finish': channel['standup_finish'] }

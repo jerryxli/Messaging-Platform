@@ -5,7 +5,7 @@ from flask_cors import CORS
 from src.error import AccessError
 from src import config
 from src.other import clear_v1, user_id_from_JWT, is_valid_JWT
-from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1, standup_start_v1, standup_active_v1, standup_send_v1
+from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1, standup_start_v1, standup_active_v1
 from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
 from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
 from src.search import search_v1
