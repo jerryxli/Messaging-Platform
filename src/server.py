@@ -11,8 +11,9 @@ from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_glo
 from src.search import search_v1
 from src.user import user_profile_v1, user_set_handle_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_uploadphoto_v1
 from src.user import user_profile_v1, user_setemail_v1, user_setname_v1, users_all_v1, user_remove_v1, users_stats_v1, user_stats_v1
-from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1, message_react_v1, message_sendlater_v1, message_share_v1
+from src.message import message_send_v1, message_remove_v1, message_edit_v1, message_pin_v1, message_unpin_v1, message_react_v1, message_sendlater_v1, message_share_v1, message_sendlaterdm_v1, message_unreact_v1
 from src.dm import dm_create_v1, dm_list_v1, dm_remove_v1, dm_details_v1,  dm_leave_v1, dm_send_v1, dm_messages_v1
+from src.notifications import notifications_get_v1
 from src.search import search_v1
 
 
@@ -38,6 +39,7 @@ CORS(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
+
 
 @APP.route('/static/<path:path>')
 def serve_static_path(path):
@@ -97,6 +99,7 @@ def handle_setemail_v1():
     token = request_data['token']
     email = request_data['email']
     return user_setemail_v1(token, email)
+
 
 @APP.route("/user/profile/uploadphoto/v1", methods=['POST'])
 def handle_uploadphoto_v1():
@@ -290,6 +293,20 @@ def handle_message_react():
     message_react_v1(user_id, int(message_id), react_id)
     return {}
 
+
+@APP.route("/message/unreact/v1", methods=['POST'])
+def handle_message_unreact():
+    request_data = request.get_json()
+    user_token = request_data['token']
+    message_id = request_data['message_id']
+    react_id = request_data['react_id']
+    if not is_valid_JWT(user_token):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    message_unreact_v1(user_id, int(message_id), react_id)
+    return {}
+
+
 @APP.route("/message/pin/v1", methods=['POST'])
 def handle_message_pin():
     request_data = request.get_json()
@@ -400,17 +417,20 @@ def handle_dm_messages():
         raise AccessError(description="JWT no longer valid")
     return dm_messages_v1(user_id_from_JWT(request.args.get('token')), int(request.args.get('dm_id')), int(request.args.get('start')))
 
-@APP.route("/user/stats/v1", methods = ["GET"])
+
+@APP.route("/user/stats/v1", methods=["GET"])
 def handle_user_stats():
     if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description="JWT no longer valid")
     return user_stats_v1(user_id_from_JWT(request.args.get('token')))
 
-@APP.route("/users/stats/v1", methods = ["GET"])
+
+@APP.route("/users/stats/v1", methods=["GET"])
 def handle_users_stats():
     if not is_valid_JWT(request.args.get('token')):
         raise AccessError(description="JWT no longer valid")
     return users_stats_v1()
+
 
 @APP.route("/message/sendlater/v1", methods=["POST"])
 def handle_message_sendlater():
@@ -420,6 +440,7 @@ def handle_message_sendlater():
     user_id = user_id_from_JWT(request_data['token'])
     return message_sendlater_v1(user_id, request_data['channel_id'], request_data['message'], request_data['time_sent'])
 
+
 @APP.route("/search/v1", methods=["GET"])
 def handle_search():
     user_token = request.args.get('token')
@@ -428,6 +449,7 @@ def handle_search():
         raise AccessError(description="JWT no longer valid")
     user_id = user_id_from_JWT(user_token)
     return search_v1(user_id, query_string)
+
 
 @APP.route("/message/share/v1", methods=['POST'])
 def handle_message_share():
@@ -443,6 +465,22 @@ def handle_standup_start():
         raise AccessError(description="JWT no longer valid")
     user_id = user_id_from_JWT(request_data['token'])
     return standup_start_v1(user_id, int(request_data['channel_id']), int(request_data['length']))
+
+@APP.route("/message/sendlaterdm/v1", methods=["POST"])
+def handle_message_sendlaterdm():
+    request_data = request.get_json()
+    if not is_valid_JWT(request_data['token']):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(request_data['token'])
+    return message_sendlaterdm_v1(user_id, request_data['dm_id'], request_data['message'], request_data['time_sent'])
+
+
+@APP.route("/notifications/get/v1", methods=["GET"])
+def handle_get_notifications():
+    if not is_valid_JWT(request.args.get('token')):
+        raise AccessError(description="JWT no longer valid")
+    return notifications_get_v1(user_id_from_JWT(request.args.get('token')))
+
 
 # NO NEED TO MODIFY BELOW THIS POINT
 

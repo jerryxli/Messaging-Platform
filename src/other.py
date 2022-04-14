@@ -80,11 +80,13 @@ def clear_v1():
         None
 
     """
+    print("Clearing store....")
     store = data_store.get()
     store['users'] = {}
     store['channels'] = {}
     store['dms'] = {}
     store['messages'] = {}
+    store['notifications'] = {}
     store['user_stats'] = {}
     store['server_stats'] = {}
     data_store.set(store)
@@ -300,6 +302,158 @@ def check_user_in_channel(auth_user_id:int, channel:dict)->bool:
     ids = [user['u_id'] for user in channel['all_members']]
     return bool(auth_user_id in ids)
 
+def check_user_in_dm(auth_user_id:int, dm:dict)->bool: 
+    """
+    Checks whether a user is in a dm or not
+
+    Arguments:
+        user_id (int)   - the id of the user
+        dm (dict)       - the dm to check
+
+    Returns:
+        A boolean, true if the user is in the dm, false if not
+    """
+    ids = [user['u_id'] for user in dm['members']]
+    return bool(auth_user_id in ids)
+
+def check_user_is_member(auth_user_id:int, dm_id:int, channel_id:int)->bool:
+    """
+    Checks whether a user is in a dm or a channel
+
+    Arguments:
+        auth_user_id (int)      - the id of the user
+        dm_id (int)             - the dm_id of the dm to check
+        channel_id (int)        - the channel_id of the channel to check
+
+    Returns:
+        A boolean, true if the user is in the dm or channel, false if not
+    """
+    store = data_store.get()
+    channels = store['channels']
+    dms = store['dms']
+    if dm_id < 0:
+        is_member = check_user_in_channel(auth_user_id, channels[channel_id])
+    else:
+        is_member = check_user_in_dm(auth_user_id, dms[dm_id])
+    return is_member
+
+def id_to_handle(auth_user_id:int)->str:
+    """
+    Gets the handle from a user_id
+
+    Arguments:
+        auth_user_id (int)   - the id of the user
+
+    Returns:
+        A handle string corresponding to the user_id
+    """
+    store = data_store.get()
+    users = store['users']
+    return users[auth_user_id]['handle']
+
+def handle_to_id(user_handle:str)->int:
+    """
+    Gets the user_id from a handle string
+
+    Arguments:
+        user_handle (str)   - the id of the user
+
+    Returns:
+        A user_id corresponding to the handle string
+    """
+    store = data_store.get()
+    users = store['users']
+    user_handles_id = {user_info['handle']:user_id for user_id, user_info in users.items()}
+    return user_handles_id[user_handle]
+
+def get_handles(message:str)->list:
+    """
+    Extracts the handles in a message
+
+    Arguments:
+        message (str)   - the message that may contain handles
+
+    Returns:
+        A list of all valid handles
+    """
+    store = data_store.get()
+    users = store['users']
+    letters = list(message)
+    at_array = list()
+    handles = list()
+    counter = -1
+    for index, letter in enumerate(letters):
+        if (letter == '@'):
+            at_array.append(index)
+
+    for at_index in at_array:
+        handles.append('')
+        counter += 1
+        # Should change later because of nesting but I'm not bothered right now sorry
+        for letter in letters[at_index + 1:]:
+            if letter.isalpha():
+                handles[counter] += letter
+            else:
+                break
+
+    valid_handles = list()
+    user_handles = [user_info['handle'] for user_info in users.values()]
+    for handle in handles:
+        if handle in user_handles:
+            valid_handles.append(handle)
+    return valid_handles
+
+def create_notification(channel_id:int, dm_id:int, auth_user_id:int, u_id:int, room_name:str, message:str, type:str)->None:
+    """
+    Creates a notification
+
+    Arguments:
+        channel_id (int)    - The id of the channel if applicable
+        dm_id (int)         - The id of the dm if applicable
+        auth_user_id (int)  - The id of the user who triggered the action if applicable
+        u_id (int)          - The id of the user who receives the notification if applicable
+        room_name (str)     - The name of the channel/dm
+        message (str)       - The message in which the notification may be for
+        type (str)          - The notification type
+
+    Returns:
+        None
+    """
+    store = data_store.get()
+    notifications = store['notifications']
+    user_handle = id_to_handle(auth_user_id)
+
+    if type == 'tagged':
+        handles = get_handles(message)
+        for handle in handles:
+            u_id = handle_to_id(handle)
+            is_member = check_user_is_member(u_id, dm_id, channel_id)
+            if is_member and not notifications.get(u_id):
+                notifications[u_id] = list()
+                notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} tagged you in {room_name}: {message[:20]}"})
+            elif is_member:
+                notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} tagged you in {room_name}: {message[:20]}"})
+
+    if type == 'reacted':
+        is_member = check_user_is_member(u_id, dm_id, channel_id)
+        if is_member and not notifications.get(u_id):
+            notifications[u_id] = list()
+            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} reacted to your message in {room_name}"})
+        elif is_member:
+            notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} reacted to your message in {room_name}"})
+
+    if type == 'added':
+        if not notifications.get(u_id):
+            notifications[u_id] = list()
+        notifications[u_id].append({'channel_id': channel_id, 'dm_id': dm_id, 
+                                        'notification_message': f"{user_handle} has added you to {room_name}"})
+
+    data_store.set(store)
+
 def user_stats_update(channels: int, dms: int, messages: int, u_id: int):
     store = data_store.get()
     user_stats = store['user_stats'][u_id]
@@ -344,29 +498,23 @@ def sendlater_thread_function(auth_user_id:int, message_id:int, channel_id:int,
     """
     store = data_store.get()
     messages = store['messages']
+    dms = store['dms']
+    channels = store['channels']
+
     sleep(time_sent - time())
-    # if channel_id < 0:
-    #     messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
-    #                         'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
-    #                         'reacts': [], 'is_pinned': False}
-    # else: 
-    messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
-                        'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
-                        'reacts': [], 'is_pinned': False}
 
-    # if '@' in message:
-        # other.create_notification(channel_id, dm_id, user_id, None, message_channel['name'], message, 'tagged')
+    if channel_id < 0:
+        messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
+                            'message': message, 'time_sent': time_sent, 'is_channel': False, 'id': dm_id, 
+                            'reacts': [{'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}], 'is_pinned': False}
+        room_name = dms[dm_id]['name']
+    else: 
+        messages[message_id] = {'message_id': message_id, 'u_id': auth_user_id,
+                            'message': message, 'time_sent': time_sent, 'is_channel': True, 'id': channel_id, 
+                            'reacts': [{'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False}], 'is_pinned': False}
+        room_name = channels[channel_id]['name']
 
-def check_user_in_dm(auth_user_id:int, dm:dict)->bool: 
-    """
-    Checks whether a user is in a dm or not
+    if '@' in message:
+        create_notification(channel_id, dm_id, auth_user_id, None, room_name, message, 'tagged')
 
-    Arguments:
-        user_id (int)   - the id of the user
-        dm (dict)       - the dm to check
 
-    Returns:
-        A boolean, true if the user is in the dm, false if not
-    """
-    ids = [user['u_id'] for user in dm['members']]
-    return bool(auth_user_id in ids)
