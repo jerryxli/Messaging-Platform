@@ -66,8 +66,12 @@ def dm_create_v1(auth_user_id: int, u_ids: list) -> dict:
     dm_info['messages'] = []
     dms[dm_id] = dm_info
     store['dms'] = dms
+
+    for id in u_ids:
+        if id != auth_user_id:
+            other.create_notification(-1, dm_id, auth_user_id, id, name, None, 'added')
     other.server_stats_update(0,1,0)
-    
+
     data_store.set(store)
 
     return {'dm_id': dm_id}
@@ -247,8 +251,12 @@ def dm_send_v1(auth_user_id: int, message: str, dm_id: int) -> dict:
                                 'time_sent': time(), 'is_channel': False, 'id': dm_id, 'reacts': [], 'is_pinned': False}
     messages[new_message_id]['reacts'].append(
         {'react_id': 1, 'u_ids': [], 'is_this_user_reacted': False})
+
+    if '@' in message:
+        other.create_notification(-1, dm_id, auth_user_id, None, dm['name'], message, 'tagged')
     other.user_stats_update(0,0,1,auth_user_id)
     other.server_stats_update(0,0,1)
+
     data_store.set(store)
     return {'message_id': new_message_id}
 
@@ -280,7 +288,7 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
             description="dm_id is valid but user is not a member of the channel")
     dm_messages = []
     for message in stored_messages.values():
-        if message['is_channel'] == False and message['id'] == dm_id:
+        if message != "invalid" and message['is_channel'] == False and message['id'] == dm_id:
             dm_messages.append({'message': message['message'], 'message_id': message['message_id'],
                                'u_id': message['u_id'], 'time_sent': message['time_sent'], 'reacts': message['reacts'], 'is_pinned': message['is_pinned']})
     if start > len(dm_messages):
@@ -294,4 +302,5 @@ def dm_messages_v1(auth_user_id: int, dm_id: int, start: int) -> dict:
         not_displayed[:min(other.PAGE_THRESHOLD, len(not_displayed))])
     end = -1 if len(messages) == len(not_displayed) else start + \
         other.PAGE_THRESHOLD
+
     return {'messages': messages, 'start': start, 'end': end}
