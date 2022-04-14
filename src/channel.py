@@ -94,7 +94,7 @@ def channel_details_v2(auth_user_id: int, channel_id: int) -> dict:
     ids = [user['u_id'] for user in channel['all_members']]
 
     if auth_user_id in ids:
-        return {k: v for k, v in channel.items() if k not in ['messages']}
+        return {k: v for k, v in channel.items() if k not in ['messages', 'standup_active', 'standup_messages']}
     else:
         raise AccessError(description="User is not a member of the channel")
 
@@ -333,17 +333,18 @@ def channel_removeowner_v1(auth_user_id: int, channel_id: int, u_id: int) -> Non
     store['channels'] = channels
     data_store.set(store)
 
-def print_standup_messages(auth_user_id:int, channel:dict,  channel_id:int, length:int):
+def print_standup_messages(auth_user_id:int, channel:dict, channel_id:int, length:int):
     sleep(length)
     store = data_store.get()
     # if there are messages, send them
-    if not channel['standup_messages']:
+    if len(channel['standup_messages']) != 0:
         messages = store['messages']
         new_message_id = len(messages)
-        messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': channel['standup_messages'], 'time_sent': time(), 'is_channel': True, 'id': channel_id}
-    #then clear standup_messages and set standup_active to false
+        messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': channel['standup_messages'], 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
+    # then clear standup_messages and set standup_active to false
     channel['standup_messages'] = ''
     channel['standup_active'] = False
+    data_store.set(store)
 
 
 def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
@@ -374,18 +375,20 @@ def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
-        raise InputError(description="Channel id not valid")
+        raise InputError(description="Channel id does not refer to a valid channel")
         
     user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
     if user in channel['all_members']:
+        if channel['standup_active'] == True:
+            raise InputError(description = "Active standup is already running in the channel")
         channel['standup_active'] = True
         # create thread here
-        standup_thread = threading.Thread(target = print_standup_messages, args = (auth_user_id, channel, channel_id, length))
+        standup_thread = threading.Thread(target = print_standup_messages, args = (auth_user_id, channel, channel_id, length), daemon = True)
         standup_thread.start()
     else:
         raise AccessError(description="User is not a member of channel")
     
     data_store.set(store)
-    return time.time() + length
+    return {'time_finish': int(time() + length)}
