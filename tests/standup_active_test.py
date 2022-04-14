@@ -45,7 +45,7 @@ def test_is_not_active(clear_store, create_user):
     response = requests.get(other.STANDUP_ACTIVE_URL, params={'token': user_token, 'channel_id': channel_id})
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data == {'is_active': False, 'time_finish': time_finish}
+    assert response_data == {'is_active': False, 'time_finish': None}
     
 def test_invalid_channel(clear_store, create_user):
     user_token = create_user['token']

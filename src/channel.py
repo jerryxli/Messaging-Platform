@@ -427,4 +427,7 @@ def standup_active_v1(auth_user_id:int, channel_id:int):
         raise AccessError(description="User is not a member of channel")
     
     data_store.set(store)
-    return {'is_active': channel['standup_active'], 'time_finish': channel['standup_finish'] }
+    if channel['standup_active']:
+        return {'is_active': channel['standup_active'], 'time_finish': channel['standup_finish'] }
+    else:
+        return {'is_active': channel['standup_active'], 'time_finish': None }
