@@ -33,6 +33,16 @@ def test_success_start(clear_store, create_user):
     response_data = response.json()
     assert response_data == {'time_finish': time_finish}
 
+def test_standup_ends(clear_store, create_user):
+    user_token = create_user['token']
+    channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    response = requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': channel_id, 'length': 2})
+    time_start = time()
+    time_finish = int(time_start + 2)
+    sleep(3)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data == {'time_finish': time_finish}
 
 def test_negative_length(clear_store, create_user):
     user_token = create_user['token']
