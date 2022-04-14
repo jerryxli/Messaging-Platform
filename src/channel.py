@@ -336,12 +336,11 @@ def channel_removeowner_v1(auth_user_id: int, channel_id: int, u_id: int) -> Non
 def print_standup_messages(auth_user_id:int, channel:dict, channel_id:int, length:int):
     sleep(length)
     store = data_store.get()
-    # if there are messages, send them
+    # The code commented out below is for standup_send
     # if len(channel['standup_messages']) != 0:
     #     messages = store['messages']
     #     new_message_id = len(messages)
     #     messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': channel['standup_messages'], 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
-    # then clear standup_messages and set standup_active to false
     channel['standup_messages'] = ''
     channel['standup_active'] = False
     data_store.set(store)
