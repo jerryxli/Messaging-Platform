@@ -5,7 +5,7 @@ from flask_cors import CORS
 from src.error import AccessError
 from src import config
 from src.other import clear_v1, user_id_from_JWT, is_valid_JWT
-from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1, standup_start_v1
+from src.channel import channel_invite_v2, channel_details_v2, channel_join_v2, channel_leave_v1, channel_messages_v2, channel_addowner_v1, channel_removeowner_v1, standup_start_v1, standup_active_v1, standup_send_v1
 from src.channels import channels_create_v2, channels_list_v2, channels_listall_v2
 from src.auth import auth_login_v2, auth_logout_v1, auth_register_v2, change_global_permission
 from src.search import search_v1
@@ -465,6 +465,15 @@ def handle_standup_start():
         raise AccessError(description="JWT no longer valid")
     user_id = user_id_from_JWT(request_data['token'])
     return standup_start_v1(user_id, int(request_data['channel_id']), int(request_data['length']))
+
+@APP.route("/standup/active/v1", methods=["GET"])
+def handle_standup_active():
+    user_token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    if not is_valid_JWT(user_token):
+        raise AccessError(description="JWT no longer valid")
+    user_id = user_id_from_JWT(user_token)
+    return standup_active_v1(user_id, channel_id)
 
 @APP.route("/message/sendlaterdm/v1", methods=["POST"])
 def handle_message_sendlaterdm():
