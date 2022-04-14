@@ -28,7 +28,7 @@ def test_success_start(clear_store, create_user):
     response = requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': channel_id, 'length': 10})
     time_start = time()
     time_finish = int(time_start + 10)
-    assert channel_id == 0
+
     assert response.status_code == 200
     response_data = response.json()
     assert response_data == {'time_finish': time_finish}
