@@ -38,8 +38,6 @@ def test_is_not_active(clear_store, create_user):
     user_token = create_user['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
     requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': channel_id, 'length': 2})
-    time_start = time()
-    time_finish = int(time_start + 2)
     sleep(3)
 
     response = requests.get(other.STANDUP_ACTIVE_URL, params={'token': user_token, 'channel_id': channel_id})
