@@ -349,7 +349,7 @@ def thread_standup_message(auth_user_id:int, channel:dict, channel_id:int, lengt
     data_store.set(store)
 
 
-def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
+def standup_start_v1(auth_user_id:int, channel_id:int, length:int) -> dict:
     """
     Starts the standup period for 'length' seconds.  
 
@@ -396,7 +396,7 @@ def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
     data_store.set(store)
     return {'time_finish': channel['standup_finish']}
 
-def standup_active_v1(auth_user_id:int, channel_id:int):
+def standup_active_v1(auth_user_id:int, channel_id:int) -> dict:
     """
     Starts the standup period for 'length' seconds.  
 
@@ -432,7 +432,7 @@ def standup_active_v1(auth_user_id:int, channel_id:int):
     else:
         return {'is_active': channel['standup_active'], 'time_finish': None }
 
-def standup_send_v1(auth_user_id:int, channel_id:int, message:str):
+def standup_send_v1(auth_user_id:int, channel_id:int, message:str) -> None:
     """
     Sending a message to get buffered in the standup queue, assuming a standup is currently active.
 
