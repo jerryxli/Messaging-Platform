@@ -43,8 +43,14 @@ def test_send_one_message(clear_store, create_user):
 
     response = requests.post(other.STANDUP_SEND_URL, json={'token': user_token, 'channel_id': channel_id, 'message': 'Hello World'})
     assert response.status_code == 200
-    response_data = response.json()
-    assert response_data == {}
+    assert response.json() == {}
+
+    sleep(2)
+    response2 = requests.get(other.CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token})
+    for message in response2.json()['messages']:
+        message_id = message['message_id'] 
+   
+    assert response2.json()['messages'][message_id]['message'] == "twixfix: Hello World\n"
 
 def test_send_multiple_message(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
@@ -62,7 +68,12 @@ def test_send_multiple_message(clear_store, create_user, create_user2, create_us
     assert response1.status_code == 200
     assert response2.status_code == 200
     assert response3.status_code == 200
-
+    sleep(2)
+    response = requests.get(other.CHANNEL_MESSAGES_URL, params={'channel_id': channel_id, 'start': 0, 'token': user_token_1})
+    for message in response.json()['messages']:
+        message_id = message['message_id'] 
+   
+    assert response.json()['messages'][message_id]['message'] == "twixfix: I ate a catfish\nname2lastname2: I went to kmart\nname1lastname1: I ate a toaster\n"
 
 def test_length_over_1000(clear_store, create_user, long_string):
     user_token = create_user['token']
