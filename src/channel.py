@@ -336,7 +336,7 @@ def channel_removeowner_v1(auth_user_id: int, channel_id: int, u_id: int) -> Non
     store['channels'] = channels
     data_store.set(store)
 
-def print_standup_messages(auth_user_id:int, channel:dict, channel_id:int, length:int):
+def thread_standup_message(auth_user_id:int, channel:dict, channel_id:int, length:int):
     sleep(length)
     store = data_store.get()
 
@@ -388,7 +388,7 @@ def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
         channel['standup_active'] = True
         channel['standup_finish'] = int(time() + length)
         # create thread here
-        standup_thread = threading.Thread(target = print_standup_messages, args = (auth_user_id, channel, channel_id, length), daemon = True)
+        standup_thread = threading.Thread(target = thread_standup_message, args = (auth_user_id, channel, channel_id, length), daemon = True)
         standup_thread.start()
     else:
         raise AccessError(description="User is not a member of channel")
@@ -458,14 +458,14 @@ def standup_send_v1(auth_user_id:int, channel_id:int, message:str):
     if len(message) > 1000:
         raise InputError(description="length of message is over 1000 characters")
 
-    if not channel['standup_active']:
-        raise InputError(description="active standup is not currently running")
-
     if channel_id in channels.keys():
         channel = channels[channel_id]
     else:
         raise InputError(description="Channel id does not refer to a valid channel")
     
+    if not channel['standup_active']:
+        raise InputError(description="active standup is not currently running")
+
     user = other.non_password_global_permission_field(users[auth_user_id])
     user['u_id'] = auth_user_id
     user['handle_str'] = user.pop('handle')
