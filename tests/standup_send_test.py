@@ -46,11 +46,13 @@ def test_send_one_message(clear_store, create_user):
     response_data = response.json()
     assert response_data == {}
 
-def test_send_multiple_message(clear_store, create_user, create_user_2, create_user_3):
+def test_send_multiple_message(clear_store, create_user, create_user2, create_user3):
     user_token_1 = create_user['token']
     user_token_2 = create_user2['token']
     user_token_3 = create_user3['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token_1, 'name': 'Channel!', 'is_public': True}).json()['channel_id']
+    requests.post(other.CHANNEL_JOIN_URL, json={'token': user_token_2, 'channel_id': channel_id})
+    requests.post(other.CHANNEL_JOIN_URL, json={'token': user_token_3, 'channel_id': channel_id})
     requests.post(other.STANDUP_START_URL, json={'token': user_token_1, 'channel_id': channel_id, 'length': 2})
 
     response1 = requests.post(other.STANDUP_SEND_URL, json={'token': user_token_1, 'channel_id': channel_id, 'message': 'I ate a catfish'})
@@ -86,7 +88,7 @@ def test_unauthorised_member(clear_store, create_user, create_user2):
     user_token = create_user['token']
     user_token_2 = create_user2['token']
     channel_id = requests.post(other.CHANNELS_CREATE_URL, json={'token': user_token, 'name': 'My Channel!', 'is_public': True}).json()['channel_id']
-    requests.post(other.STANDUP_START_URL, json={'token': user_token_2, 'channel_id': channel_id, 'length': 10})
-    
+    requests.post(other.STANDUP_START_URL, json={'token': user_token, 'channel_id': channel_id, 'length': 10})
+
     response = requests.post(other.STANDUP_SEND_URL, json={'token': user_token_2, 'channel_id': channel_id, 'message': 'Hello World'})
     assert response.status_code == 403
