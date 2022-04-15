@@ -481,8 +481,9 @@ def handle_standup_send():
     if not is_valid_JWT(request_data['token']):
         raise AccessError(description="JWT no longer valid")
     user_id = user_id_from_JWT(request_data['token'])
-    return standup_send_v1(user_id, int(request_data['channel_id']), request_data['message'])
-
+    standup_send_v1(user_id, int(request_data['channel_id']), request_data['message'])
+    return {}
+     
 @APP.route("/message/sendlaterdm/v1", methods=["POST"])
 def handle_message_sendlaterdm():
     request_data = request.get_json()
