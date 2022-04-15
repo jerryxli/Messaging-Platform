@@ -339,11 +339,11 @@ def channel_removeowner_v1(auth_user_id: int, channel_id: int, u_id: int) -> Non
 def print_standup_messages(auth_user_id:int, channel:dict, channel_id:int, length:int):
     sleep(length)
     store = data_store.get()
-    # The code commented out below is for standup_send
-    # if len(channel['standup_messages']) != 0:
-    #     messages = store['messages']
-    #     new_message_id = len(messages)
-    #     messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': channel['standup_messages'], 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
+
+    if len(channel['standup_messages']) != 0:
+        messages = store['messages']
+        new_message_id = len(messages)
+        messages[new_message_id] = {'message_id': new_message_id, 'u_id': auth_user_id, 'message': channel['standup_messages'], 'time_sent': time(), 'is_channel': True, 'id': channel_id, 'reacts': [], 'is_pinned': False}
     channel['standup_messages'] = ''
     channel['standup_active'] = False
     data_store.set(store)
@@ -357,7 +357,7 @@ def standup_start_v1(auth_user_id:int, channel_id:int, length:int):
         InputError      - Occurs when channel_id is invalid
         InputError      - Occurs when length is a negative integer
         InputError      - Occurs when an active standup is already running
-        AcessError      - Occurs when the auth user is not a member of the channel
+        AccessError     - Occurs when the auth user is not a member of the channel
 
     Arguments:
         auth_user_id (int)  - the id of the user
@@ -402,7 +402,7 @@ def standup_active_v1(auth_user_id:int, channel_id:int):
 
     Exceptions:
         InputError      - Occurs when channel_id is invalid
-        AcessError      - Occurs when the auth user is not a member of the channel
+        AccessError     - Occurs when the auth user is not a member of the channel
 
     Arguments:
         auth_user_id (int)  - the id of the user
@@ -431,3 +431,48 @@ def standup_active_v1(auth_user_id:int, channel_id:int):
         return {'is_active': channel['standup_active'], 'time_finish': channel['standup_finish'] }
     else:
         return {'is_active': channel['standup_active'], 'time_finish': None }
+
+def standup_send_v1(auth_user_id:int, channel_id:int, message:str):
+    """
+    Sending a message to get buffered in the standup queue, assuming a standup is currently active.
+
+    Exceptions:
+        InputError      - Occurs when channel_id is invalid
+        InputError      - Occurs when length of message is over 1000 characters
+        InputError      - Occurs when an active standup is not currently running in the channel
+        
+        AccessError     - Occurs when the auth user is not a member of the channel
+
+    Arguments:
+        auth_user_id (int)  - the id of the user
+        channel_id (int)    - the id of the channel
+        message (string)    - the message being sent
+
+    Returns:
+        Returns {} on successful creation
+    """
+    store = data_store.get()
+    channels = store['channels']
+    users = store['users']
+
+    if len(message) > 1000:
+        raise InputError(description="length of message is over 1000 characters")
+
+    if not channel['standup_active']:
+        raise InputError(description="active standup is not currently running")
+
+    if channel_id in channels.keys():
+        channel = channels[channel_id]
+    else:
+        raise InputError(description="Channel id does not refer to a valid channel")
+    
+    user = other.non_password_global_permission_field(users[auth_user_id])
+    user['u_id'] = auth_user_id
+    user['handle_str'] = user.pop('handle')
+    if user not in channel['all_members']:
+        raise AccessError(description="User is not a member of channel")
+    
+    user_message = user['handle_str'] + ': ' + message + '\n'
+    channel['standup_messages'] += user_message
+
+    data_store.set(store)
